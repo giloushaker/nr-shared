@@ -2,6 +2,7 @@ import type { ReportScore } from "../../../types/db_types";
 import { IArmyRoster } from "./army_interfaces";
 import { GameSystem } from "./game_system";
 import { calcBattlepoints, CalculatedBP } from "../../shared/util";
+import type { ScoringSystem } from "./bs_game_system";
 
 export const defaultScore: ScoringSystem = {
   id: 0,
