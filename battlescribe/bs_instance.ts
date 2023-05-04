@@ -9,7 +9,7 @@ import type {
   ICost,
   IModel,
   ListTextFormat,
-} from "../../shared/systems/army_interfaces";
+} from "../systems/army_interfaces";
 import { getRandomKey } from "../../../assets/shared/util";
 import AlgoSettings from "../army/algo_settings";
 import { ErrorMessage, ErrorMessageWithHash } from "../error_manager";

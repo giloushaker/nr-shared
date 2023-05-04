@@ -6,7 +6,6 @@ import type { BookRow, GameSystemRow, IndexAndArray, ListRow } from "../../../ty
 import { BsBook } from "../../shared/battlescribe/bs_book";
 
 import { BooksDate, getBookDate } from "../../shared/battlescribe/bs_versioning";
-export const ScoringSystem = {} as any;
 export type FetchedBook = any;
 
 export interface Icons {
