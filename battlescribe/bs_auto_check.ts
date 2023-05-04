@@ -1,4 +1,4 @@
-import type { IArmyOption } from "../systems/army_interfaces";
+import type { IArmyOption } from "../../shared/systems/army_interfaces";
 import type { Base, Link } from "./bs_main";
 import type { BSIConstraint } from "./bs_types";
 import { HeaderInstance, Instance } from "./bs_instance";

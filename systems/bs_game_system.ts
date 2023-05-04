@@ -1,15 +1,12 @@
 import { arrayToIndex, systemToString } from "../util";
-import { NRClientCatalogueManager } from "../battlescribe/bs_system";
-import type { PatchIndex } from "../battlescribe/bs_helpers";
+import { NRClientCatalogueManager } from "../../shared/battlescribe/bs_system";
+import type { PatchIndex } from "../../shared/battlescribe/bs_helpers";
 import type { IArmyBook, SetupCategory } from "./army_interfaces";
 import type { BookRow, GameSystemRow, IndexAndArray, ListRow } from "../../../types/db_types";
-import { BsBook } from "../battlescribe/bs_book";
+import { BsBook } from "../../shared/battlescribe/bs_book";
 
-import { BooksDate, getBookDate } from "../battlescribe/bs_versioning";
-
-import { ScoringSystem } from "../../../types/db_types";
-import { defaultScore } from "../profile/system_scores";
-
+import { BooksDate, getBookDate } from "../../shared/battlescribe/bs_versioning";
+export const ScoringSystem = {} as any;
 export type FetchedBook = any;
 
 export interface Icons {
@@ -326,7 +323,7 @@ export class BsGameSystem {
     this.language = lang;
   }
 
-  public async loadExtraBooks(booksDate?: string): Promise<void> { }
+  public async loadExtraBooks(booksDate?: string): Promise<void> {}
 
   public freezeList(list: ListRow): void {
     list.isFrozen = true;

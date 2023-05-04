@@ -1,14 +1,15 @@
 import { GameSystemRow } from "~/types/db_types";
-import ArmyBook from "../army/army_book";
 import { IArmyBook } from "./army_interfaces";
-import { BsBook } from "../battlescribe/bs_book";
-import { NRClientCatalogueManager } from "../battlescribe/bs_system";
-import { BooksDate } from "../battlescribe/bs_versioning";
-import Path from "../game/path";
-import Spell from "../game/spell";
-import { Spells } from "../game/wizard";
-import { RuleDefinition, getStatModifier } from "../rule/rule";
+import { BsBook } from "../../shared/battlescribe/bs_book";
+import { NRClientCatalogueManager } from "../../shared/battlescribe/bs_system";
+import { BooksDate } from "../../shared/battlescribe/bs_versioning";
+
 import { BookFetchFunction, BsGameSystem } from "./bs_game_system";
+import { RuleDefinition, getStatModifier } from "../../../assets/ts/rule/rule";
+import { Spells } from "../../../assets/ts/game/wizard";
+import Spell from "../../../assets/ts/game/spell";
+import Path from "../../../assets/ts/game/path";
+import ArmyBook from "../../../assets/ts/army/army_book";
 
 /*
  ** Turn the string representation of stat modifier ("+1" or "+D6") into a structured StatModifier
@@ -90,7 +91,6 @@ export class GameSystem extends BsGameSystem {
     this.lastBooksDate = booksDate;
   }
 
-
   async loadSpells(booksDate?: string): Promise<Spells | null> {
     // Load Spells
     try {
@@ -132,10 +132,10 @@ export class GameSystem extends BsGameSystem {
   }
 
   /**
- * Loads all books
- * @param date
- * @returns All loaded books
- */
+   * Loads all books
+   * @param date
+   * @returns All loaded books
+   */
   async loadAllBooks(): Promise<IArmyBook[]> {
     let result = await super.loadAllBooks();
     switch (this.engine) {
@@ -162,7 +162,6 @@ export class GameSystem extends BsGameSystem {
   ): Promise<IArmyBook | null> {
     // BS Book
     if (jsonData === null) return null;
-
 
     if (jsonData.catalogue || jsonData.gameSystem || jsonData.bsid || jsonData.url) {
       return await BsBook.loadFromJson(this, jsonData, booksDate);

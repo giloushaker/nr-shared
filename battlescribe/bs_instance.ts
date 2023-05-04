@@ -9,11 +9,10 @@ import type {
   ICost,
   IModel,
   ListTextFormat,
-} from "../systems/army_interfaces";
-import { getRandomKey } from "../../../assets/ts/util";
+} from "../../shared/systems/army_interfaces";
+import { getRandomKey } from "../../../assets/shared/util";
 import AlgoSettings from "../army/algo_settings";
 import { ErrorMessage, ErrorMessageWithHash } from "../error_manager";
-import { warhammer_wtc_format } from "../export/warhammer_formatter_wtc";
 import { BsBook } from "./bs_book";
 
 import { getMultipliers, getRosterLimit, getInScope } from "./bs_condition";
@@ -21,7 +20,6 @@ import { cleanName, Recursive, removeOne, addOne, sortByAscending } from "./bs_h
 import { Category, iterateModifierGroupsRecursive, Force, entryIsModel, entryIsCrew } from "./bs_main";
 import { Selector, SwitchedSelector, RootSelector } from "./bs_selector";
 
-import { default_format } from "../export/default_formatter";
 import { Base, Link } from "./bs_main";
 import { Roster } from "./bs_system";
 import {
@@ -31,7 +29,6 @@ import {
   clearAssociations,
   AssociationConstraint,
 } from "./bs_association";
-import { warhammer_feq_format } from "../export/warhammer_formatter_feq";
 import {
   autoCheckCreation,
   autoCheckOnHideOrMaxZero,
@@ -45,8 +42,11 @@ import { Catalogue } from "./bs_main_catalogue";
 import { ReactiveProflileToBSIProfile, ReactiveRuleToBSIRule } from "./reactive/reactive_info";
 import * as $helpers from "./bs_helpers";
 import { autoCheckCreationChildsAsync } from "./bs_async_autocheck";
-import { aos_warscroll_format } from "../export/aos_warscroll_formatter";
 import { BooksDate } from "./bs_versioning";
+import { aos_warscroll_format } from "../../../assets/ts/export/aos_warscroll_formatter";
+import { warhammer_feq_format } from "../../..//assets/ts/export/warhammer_formatter_feq";
+import { default_format } from "../../..//assets/ts/export/default_formatter";
+import { warhammer_wtc_format } from "../../..//assets/ts/export/warhammer_formatter_wtc";
 (globalThis as any).$helpers = $helpers;
 
 export class Instance implements IArmyUnit, IArmyOption, IArmyRoster, IArmyCategory, IArmyEntry {

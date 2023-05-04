@@ -1,7 +1,7 @@
 import { Instance } from "./bs_instance";
 import type { Catalogue } from "./bs_main_catalogue";
 import type { BSIRule, BSIProfile, BSICharacteristic, BSISelectionCategory, BSICost } from "./bs_types";
-import type { ICost } from "../systems/army_interfaces";
+import type { ICost } from "../../shared/systems/army_interfaces";
 
 const disableRulesAndProfiles = false;
 class FormatResult {

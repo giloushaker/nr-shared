@@ -1,4 +1,4 @@
-import { getRandomKey } from "../../../assets/ts/util";
+import { getRandomKey } from "../../../assets/shared/util";
 import { BSICost } from "./bs_types";
 import { BsBook } from "./bs_book";
 import { Instance, HeaderInstance, ExportedNode, RootInstance } from "./bs_instance";

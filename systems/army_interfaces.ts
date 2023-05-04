@@ -3,9 +3,9 @@ import type { GameSystem } from "./game_system";
 import { leanName } from "../util";
 import AlgoSettings from "../army/algo_settings";
 
-import { sortByDescending } from "../battlescribe/bs_helpers";
-import type { BooksDate } from "../battlescribe/bs_versioning";
-import type { NRAssociationInstance } from "../battlescribe/bs_association";
+import { sortByDescending } from "../../shared/battlescribe/bs_helpers";
+import type { BooksDate } from "../../shared/battlescribe/bs_versioning";
+import type { NRAssociationInstance } from "../../shared/battlescribe/bs_association";
 
 type CostIndex = { [key: string]: ICost };
 

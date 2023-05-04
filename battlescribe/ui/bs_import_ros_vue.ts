@@ -1,13 +1,13 @@
 import { Store } from "store/index";
 import { unzip } from "unzipit";
 import { xml_to_json } from "../bs_xml";
-import { GameSystem } from "../../systems/game_system";
+import { GameSystem } from "../../../shared/systems/game_system";
 import { selectedSystemChanged } from "~/assets/js/selection";
 import { loadBSRoster } from "../bs_import_ros";
 import { Instance } from "../bs_instance";
-import { initListRow } from "../../util";
 import { addList } from "~/assets/js/list_functions";
-import { addInstalledSystemVue } from "../../systems/installed";
+import { addInstalledSystemVue } from "../../../shared/systems/installed";
+import { initListRow } from "~/assets/ts/listdb/listrow_util";
 
 function errormsg(str: string) {
   return {

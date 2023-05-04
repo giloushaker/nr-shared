@@ -12,7 +12,7 @@ import type {
 } from "./bs_types";
 import type { Catalogue } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
-import type { IModel } from "../systems/army_interfaces";
+import type { IModel } from "../../shared/systems/army_interfaces";
 import type { NRAssociation, AssociationConstraint } from "./bs_association";
 import { clone, isObject } from "./bs_helpers";
 import { getAllInfoGroups } from "./bs_modifiers";
@@ -352,7 +352,7 @@ export class Base implements BSModifierBase {
         if (isObject(value)) {
           if (Array.isArray(value)) {
             if (value.length && isObject(value[0])) {
-              for (let i = value.length; i--;) {
+              for (let i = value.length; i--; ) {
                 const cur = value[i];
                 callbackfn(cur, current);
                 stack.push(cur);
@@ -379,7 +379,7 @@ export class Base implements BSModifierBase {
         if (isObject(value)) {
           if (Array.isArray(value)) {
             if (value.length && isObject(value[0])) {
-              for (let i = value.length; i--;) {
+              for (let i = value.length; i--; ) {
                 const cur = value[i];
                 callbackfn(cur, current);
                 stack.push(cur);

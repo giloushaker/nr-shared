@@ -22,7 +22,7 @@ import type {
 } from "./bs_types";
 import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { BsBook } from "./bs_book";
-import type { GameSystem } from "../systems/game_system";
+import type { GameSystem } from "../../shared/systems/game_system";
 export interface WikiLink extends Link {
   parent: WikiBase;
   links?: WikiLink[];

@@ -1,8 +1,10 @@
 import type { BSIProfile, BSICharacteristic } from "./bs_types";
 import { createHash } from "crypto";
-import { stripNumber } from "../export/warhammer_formatter_helpers";
-export type Modify<T, R> = Omit<T, keyof R> & R;
 
+export type Modify<T, R> = Omit<T, keyof R> & R;
+export function stripNumber(str: string): string {
+  return str.replace(/[0-9]+ *[.-] *(.*)/, "$1");
+}
 export function fix_xml_object(obj: any): void {
   const O = [obj]; // ensure that f is called with the top-level object
   while (O.length) {

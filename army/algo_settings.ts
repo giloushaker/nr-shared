@@ -1,5 +1,5 @@
-import { ErrorMessage } from "../error_manager";
-import { IArmyEntry } from "../systems/army_interfaces";
+import { ErrorMessage } from "../../shared/error_manager";
+import { IArmyEntry } from "../../shar../../shared/systems/army_interfaces";
 
 interface OptionMod {
   option: any;
@@ -46,7 +46,6 @@ export default class AlgoSettings {
     if (node?.field("skipErrors") === true) {
       depth = 1000;
     }
-
 
     if (type == 0) {
       this.warningStack.push({

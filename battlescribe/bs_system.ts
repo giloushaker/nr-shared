@@ -1,6 +1,6 @@
 import type { BSICatalogueLink, BSIData, BSICostType } from "./bs_types";
 import type { Catalogue } from "./bs_main_catalogue";
-import type { GameSystem } from "../systems/game_system";
+import type { GameSystem } from "../../shared/systems/game_system";
 import type { BsBook } from "./bs_book";
 import type { NRAssociationInstance } from "./bs_association";
 import type { Instance } from "./bs_instance";

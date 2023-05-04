@@ -1,4 +1,4 @@
-import { GameSystem } from "../systems/game_system";
+import { GameSystem } from "../../shared/systems/game_system";
 import { BSIData, BSICost } from "./bs_types";
 import { getAllModels } from "./bs_main";
 import { newList, ExportedRoot } from "./bs_selector";
@@ -7,6 +7,7 @@ import { patchJson, sortByAscending } from "./bs_helpers";
 import { ExportedNode, RootInstance } from "./bs_instance";
 import { loadAssociationsRoster } from "./bs_association";
 import { BooksDate } from "./bs_versioning";
+import { IArmyBook } from "../../shared/systems/army_interfaces";
 
 export interface CatalogueExtraInfo {
   revision: number;
@@ -20,7 +21,7 @@ export interface CatalogueExtraInfo {
   meta?: string;
   xml_hash?: string;
 }
-export class BsBook {
+export class BsBook implements IArmyBook {
   id: number;
   name: string;
   revision: number;
