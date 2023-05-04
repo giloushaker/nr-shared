@@ -1,0 +1,878 @@
+import type {
+  BSIModifier,
+  BSIModifierGroup,
+  BSIConstraint,
+  BSIProfile,
+  BSIRule,
+  BSIInfoLink,
+  BSIInfoGroup,
+  BSICost,
+  BSIPublication,
+  BSINamed,
+} from "./bs_types";
+import type { Catalogue } from "./bs_main_catalogue";
+import type { Roster } from "./bs_system";
+import type { IModel } from "../systems/army_interfaces";
+import type { NRAssociation, AssociationConstraint } from "./bs_association";
+import { clone, isObject } from "./bs_helpers";
+import { getAllInfoGroups } from "./bs_modifiers";
+const isNonEmptyIfHasOneOf = [
+  "modifiers",
+  "modifierGroups",
+  "constraints",
+
+  "entryLinks",
+  "categoryLinks",
+  "selectionEntries",
+  "selectionEntryGroups",
+
+  "infoLinks",
+  "infoGroups",
+  "rules",
+  "profiles",
+];
+export interface BSModifierBase {
+  modifiers?: BSIModifier[];
+  modifierGroups?: BSIModifierGroup[];
+}
+
+const good1 = [
+  "profile",
+  "rule",
+  "infoLink",
+  "infoGroup",
+  "selectionEntry",
+  "selectionEntryGroup",
+  "entryLink",
+
+  "profiles",
+  "rules",
+  "infoLinks",
+  "infoGroups",
+  "entryLinks",
+  "selectionEntryLinks",
+  "categoryLinks",
+
+  "costTypes",
+  "profileTypes",
+  "characteristicTypes",
+  "categoryEntries",
+  "categories",
+  "forceEntries",
+  "forces",
+  "sharedSelectionEntries",
+  "sharedSelectionEntryGroups",
+  "sharedProfiles",
+  "sharedRules",
+  "sharedInfoGroups",
+  "selectionEntries",
+  "selectionEntryGroups",
+  "rules",
+  "rootRules",
+
+  "publications",
+  "constraints",
+];
+
+const good2 = ["conditions", "modifiers", "modifierGroups", "repeats", "conditionGroups"];
+export const goodKeys = new Set([...good1, ...good2]);
+export const goodKeysWiki = new Set(good1);
+
+/**
+ * This is a base class with generic functions for all nodes in the BSData xml/json
+ * Usage: Add it as a prototype on the json to use the functions with Object.setPrototypeOf
+ */
+export class Base implements BSModifierBase {
+  // Data
+  id!: string;
+  type?: string;
+  shared?: boolean;
+  import?: boolean;
+  collective?: boolean;
+  defaultSelectionEntryId?: string;
+
+  // Data - Modifiable
+  name!: string;
+  hidden!: boolean;
+  value?: number | string | boolean;
+  page?: string;
+
+  profiles?: BSIProfile[];
+  rules?: BSIRule[];
+  infoLinks?: BSIInfoLink[];
+  infoGroups?: BSIInfoGroup[];
+  publications?: BSIPublication[];
+  costs?: BSICost[];
+
+  // Childs
+  selectionEntries?: Base[];
+  selectionEntryGroups?: Base[];
+  entryLinks?: Link[];
+  categoryEntries?: Category[];
+  categoryLinks?: CategoryLink[];
+  forceEntries?: Force[];
+  sharedSelectionEntryGroups?: Base[];
+  sharedSelectionEntries?: Base[];
+  target?: Base;
+
+  // Modifiers
+  modifiers?: BSIModifier[];
+  modifierGroups?: BSIModifierGroup[];
+  constraints?: BSIConstraint[];
+
+  // Processed (Catalogue)
+  catalogue!: Catalogue; // Parent Catalogue
+  extra_constraints?: BSIExtraConstraint[];
+  childs!: Base[];
+
+  // Processed (self)
+  loaded?: boolean;
+  collective_recursive?: boolean;
+  limited_to_one?: boolean;
+
+  // NR Only
+  associations?: NRAssociation[];
+  associationConstraints?: AssociationConstraint[];
+
+  constructor(json: any) {
+    return Object.setPrototypeOf(json, Object.getPrototypeOf(this));
+  }
+  get url(): string {
+    return "%{main_catalogue|catalogue}/%{id}/%{getName}";
+  }
+  // Prevent Vue Observers
+  get [Symbol.toStringTag](): string {
+    // Anything can go here really as long as it's not 'Object'
+    return "ObjectNoObserve";
+  }
+  isGroup(): boolean {
+    return false;
+  }
+  isForce(): this is Force {
+    return false;
+  }
+  isCatalogue(): this is Catalogue {
+    return false;
+  }
+  isLink(): this is Link {
+    return false;
+  }
+  isCategory(): this is Category {
+    return false;
+  }
+  isRoster(): this is Roster {
+    return false;
+  }
+  isQuantifiable(): boolean {
+    return true;
+  }
+  isEntry(): boolean {
+    return true;
+  }
+  isUnit(): boolean {
+    for (const categoryLink of this.categoryLinks || []) {
+      if (categoryLink.primary) return true;
+    }
+    return false;
+  }
+  getId(): string {
+    return this.id;
+  }
+  getType(): string | undefined {
+    return this.type;
+  }
+  getHidden(): boolean | undefined {
+    return this.hidden;
+  }
+  getPage(): string | undefined {
+    return this.page;
+  }
+  getName(): string {
+    return this.name;
+  }
+  isCollective(): boolean | undefined {
+    return this.collective;
+  }
+  isCollectiveRecursive() {
+    const stack = [...this.selectionsIterator()];
+    while (stack.length) {
+      const current = stack.pop()!;
+      if (!current.isCollective() && !current.isGroup()) return false;
+      stack.push(...current.selectionsIterator());
+    }
+    return true;
+  }
+
+  process() {
+    if (this.loaded) return;
+    this.collective_recursive = this.isCollectiveRecursive();
+    this.limited_to_one = !this.canAmountBeAbove1();
+    this.loaded = true;
+  }
+  *forcesIterator(): Iterable<Force> {
+    return;
+  }
+  *profilesIterator(): Iterable<BSIProfile> {
+    for (const group of getAllInfoGroups(this)) {
+      if (group.profiles) {
+        yield* group.profiles;
+      }
+      if (group.infoLinks) {
+        yield* group.infoLinks?.filter((o) => o.type === "profile").map((o) => o.target as BSIProfile);
+      }
+    }
+  }
+  *rulesIterator(): Iterable<BSIRule> {
+    for (const group of getAllInfoGroups(this)) {
+      if (group.rules) {
+        yield* group.rules;
+      }
+      if (group.infoLinks) {
+        yield* group.infoLinks?.filter((o) => o.type === "rule").map((o) => o.target as BSIRule);
+      }
+    }
+  }
+  *constraintsIterator(): Iterable<BSIConstraint> {
+    if (this.constraints) yield* this.constraints;
+  }
+  *extraConstraintsIterator(): Iterable<BSIExtraConstraint> {
+    if (this.extra_constraints) yield* this.extra_constraints;
+  }
+  *modifierGroupsIterator(): Iterable<BSIModifierGroup> {
+    if (this.modifierGroups) yield* this.modifierGroups;
+  }
+  *modifiersIterator(): Iterable<BSIModifier> {
+    if (this.modifiers) yield* this.modifiers;
+  }
+  *modifierGroupsIteratorRecursive(): Generator<BSIModifierGroup, void, undefined> {
+    yield this;
+    if (this.isLink()) yield this.target;
+    for (const group of this.modifierGroupsIterator()) {
+      yield group;
+      yield* iterateModifierGroupsRecursive(group.modifierGroups);
+    }
+  }
+  *selectionsIterator(): Iterable<Base | Link> {
+    if (this.selectionEntries) yield* this.selectionEntries;
+    if (this.selectionEntryGroups) yield* this.selectionEntryGroups;
+    if (this.entryLinks) yield* this.entryLinks;
+  }
+  *localSelectionsIterator(): Iterable<Base | Link> {
+    if (this.selectionEntries) yield* this.selectionEntries;
+    if (this.selectionEntryGroups) yield* this.selectionEntryGroups;
+    if (this.entryLinks) yield* this.entryLinks;
+  }
+  *nodesIterator(): Iterable<Base | Link> {
+    if (this.isLink()) yield* this.target.nodesIterator();
+    if (this.selectionEntries) yield* this.selectionEntries;
+    if (this.selectionEntryGroups) yield* this.selectionEntryGroups;
+    if (this.entryLinks) yield* this.entryLinks;
+    if (this.childs) yield* this.childs;
+  }
+  *entriesIterator(): Iterable<Base | Link> {
+    if (this.isLink()) yield* this.target.entriesIterator();
+    if (this.selectionEntries) yield* this.selectionEntries;
+    if (this.selectionEntryGroups) yield* this.selectionEntryGroups;
+    if (this.entryLinks) yield* this.entryLinks;
+    if (this.childs) yield* this.childs;
+  }
+  *categoryLinksIterator(): Iterable<CategoryLink> {
+    if (this.categoryLinks) yield* this.categoryLinks;
+  }
+  *infoLinksIterator(): Iterable<BSIInfoLink> {
+    if (this.infoLinks) yield* this.infoLinks;
+  }
+  *infoGroupsIterator(): Iterable<BSIInfoGroup> {
+    if (this.infoGroups) yield* this.infoGroups;
+  }
+  *infoRulesIterator(): Iterable<BSIRule> {
+    if (this.rules) yield* this.rules;
+  }
+  *infoProfilesIterator(): Iterable<BSIProfile> {
+    if (this.profiles) yield* this.profiles;
+  }
+
+  /**
+   *If callback returns something other than `undefined`, callback will not be called for the childs of this node
+   */
+  forEachCond(callbackfn: (value: Base | Link, depth: number) => any, _depth = 0): void {
+    if (callbackfn(this, 0) === undefined)
+      for (const instance of this.selectionsIterator()) instance.forEachCond(callbackfn, _depth + 1);
+  }
+  forEach(callbackfn: (value: Base | Link) => unknown): void {
+    callbackfn(this);
+    for (const instance of this.selectionsIterator()) instance.forEach(callbackfn);
+  }
+  forEachNode(callbackfn: (value: Base | Link) => unknown): void {
+    callbackfn(this);
+    for (const instance of this.nodesIterator()) instance.forEachNode(callbackfn);
+  }
+  forEachNodeCb(callbackfn: (value: Base | Link) => unknown): void {
+    const stack = [this as Base | Link];
+    const blacklist = new Set<string>();
+    while (stack.length) {
+      const cur = stack.pop()!;
+      if (blacklist.has(cur.id)) {
+        continue;
+      } else {
+        blacklist.add(cur.id);
+      }
+      callbackfn(cur);
+      if (cur.childs) {
+        stack.push(...cur.childs);
+        continue;
+      }
+
+      if (cur.target) {
+        const target = cur.target;
+
+        if (target.selectionEntries) stack.push(...target.selectionEntries);
+
+        if (target.selectionEntryGroups) stack.push(...target.selectionEntryGroups);
+
+        if (target.entryLinks) stack.push(...target.entryLinks);
+      }
+      if (cur.selectionEntries) stack.push(...cur.selectionEntries);
+
+      if (cur.selectionEntryGroups) stack.push(...cur.selectionEntryGroups);
+
+      if (cur.entryLinks) stack.push(...cur.entryLinks);
+    }
+  }
+  forEachObjectWhitelist(callbackfn: (value: Base | Link, parent: Base) => unknown, whiteList = goodKeys) {
+    const stack = [this as any];
+    // const keys = {} as any;
+    while (stack.length) {
+      const current = stack.pop()!;
+      for (const key of Object.keys(current)) {
+        const value = current[key];
+        if (!whiteList.has(key)) continue;
+        //  If Array: add each object inside array if (Array.isArray(value)) {
+
+        if (isObject(value)) {
+          if (Array.isArray(value)) {
+            if (value.length && isObject(value[0])) {
+              for (let i = value.length; i--;) {
+                const cur = value[i];
+                callbackfn(cur, current);
+                stack.push(cur);
+              }
+            }
+          } else {
+            callbackfn(value, current);
+            stack.push(value);
+          }
+        }
+      }
+    }
+  }
+  forEachObject(callbackfn: (value: Base | Link, parent: Base) => unknown, badKeys = new Set()) {
+    const stack = [this as any];
+    // const keys = {} as any;
+    while (stack.length) {
+      const current = stack.pop()!;
+      for (const key of Object.keys(current)) {
+        const value = current[key];
+        if (badKeys.has(key)) continue;
+        //  If Array: add each object inside array if (Array.isArray(value)) {
+
+        if (isObject(value)) {
+          if (Array.isArray(value)) {
+            if (value.length && isObject(value[0])) {
+              for (let i = value.length; i--;) {
+                const cur = value[i];
+                callbackfn(cur, current);
+                stack.push(cur);
+              }
+            }
+          } else {
+            callbackfn(value, current);
+            stack.push(value);
+          }
+        }
+      }
+    }
+  }
+  findOption(cb: (opt: Base | Link) => boolean): Base | Link | undefined {
+    for (const s of this.selectionsIterator()) {
+      if (cb(s)) return s;
+    }
+  }
+  findOptionRecursive(cb: (opt: Base | Link) => boolean): Base | Link | undefined {
+    const stack = [...this.selectionsIterator()];
+    while (stack.length) {
+      const current = stack.pop()!;
+      if (cb(current)) return current;
+    }
+  }
+  getCosts(): BSICost[] {
+    return this.costs || [];
+  }
+
+  getPrimaryCategory(): string {
+    for (const categoryLink of this.categoryLinks || []) {
+      if (categoryLink.primary) return categoryLink.targetId;
+    }
+    return UNCATEGORIZED_ID;
+  }
+
+  // Modifiers a constraints query to have the same effect when checked from a roster/force.
+  // packs modifiers & modifiers groups inside it
+  getBoundConstraint(constraint: BSIConstraint): BSIExtraConstraint {
+    const result = Object.assign({}, constraint) as BSIExtraConstraint;
+    result.name = this.getName();
+    result.parent = this;
+    const useTarget = constraint.shared || this instanceof CategoryLink;
+    result.childId = this.isLink() && useTarget ? this.targetId : this.id;
+    result.scope = "self";
+
+    result.modifiers = [];
+    for (const modifier of this.modifiersIterator()) {
+      if (modifier.field === constraint.id || modifier.field === "hidden") result.modifiers.push(modifier);
+    }
+    result.modifierGroups = [];
+    for (const group of this.modifierGroupsIterator()) {
+      current: for (const sub_grp of iterateModifierGroupsRecursive([group])) {
+        for (const modifier of sub_grp.modifiers || []) {
+          if (modifier.field === constraint.id || modifier.field === "hidden") {
+            result.modifierGroups.push(group);
+            break current;
+          }
+        }
+      }
+    }
+    return result;
+  }
+  // checks if extra constraints are null before adding them to prevent duplicates
+  // because of this, this must be called before setting roster/force constraints
+  getChildBoundConstraints(skipGroup?: boolean): BSIExtraConstraint[] {
+    const result = [];
+    for (const child of this.selectionsIterator()) {
+      if (skipGroup && child.isGroup()) continue;
+      for (const constraint of child.constraintsIterator()) {
+        if (constraint.type === "min") {
+          if (constraint.scope === "parent") result.push(child.getBoundConstraint(constraint));
+        }
+      }
+
+      if (child.isGroup()) result.push(...child.getChildBoundConstraints());
+    }
+    return result;
+  }
+  canAmountBeAbove1(): boolean {
+    const maxes = getTheoreticalMaxes(this.constraintsIterator(), [
+      ...this.modifierGroupsIterator(),
+      { modifiers: [...this.modifiersIterator()] },
+    ]);
+    if (!maxes.length || maxes.includes(-1)) return true;
+    return Math.min(...maxes) > 1;
+  }
+  hasOption(name: string) {
+    let found: undefined | true = undefined;
+    this.forEachCond((o) => {
+      if (o.getName() === name) found = true;
+      return found;
+    });
+    return found ? true : false;
+  }
+}
+
+export class Group extends Base {
+  isGroup() {
+    return true;
+  }
+  isQuantifiable(): boolean {
+    return false;
+  }
+  isEntry(): boolean {
+    return false;
+  }
+}
+export class Link extends Base {
+  targetId!: string;
+  target!: Base;
+  isLink(): this is Link {
+    return true;
+  }
+  isGroup(): boolean {
+    return this.target.isGroup();
+  }
+  isCategory() {
+    return this.target.isCategory();
+  }
+  isQuantifiable(): boolean {
+    return this.target.isQuantifiable();
+  }
+  isEntry(): boolean {
+    return this.target.isEntry();
+  }
+  isUnit(): boolean {
+    if (this.target.isUnit()) return true;
+    for (const categoryLink of this.categoryLinks || []) {
+      if (categoryLink.primary) return true;
+    }
+    return false;
+  }
+  isEmptyLink(): boolean {
+    for (const key of isNonEmptyIfHasOneOf) {
+      if ((this as any)[key] !== undefined) return false;
+    }
+    return true;
+  }
+  getId(): string {
+    return this.targetId;
+  }
+  getType(): string | undefined {
+    return this.target.type;
+  }
+  getPage(): string | undefined {
+    return this.page || this.target.page;
+  }
+  getHidden(): boolean | undefined {
+    return this.target.hidden || this.hidden;
+  }
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore: TS2611
+  get associationConstraints(): AssociationConstraint[] | undefined {
+    return this.target.associationConstraints;
+  }
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore: TS2611
+  get associations(): NRAssociation[] | undefined {
+    return this.target.associations;
+  }
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore: TS2611
+  get defaultSelectionEntryId(): string | undefined {
+    return this.target.defaultSelectionEntryId;
+  }
+  isCollective(): boolean | undefined {
+    return super.isCollective() || this.target.isCollective();
+  }
+  *extraConstraintsIterator(): Iterable<BSIExtraConstraint> {
+    yield* this.target.extraConstraintsIterator();
+    yield* super.extraConstraintsIterator();
+  }
+  *rulesIterator(): Iterable<BSIRule> {
+    yield* this.target.rulesIterator();
+    yield* super.rulesIterator();
+  }
+  *profilesIterator(): Iterable<BSIProfile> {
+    yield* this.target.profilesIterator();
+    yield* super.profilesIterator();
+  }
+  *constraintsIterator(): Iterable<BSIConstraint> {
+    yield* this.target.constraintsIterator();
+    yield* super.constraintsIterator();
+  }
+  *modifierGroupsIterator(): Iterable<BSIModifierGroup> {
+    yield* this.target.modifierGroupsIterator();
+    yield* super.modifierGroupsIterator();
+  }
+  *modifiersIterator(): Iterable<BSIModifier> {
+    yield* this.target.modifiersIterator();
+    yield* super.modifiersIterator();
+  }
+  *selectionsIterator(): Iterable<Base | Link> {
+    yield* this.target.selectionsIterator();
+    yield* super.selectionsIterator();
+  }
+  *categoryLinksIterator(): Iterable<CategoryLink> {
+    yield* this.target.categoryLinksIterator();
+    yield* super.categoryLinksIterator();
+  }
+  *infoLinksIterator(): Iterable<BSIInfoLink> {
+    yield* this.target.infoLinksIterator();
+    yield* super.infoLinksIterator();
+  }
+  *infoGroupsIterator(): Iterable<BSIInfoGroup> {
+    yield* this.target.infoGroupsIterator();
+    yield* super.infoGroupsIterator();
+  }
+  *infoRulesIterator(): Iterable<BSIRule> {
+    yield* this.target.infoRulesIterator();
+    yield* super.infoRulesIterator();
+  }
+  *infoProfilesIterator(): Iterable<BSIProfile> {
+    yield* this.target.infoProfilesIterator();
+    yield* super.infoProfilesIterator();
+  }
+  getName(): string {
+    return this.target.name || this.name;
+  }
+
+  getPrimaryCategory(): string {
+    for (const categoryLink of this.categoryLinks || []) {
+      if (categoryLink.primary) return categoryLink.targetId;
+    }
+    for (const categoryLink of this.target.categoryLinks || []) {
+      if (categoryLink.primary) return categoryLink.targetId;
+    }
+    return UNCATEGORIZED_ID;
+  }
+  getCosts(): BSICost[] {
+    const d = {} as Record<string, BSICost>;
+    if (this.target.costs) {
+      for (const cost of this.target.costs) d[cost.typeId] = cost;
+    }
+    if (this.costs) {
+      for (const cost of this.costs) d[cost.typeId] = cost;
+    }
+    return Object.values(d);
+  }
+}
+export class CategoryLink extends Link {
+  targetId!: string;
+  target!: Category;
+  primary?: boolean;
+  main_catalogue!: Catalogue;
+
+  get units() {
+    return this.target.units;
+  }
+  *selectionsIterator(): Iterable<Base> {
+    yield* this.target.units;
+  }
+  isEmpty(): boolean {
+    return this.target.isEmpty();
+  }
+}
+
+export const UNCATEGORIZED_ID = "(No Category)";
+export const ILLEGAL_ID = "(Illegal Units)";
+export class Category extends Base {
+  id!: string;
+  units!: Array<Base | Link>;
+  main_catalogue!: Catalogue;
+  isCategory(): this is Category {
+    return true;
+  }
+  isQuantifiable(): boolean {
+    return false;
+  }
+  isEntry(): boolean {
+    return false;
+  }
+  *selectionsIterator(): Iterable<Base> {
+    yield* this.units;
+  }
+  isEmpty(): boolean {
+    return !Boolean(this.units.length);
+  }
+}
+export class Force extends Base {
+  name!: string;
+  id!: string;
+  categories!: Array<Category | CategoryLink>;
+  forces?: Force[];
+  main_catalogue!: Catalogue;
+  isForce(): this is Force {
+    return true;
+  }
+  isQuantifiable(): boolean {
+    return false;
+  }
+  isEntry(): boolean {
+    return true;
+  }
+  *selectionsIterator(): Iterable<Base> {
+    yield* this.categories;
+    if (this.forces) yield* this.forces;
+  }
+  *rulesIterator(): Iterable<BSIRule> {
+    for (const group of getAllInfoGroups(this)) {
+      if (group.rules) {
+        yield* group.rules;
+      }
+      if (group.infoLinks) {
+        yield* group.infoLinks?.filter((o) => o.type === "rule").map((o) => o.target as BSIRule);
+      }
+    }
+    if (this.main_catalogue) yield* this.main_catalogue.rulesIterator();
+  }
+  generateForces(categories: Record<string, Category>): Force[] {
+    const result = [];
+    for (const force of this.forceEntries || []) {
+      const copied = clone(force);
+      copied.main_catalogue = this.main_catalogue;
+      const forceCategories = [];
+      for (const link of force.categoryLinks || []) {
+        if (link.targetId in categories) {
+          forceCategories.push(categories[link.targetId]);
+        }
+      }
+      copied.categories = forceCategories;
+      this.main_catalogue.index[copied.id] = copied;
+      result.push(copied);
+    }
+    this.forces = result;
+    return result;
+  }
+  isEmpty(): boolean {
+    for (const category of this.categories) {
+      if (!category.isEmpty()) {
+        return false;
+      }
+    }
+    return true;
+  }
+  *forcesIterator(): Iterable<Force> {
+    if (this.forces) {
+      yield* this.forces;
+    }
+  }
+  *forcesIteratorRecursive(): Iterable<Force> {
+    if (this.forces) {
+      for (const force of this.forces) {
+        yield force;
+        yield* force.forcesIteratorRecursive();
+      }
+    }
+  }
+}
+
+const maxValue = Infinity;
+export function getTheoreticalMaxes(
+  constraints: Iterable<BSIConstraint>,
+  modifierGroups: Iterable<BSIModifierGroup>
+): number[] {
+  const maxConstraints = [] as number[];
+  function push(n: number) {
+    maxConstraints.push(n);
+  }
+  for (const constraint of constraints) {
+    const beginLength = maxConstraints.length;
+    if (constraint.field !== "selections" || constraint.type !== "max") continue;
+    if (constraint.value > 1) {
+      push(constraint.value);
+      continue;
+    }
+    let constraintValue = constraint.value;
+    for (const modifier_group of iterateModifierGroupsRecursive(modifierGroups)) {
+      for (const modifier of modifier_group.modifiers || []) {
+        if (modifier.field !== constraint.id) continue;
+        if (modifier.type === "increment") {
+          if (modifier_group.repeats?.length || modifier.repeats?.length) {
+            push(maxValue);
+            continue;
+          }
+          constraintValue += modifier.value as number;
+          if (constraintValue > 1) {
+            push(constraintValue);
+            continue;
+          }
+        }
+        if (modifier.type === "decrement" && modifier.value < 0) {
+          if (modifier_group.repeats?.length || modifier.repeats?.length) {
+            push(maxValue);
+            continue;
+          }
+          constraintValue -= modifier.value as number;
+          if (constraintValue > 1) {
+            push(constraintValue);
+            continue;
+          }
+        }
+        if (modifier.type === "set" && modifier.value > 1) {
+          if (modifier.value === -1) {
+            push(maxValue);
+            continue;
+          }
+          push(modifier.value as number);
+        }
+      }
+    }
+
+    if (beginLength === maxConstraints.length) push(constraintValue);
+  }
+
+  return maxConstraints;
+}
+
+export function entryIsModel(entry: Base | Link): boolean {
+  if (entry.isGroup() == true) {
+    return false;
+  }
+  return entry.getType() === "model" || entry.getType() === "crew";
+}
+
+export function entryIsCrew(entry: Base | Link): boolean {
+  if (entry.isGroup() == true) {
+    return false;
+  }
+  return entry.getType() === "crew";
+}
+
+export function entryIsWarMachine(entry: Base | Link): boolean {
+  if (entry.getType() == "unit") {
+    if (entry.profiles) {
+      for (const prf of entry.profiles) {
+        if (prf.typeName === "War Machine") {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+export function getAllModels(entry: Base | Link): IModel[] {
+  const result: IModel[] = [];
+
+  entry.forEachNode((o) => {
+    if (entryIsModel(o)) {
+      result.push({
+        name: o.getName(),
+      });
+    }
+  });
+  return result;
+}
+
+export interface BSIExtraConstraint extends BSIConstraint, BSINamed {
+  parent: Base;
+  modifiers: BSIModifier[];
+  modifierGroups: BSIModifierGroup[];
+}
+
+// const debugKeys = new Set();
+export class Rule implements BSIRule {
+  id!: string;
+  name!: string;
+  description!: string;
+  hidden!: boolean;
+  page?: string;
+  modifiers?: BSIModifier[] | undefined;
+  modifierGroups?: BSIModifierGroup[] | undefined;
+  getDescription(): string {
+    return Array.isArray(this.description) ? this.description.join("\n") : this.description;
+  }
+  _init_() {
+    if (Array.isArray(this.description)) {
+      this.description = this.description[0];
+    }
+  }
+}
+
+export function getStaticFilters(source: Base): string[] {
+  const ids = ["any", source.id];
+  if (source.isLink()) ids.push(source.targetId);
+  const type = source.getType();
+  if (type) ids.push(type);
+  return ids;
+}
+
+export function getIds(source: Base): string[] {
+  return source.isLink() ? [source.id, source.targetId] : [source.id];
+}
+
+export function* iterateModifierGroupsRecursive(
+  groups?: Iterable<BSIModifierGroup>
+): Generator<BSIModifierGroup, void, undefined> {
+  if (groups) {
+    for (const group of groups) {
+      yield group;
+      yield* iterateModifierGroupsRecursive(group.modifierGroups);
+    }
+  }
+}
