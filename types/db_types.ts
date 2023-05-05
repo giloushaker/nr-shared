@@ -9,7 +9,7 @@ import type {
 
 import type { PatchIndex } from "../battlescribe/bs_helpers";
 import type { BSICost } from "../battlescribe/bs_types";
-import type { BooksDate } from "~/assets/shared/battlescribe/bs_versioning";
+import type { BooksDate } from "../battlescribe/bs_versioning";
 
 import type { StateOptions } from "./stateOptions";
 import type { ScoringSystem } from "../systems/bs_game_system";
@@ -41,7 +41,10 @@ export interface GameSystemRow {
     defaultMaxCosts?: Record<string, number>;
     patch?: PatchIndex;
     profileFilter?: string;
-    sizes?: Record<string, { type: string; size: { w: number; h: number; r: boolean } }>;
+    sizes?: Record<
+      string,
+      { type: string; size: { w: number; h: number; r: boolean } }
+    >;
     major?: Record<string, Array<{ name: string; date: string }>>;
     score?: ScoringSystem[];
     setup_categories?: Record<string, SetupCategory>;

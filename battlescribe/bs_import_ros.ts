@@ -1,5 +1,5 @@
 import { SavedRoster, SavedForce, SavedSelection } from "./bs_types";
-import { BookRow } from "~/assets/shared/types/db_types";
+import { BookRow } from "../types/db_types";
 import { GameSystem } from "../../ts/systems/game_system";
 import { IArmyRoster } from "../../shared/systems/army_interfaces";
 import { BsBook } from "./bs_book";
@@ -17,7 +17,9 @@ export async function loadBSRoster(
   const firstForce = json.forces[0];
 
   if (bookRow.bsid !== firstForce.catalogueId)
-    throw Error(`Select ${firstForce.catalogueName} before importing this roster`);
+    throw Error(
+      `Select ${firstForce.catalogueName} before importing this roster`
+    );
 
   // Create List
   const root = newList(bs_book.getMainCatalogue(), true);
@@ -34,9 +36,13 @@ export async function loadBSRoster(
   }
 
   for (const catalogueToLoad of json.forces) {
-    const book = await selectedSystem.findBookByBsid(catalogueToLoad.catalogueId);
+    const book = await selectedSystem.findBookByBsid(
+      catalogueToLoad.catalogueId
+    );
     if (!book)
-      throw Error(`Couldn't find book ${catalogueToLoad.catalogueName} with id ${catalogueToLoad.catalogueId}`);
+      throw Error(
+        `Couldn't find book ${catalogueToLoad.catalogueName} with id ${catalogueToLoad.catalogueId}`
+      );
 
     roster.addBook(book as BsBook);
   }
@@ -56,18 +62,33 @@ export async function loadBSRoster(
 async function loadBsForce(parent: Instance, roster_force: SavedForce) {
   const roster = parent.getParentRoster();
   const system = roster.getBook().getSystem();
-  let book: BsBook | undefined | null = roster.selectors.find((o) => o.getId() === roster_force.catalogueId)?.getBook();
+  let book: BsBook | undefined | null = roster.selectors
+    .find((o) => o.getId() === roster_force.catalogueId)
+    ?.getBook();
 
   if (!book) {
-    book = (await system.findBookByBsid(roster_force.catalogueId)) as BsBook | undefined | null;
+    book = (await system.findBookByBsid(roster_force.catalogueId)) as
+      | BsBook
+      | undefined
+      | null;
     if (!book) {
-      console.warn("Catalogue", "couldn't be loaded", roster_force.catalogueName, roster_force.catalogueId);
+      console.warn(
+        "Catalogue",
+        "couldn't be loaded",
+        roster_force.catalogueName,
+        roster_force.catalogueId
+      );
       return;
     }
   }
   const new_force = parent.insertForce(book, roster_force.entryId);
   if (!new_force) {
-    console.warn("Force", "couldn't be loaded", roster_force.name, roster_force.entryId);
+    console.warn(
+      "Force",
+      "couldn't be loaded",
+      roster_force.name,
+      roster_force.entryId
+    );
     return;
   }
 
@@ -75,22 +96,42 @@ async function loadBsForce(parent: Instance, roster_force: SavedForce) {
   for (const roster_unit of roster_force.selections || []) {
     const unit_category = roster_unit.categories?.find((o) => o.primary);
     if (!unit_category) {
-      console.warn("found Unit without Primary Category", roster_unit.name, roster_unit.entryId);
+      console.warn(
+        "found Unit without Primary Category",
+        roster_unit.name,
+        roster_unit.entryId
+      );
       continue;
     }
-    const category = new_force.findOption(unit_category.entryId, unit_category.name);
+    const category = new_force.findOption(
+      unit_category.entryId,
+      unit_category.name
+    );
     if (!category) {
-      console.warn("Category", "couldn't be loaded", unit_category.name, unit_category.entryId);
+      console.warn(
+        "Category",
+        "couldn't be loaded",
+        unit_category.name,
+        unit_category.entryId
+      );
       continue;
     }
     const splitEntryId = roster_unit.entryId.split("::");
     const unitEntryId = splitEntryId[splitEntryId.length - 1];
     let unit_selector;
     try {
-      unit_selector = category.first().findOrAddSelector(unitEntryId, roster_unit.name, true);
+      unit_selector = category
+        .first()
+        .findOrAddSelector(unitEntryId, roster_unit.name, true);
       loadBsUnit(unit_selector, roster_unit);
     } catch (e) {
-      console.warn("unit", "couldn't be loaded", roster_unit.name, roster_unit.entryId, e);
+      console.warn(
+        "unit",
+        "couldn't be loaded",
+        roster_unit.name,
+        roster_unit.entryId,
+        e
+      );
     }
   }
 
@@ -105,7 +146,11 @@ function loadBsUnit(unit_selector: Selector, roster_unit: SavedSelection) {
     loadBsSelections(selection, unit, 1);
   }
 }
-function loadBsSelections(self: SavedSelection, parent: Instance, divide: number) {
+function loadBsSelections(
+  self: SavedSelection,
+  parent: Instance,
+  divide: number
+) {
   const num = self.number / divide || 1;
   const option = parent.findOption(self.entryId, self.name);
   if (!option) {
