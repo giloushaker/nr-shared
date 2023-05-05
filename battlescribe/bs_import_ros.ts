@@ -1,5 +1,5 @@
 import { SavedRoster, SavedForce, SavedSelection } from "./bs_types";
-import { BookRow } from "~/types/db_types";
+import { BookRow } from "~/assets/shared/types/db_types";
 import { GameSystem } from "../../ts/systems/game_system";
 import { IArmyRoster } from "../../shared/systems/army_interfaces";
 import { BsBook } from "./bs_book";

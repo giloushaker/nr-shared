@@ -2,7 +2,7 @@ import { arrayToIndex, systemToString } from "../util";
 import { NRClientCatalogueManager } from "../../shared/battlescribe/bs_system";
 import type { PatchIndex } from "../../shared/battlescribe/bs_helpers";
 import type { IArmyBook, SetupCategory } from "./army_interfaces";
-import type { BookRow, GameSystemRow, Icons, IndexAndArray, ListRow } from "../../../types/db_types";
+import type { BookRow, GameSystemRow, Icons, IndexAndArray, ListRow } from "../../../assets/shared/types/db_types";
 import { BsBook } from "../../shared/battlescribe/bs_book";
 
 import { BooksDate, getBookDate } from "../../shared/battlescribe/bs_versioning";

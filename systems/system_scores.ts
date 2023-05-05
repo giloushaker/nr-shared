@@ -1,4 +1,4 @@
-import type { ReportScore } from "../../../types/db_types";
+import type { ReportScore } from "../../../assets/shared/types/db_types";
 import { IArmyRoster } from "./army_interfaces";
 import { GameSystem } from "../../ts/systems/game_system";
 import { calcBattlepoints, CalculatedBP } from "../../shared/util";
