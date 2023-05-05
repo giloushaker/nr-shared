@@ -1,23 +1,28 @@
 import { unzip } from "unzipit";
-import { XMLParser } from "fast-xml-parser";
-import { hashFnv32a, to_snake_case } from "./bs_helpers";
+import { X2jOptionsOptional, XMLParser } from "fast-xml-parser";
+import { fix_xml_object, hashFnv32a, to_snake_case } from "./bs_helpers";
 
 export function xmlToJson(data: string) {
   try {
     // remove self-closing tags (<image />)
     data = data.replace(/<[a-zA-Z0-9]+ *[/]>/g, "");
   } catch {}
-  const options = {
+  const options: X2jOptionsOptional = {
     ignoreAttributes: false,
     attributeNamePrefix: "",
-    attrNodeName: false,
     textNodeName: "$text",
-    ignoreNameSpace: true,
-    parseNodeValue: true,
     parseAttributeValue: true,
     trimValues: true,
-    parseTrueNumberOnly: false,
-    arrayMode: false,
+    isArray: (
+      tagName: string,
+      jPath: string,
+      isLeafNode: boolean,
+      isAttribute: boolean
+    ) => {
+      return (
+        !isAttribute && tagName !== "catalogue" && tagName !== "gameSystem"
+      );
+    },
   };
   return new XMLParser(options).parse(data);
 }
@@ -32,8 +37,10 @@ export async function unzipFile(
   }
   throw "unzipFile failed: No Entries";
 }
+
 export function BSXmlToJson(data: string) {
   const result = xmlToJson(data);
+  fix_xml_object(result);
   const type = result.catalogue ? "catalogue" : "gameSystem";
   if (!result.catalogue) {
     result.playable = 0;
@@ -50,7 +57,6 @@ export function BSXmlToJson(data: string) {
   result.playable = !Boolean(content.library);
   result.version = content.battleScribeVersion;
   result.nrversion = content.revision;
-
   return result;
 }
 export async function convertToJson(data: any, extension: string) {
