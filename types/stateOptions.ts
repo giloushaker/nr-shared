@@ -1,4 +1,4 @@
-import { IPresetIndex } from "../battlescribe/ui/bs_preset";
+import { IPresetIndex } from "../../ts/battlescribe/ui/bs_preset";
 import { Figurine } from "../roster/figurines";
 
 export interface AppearanceTheme {
