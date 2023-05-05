@@ -1,4 +1,4 @@
-import { GameSystem } from "../../ts/system/game_system";
+import { GameSystem } from "../../ts/systems/game_system";
 import { BSIData, BSICost } from "./bs_types";
 import { getAllModels } from "./bs_main";
 import { newList, ExportedRoot } from "./bs_selector";

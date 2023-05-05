@@ -1,7 +1,7 @@
 import { Store } from "store/index";
 import { unzip } from "unzipit";
 import { xml_to_json } from "../bs_xml";
-import { GameSystem } from "../../../ts/system/game_system";
+import { GameSystem } from "../../../ts/systems/game_system";
 import { selectedSystemChanged } from "~/assets/js/selection";
 import { loadBSRoster } from "../bs_import_ros";
 import { Instance } from "../bs_instance";
