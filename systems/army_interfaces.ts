@@ -1,5 +1,5 @@
 import type { ErrorMessage } from "../error_manager";
-import type { GameSystem } from "./game_system";
+import type { GameSystem } from "../../ts/system/game_system";
 import { leanName } from "../util";
 import AlgoSettings from "../army/algo_settings";
 
