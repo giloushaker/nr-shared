@@ -1,6 +1,12 @@
-import { unzip } from "unzipit";
+import { ZipEntry, unzip } from "unzipit";
 import { X2jOptionsOptional, XMLParser } from "fast-xml-parser";
-import { fix_xml_object, hashFnv32a, to_snake_case } from "./bs_helpers";
+import {
+  fix_xml_object,
+  hashFnv32a,
+  removePrefix,
+  removeSuffix,
+  to_snake_case,
+} from "./bs_helpers";
 
 export function xmlToJson(data: string) {
   try {
@@ -27,6 +33,29 @@ export function xmlToJson(data: string) {
   return new XMLParser(options).parse(data);
 }
 
+export async function unzipFolder(
+  file: string | ArrayBuffer | Blob,
+  path: string
+) {
+  const unzipped = await unzip(file);
+  const result = {} as Record<string, string>;
+  console.log("unzipping folder", unzipped, "path", path);
+  for (const entry in unzipped.entries) {
+    const value = unzipped.entries[entry];
+    if (value.isDirectory) {
+      // folder
+      continue;
+    }
+    const file = removePrefix(removePrefix(entry, path), "/");
+    if (file.startsWith(".")) {
+      // git file
+      continue;
+    }
+    result[file] = await unzipped.entries[entry].text();
+  }
+  return result;
+}
+
 export async function unzipFile(
   file: string | ArrayBuffer | Blob
 ): Promise<string> {
@@ -38,6 +67,18 @@ export async function unzipFile(
   throw "unzipFile failed: No Entries";
 }
 
+const allowedExtensions = ["gst", "gstz", "xml", "zip", "cat", "catz", "json"];
+export function getExtension(extension_or_file: string) {
+  const extension = extension_or_file.split(".").pop()!.toLowerCase();
+  return extension;
+}
+export function isAllowedExtension(file: string) {
+  const fileExtension = getExtension(file);
+  if (!allowedExtensions.includes(fileExtension)) {
+    return false;
+  }
+  return true;
+}
 export function BSXmlToJson(data: string) {
   const result = xmlToJson(data);
   fix_xml_object(result);
@@ -60,6 +101,7 @@ export function BSXmlToJson(data: string) {
   return result;
 }
 export async function convertToJson(data: any, extension: string) {
+  extension = getExtension(extension);
   switch (extension) {
     case "xml":
     case "cat":
@@ -72,6 +114,6 @@ export async function convertToJson(data: any, extension: string) {
     case "json":
       return JSON.parse(data);
     default:
-      throw new Error("Extension not supported");
+      throw new Error("Extension not supported " + extension);
   }
 }
