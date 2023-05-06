@@ -38,7 +38,7 @@ export async function unzipFolder(
   path: string
 ) {
   const unzipped = await unzip(file);
-  const result = {} as Record<string, string>;
+  const result = {} as Record<string, ArrayBuffer | string>;
   console.log("unzipping folder", unzipped, "path", path);
   for (const entry in unzipped.entries) {
     const value = unzipped.entries[entry];
@@ -51,7 +51,10 @@ export async function unzipFolder(
       // git file
       continue;
     }
-    result[file] = await unzipped.entries[entry].text();
+    const data = isZipExtension(file)
+      ? await value.arrayBuffer()
+      : await value.text();
+    result[file] = data;
   }
   return result;
 }
@@ -67,10 +70,15 @@ export async function unzipFile(
   throw "unzipFile failed: No Entries";
 }
 
+const zipExtensions = ["gstz", "zip", "catz"];
 const allowedExtensions = ["gst", "gstz", "xml", "zip", "cat", "catz", "json"];
 export function getExtension(extension_or_file: string) {
   const extension = extension_or_file.split(".").pop()!.toLowerCase();
   return extension;
+}
+export function isZipExtension(extension_or_file: string) {
+  const extension = getExtension(extension_or_file);
+  return zipExtensions.includes(extension);
 }
 export function isAllowedExtension(file: string) {
   const fileExtension = getExtension(file);
