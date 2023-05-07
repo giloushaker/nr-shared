@@ -495,7 +495,7 @@ export async function downloadAndConvertBsFile<DataT = BSIData>(
     const arrayBuffer = await entry.arrayBuffer();
     const nodeBuffer = Buffer.from(arrayBuffer);
     const data = nodeBuffer.toString();
-    const hash = gitSha1(nodeBuffer);
+    const hash = await gitSha1(nodeBuffer);
 
     log(2, `converting to json, xml hash = ${hash}`);
     const as_json = bs_to_json<DataT>(data) as DataT & CatalogueExtraInfo;
