@@ -93,7 +93,7 @@ export function getDataObject(data: BSIData): BSIGameSystem | BSICatalogue {
 }
 export function getDataId(data: BSIData): string {
   if (data.catalogue) {
-    return `${data.catalogue.id}-${data.catalogue.gameSystemId}`;
+    return `${data.catalogue.gameSystemId}-${data.catalogue.id}`;
   }
   if (data.gameSystem) {
     return data.gameSystem.id;
