@@ -1,4 +1,4 @@
-import { groupBy, sortBy, clone, addObj } from "./bs_helpers";
+import { groupBy, sortBy, clone, addObj, escapeRegex } from "./bs_helpers";
 import {
   Base,
   UNCATEGORIZED_ID,
@@ -29,7 +29,7 @@ export interface WikiLink extends Link {
   links?: WikiLink[];
 }
 export interface WikiBase extends Base {
-  parent: WikiBase;
+  parent?: WikiBase;
   links?: WikiLink[];
 }
 export class CatalogueLink extends Base {
@@ -66,7 +66,8 @@ export class Catalogue extends Base {
   gameSystem!: Catalogue;
   profileTypes?: BSIProfileType[];
   declare loaded?: boolean;
-  loaded2?: boolean;
+  loaded_wiki?: boolean;
+  loaded_editor?: boolean;
 
   imports!: Catalogue[];
   importRootEntries!: Catalogue[];
@@ -95,8 +96,8 @@ export class Catalogue extends Base {
     this.generateCostIndex();
   }
   processForWiki(system: GameSystem) {
-    if (this.loaded2) return;
-    this.loaded2 = true;
+    if (this.loaded_wiki) return;
+    this.loaded_wiki = true;
     this.process();
     const rulesObj: Record<string, any> = system.rules || {};
     (system as any).rules = rulesObj;
@@ -118,6 +119,18 @@ export class Catalogue extends Base {
         (category as any).parent = force;
       }
     }
+  }
+  processForEditor() {
+    if (this.loaded_editor) return;
+    this.loaded_editor = true;
+
+    this.imports.forEach((imported) => {
+      addObj(imported as any, "links", this);
+    });
+    this.forEachObjectWhitelist((cur, parent) => {
+      (cur as WikiBase).parent = parent as WikiBase;
+      if (cur.target) addObj(cur.target as any, "links", parent as WikiBase);
+    }, goodKeysWiki);
   }
   get url(): string {
     return "%{book}";
@@ -198,6 +211,29 @@ export class Catalogue extends Base {
       return this.book.system?.books?.array?.find((o) => o.bsid === id) as any;
     }
     return undefined;
+  }
+  findOptionsById(id: string): Base[] {
+    const result = [];
+    for (const imported of [this, ...this.imports]) {
+      for (const val of Object.values(imported.index)) {
+        if (val.id && val.id === id) result.push(val);
+      }
+    }
+    return result;
+  }
+  findOptionsByName(name: string): Base[] {
+    const result = [];
+    const words = escapeRegex(name).split(" ");
+    const regexStr = `^(?=.*\\b${words.join(".*)(?=.*\\b")}\\b).*$`;
+    const regx = new RegExp(regexStr, "i");
+    for (const imported of [this, ...this.imports]) {
+      for (const val of Object.values(imported.index)) {
+        if (val.name && val.name.match(regx)) {
+          result.push(val);
+        }
+      }
+    }
+    return result;
   }
   generateCostIndex(): Record<string, BSICostType> {
     const result = {} as Record<string, BSICostType>;
@@ -359,7 +395,7 @@ export class Catalogue extends Base {
     >;
 
     function localAddBoundCategoryConstraints(
-      _this: Catalogue,
+      catalogue: Catalogue,
       category: Category,
       constraints: Iterable<BSIConstraint>
     ) {
@@ -395,13 +431,14 @@ export class Catalogue extends Base {
               );
               break;
             }
-            const fromIndex = _this.index[constraint.scope];
+            const fromIndex = catalogue.index[constraint.scope];
             if (fromIndex) {
               const from_id_extra_constraints =
                 fromIndex.extra_constraints || [];
               from_id_extra_constraints.push(
                 category.getBoundConstraint(constraint)
               );
+
               fromIndex.extra_constraints = from_id_extra_constraints;
               break;
             }
@@ -538,6 +575,21 @@ export class Catalogue extends Base {
 
     this.roster_constraints = Object.values(roster_constraints);
   }
+  addToIndex(cur: Base) {
+    if (cur instanceof Publication) {
+      this.index[cur.id] = cur;
+      return;
+    }
+    if (cur.id) {
+      cur.catalogue = this;
+      this.index[cur.id] = cur;
+    }
+  }
+  removeFromIndex(cur: Base) {
+    if (cur.id && this.index[cur.id] === cur) {
+      delete this.index[cur.id];
+    }
+  }
   resolveAllLinks(imports: Catalogue[]) {
     const catalogue = this as Catalogue;
     const unresolvedLinks: Array<Link> = [];
@@ -548,16 +600,9 @@ export class Catalogue extends Base {
     const indexes = [];
 
     if (!this.index) {
-      const index = {} as Record<string, Base>;
-      this.forEachObjectWhitelist(function (cur, parent) {
-        if (cur instanceof Publication) {
-          index[cur.id] = cur;
-          return;
-        }
-        if (cur.id) {
-          cur.catalogue = catalogue;
-          index[cur.id] = cur;
-        }
+      this.index = {};
+      this.forEachObjectWhitelist((cur, parent) => {
+        this.addToIndex(cur);
         if ((cur as any).publicationId) {
           unresolvedPublications.push(cur as any);
         }
@@ -569,7 +614,6 @@ export class Catalogue extends Base {
           unresolvedChildIds.push(cur);
         }
       }, goodKeys);
-      this.index = index;
     }
     indexes.push(this.index);
 

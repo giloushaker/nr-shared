@@ -91,6 +91,9 @@ export function pushAfterLastOfAssumingSorted<T>(
   if (index === -1) array.push(value);
   else array.splice(index + 1, 0, value);
 }
+export function escapeRegex(str: string) {
+  return str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+}
 
 export function groupBy<V>(
   items: V[],
