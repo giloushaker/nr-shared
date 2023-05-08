@@ -780,7 +780,7 @@ export function arraysEqual(a: any[], b: any[]) {
 
 export function textSearchRegex(query: string) {
   const words = escapeRegex(query).split(" ");
-  const regexStr = `^(?=.*\\b${words.join(".*)(?=.*\\b")}\\b).*$`;
+  const regexStr = `^(?=.*\\b${words.join(".*)(?=.*\\b")}).*$`;
   const regx = new RegExp(regexStr, "i");
   return regx;
 }
