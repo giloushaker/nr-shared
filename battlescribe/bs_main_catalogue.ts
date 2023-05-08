@@ -1,4 +1,11 @@
-import { groupBy, sortBy, clone, addObj, escapeRegex } from "./bs_helpers";
+import {
+  groupBy,
+  sortBy,
+  clone,
+  addObj,
+  escapeRegex,
+  textSearchRegex,
+} from "./bs_helpers";
 import {
   Base,
   UNCATEGORIZED_ID,
@@ -223,9 +230,7 @@ export class Catalogue extends Base {
   }
   findOptionsByName(name: string): Base[] {
     const result = [];
-    const words = escapeRegex(name).split(" ");
-    const regexStr = `^(?=.*\\b${words.join(".*)(?=.*\\b")}\\b).*$`;
-    const regx = new RegExp(regexStr, "i");
+    const regx = textSearchRegex(name);
     for (const imported of [this, ...this.imports]) {
       for (const val of Object.values(imported.index)) {
         if (val.name && val.name.match(regx)) {
