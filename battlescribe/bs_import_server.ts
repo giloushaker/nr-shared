@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import { writeFileSync, readFileSync, existsSync } from "fs";
 import { delete_path_related_characters, hashFnv32a, gitSha1 } from "./bs_helpers";
 import { unzip } from "unzipit";
-import { GameSystemRow, BookRow } from "../../../types/db_types";
+import { GameSystemRow, BookRow } from "../../../assets/shared/types/db_types";
 import { saveFileAtDate, getFilePathByTimestamp } from "./bs_versioning_server";
 import { CatalogueExtraInfo } from "./bs_book";
 import { bs_to_json } from "./bs_xml";
@@ -495,7 +495,7 @@ export async function downloadAndConvertBsFile<DataT = BSIData>(
     const arrayBuffer = await entry.arrayBuffer();
     const nodeBuffer = Buffer.from(arrayBuffer);
     const data = nodeBuffer.toString();
-    const hash = gitSha1(nodeBuffer);
+    const hash = await gitSha1(nodeBuffer);
 
     log(2, `converting to json, xml hash = ${hash}`);
     const as_json = bs_to_json<DataT>(data) as DataT & CatalogueExtraInfo;

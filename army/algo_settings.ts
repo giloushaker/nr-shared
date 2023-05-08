@@ -1,5 +1,5 @@
 import { ErrorMessage } from "../../shared/error_manager";
-import { IArmyEntry } from "../../shar../../shared/systems/army_interfaces";
+import { IArmyEntry } from "../../shared/systems/army_interfaces";
 
 interface OptionMod {
   option: any;

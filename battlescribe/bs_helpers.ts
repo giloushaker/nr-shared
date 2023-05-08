@@ -1,5 +1,4 @@
 import type { BSIProfile, BSICharacteristic } from "./bs_types";
-import { createHash } from "crypto";
 
 export type Modify<T, R> = Omit<T, keyof R> & R;
 export function stripNumber(str: string): string {
@@ -46,7 +45,8 @@ export function hashFnv32a(str: string, seed = 198209835): number {
 
   for (i = 0, l = str.length; i < l; i++) {
     hval ^= str.charCodeAt(i);
-    hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+    hval +=
+      (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
   }
 
   return hval >>> 0;
@@ -58,7 +58,10 @@ export function hashFnv32a(str: string, seed = 198209835): number {
  * @param array
  * @param _function Function to compare `T`, returns true if equal.
  */
-export function findLastIndexOfAssumingSorted<T>(array: T[], _function: (item: T) => boolean): number {
+export function findLastIndexOfAssumingSorted<T>(
+  array: T[],
+  _function: (item: T) => boolean
+): number {
   let found = -1;
   const array_length = array.length;
   for (let i = 0; i < array_length; i++) {
@@ -79,7 +82,11 @@ export function findLastIndexOfAssumingSorted<T>(array: T[], _function: (item: T
  * @param value The item to add
  * @param _function Function to compare `T`, returns true if equal.
  */
-export function pushAfterLastOfAssumingSorted<T>(array: T[], value: T, _function: (item: T) => boolean): void {
+export function pushAfterLastOfAssumingSorted<T>(
+  array: T[],
+  value: T,
+  _function: (item: T) => boolean
+): void {
   const index = findLastIndexOfAssumingSorted(array, _function);
   if (index === -1) array.push(value);
   else array.splice(index + 1, 0, value);
@@ -103,23 +110,40 @@ export function groupBy<V>(
   }
   return result;
 }
-
-export function gitSha1(content: string | Buffer) {
-  const gitstring = `blob ${content.length}\0`;
-  const shasum = createHash("sha1");
-  shasum.update(gitstring);
-  shasum.update(content);
-  const result = shasum.digest("hex");
-  return result;
+let gitSha1: (content: string | Buffer | ArrayBuffer) => Promise<string>;
+if (process.server) {
+  gitSha1 = (async (content: string | Buffer) => {
+    const gitstring = `blob ${content.length}\0`;
+    const shasum = require("crypto").createHash("sha1");
+    shasum.update(gitstring);
+    shasum.update(content);
+    const result = shasum.digest("hex");
+    return result;
+  }) as any;
+} else {
+  gitSha1 = (async (content: string | ArrayBuffer): Promise<string> => {
+    const gitstring = `blob ${
+      typeof content === "string" ? content.length : content.byteLength
+    }\0`;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(gitstring + content);
+    const hash = await crypto.subtle.digest("SHA-1", data);
+    return Array.from(new Uint8Array(hash))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  }) as any;
 }
-
+export { gitSha1 };
 /**
  * Recursively Calls callbackfn(value) for each object in the provided object
  * Travels Arrays but callbackfn(value) is not called on the array object itself
  * @param obj The object.
  * @param callbackfn The function to call with each value
  */
-export function forEachValueRecursive(obj: any, callbackfn: (obj: any) => unknown) {
+export function forEachValueRecursive(
+  obj: any,
+  callbackfn: (obj: any) => unknown
+) {
   const stack = [obj];
   while (stack.length) {
     const current = stack.pop()!;
@@ -140,7 +164,10 @@ export function forEachValueRecursive(obj: any, callbackfn: (obj: any) => unknow
  * @param obj The object.
  * @param callbackfn The function to call with each value
  */
-export function forEachPairRecursive(obj: any, callbackfn: (obj: any, key: string) => unknown) {
+export function forEachPairRecursive(
+  obj: any,
+  callbackfn: (obj: any, key: string) => unknown
+) {
   const stack = [obj];
   while (stack.length) {
     const current = stack.pop()!;
@@ -245,8 +272,13 @@ export interface BSIGroupedProfile extends BSIProfile {
  * @param profiles The profiles to group
  * @param bigStringLength Any string above this length is considered `big`
  */
-export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40): BSIGroupedProfile[][] {
-  const allVisible = (profiles as Array<BSIGroupedProfile>).filter((o) => !o.hidden);
+export function groupProfiles(
+  profiles: BSIProfile[],
+  bigStringLength = 40
+): BSIGroupedProfile[][] {
+  const allVisible = (profiles as Array<BSIGroupedProfile>).filter(
+    (o) => !o.hidden
+  );
   const uniques = hashProfiles(allVisible);
 
   const groupedByType = groupBy(uniques, (o) => o.typeId);
@@ -291,7 +323,10 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40): BSI
 
 export function isProfileModified(profile: BSIProfile) {
   for (const characteristic of profile.characteristics) {
-    if (characteristic.originalValue !== undefined && characteristic.originalValue !== characteristic.$text)
+    if (
+      characteristic.originalValue !== undefined &&
+      characteristic.originalValue !== characteristic.$text
+    )
       return true;
   }
   return false;
@@ -301,7 +336,9 @@ export function hashProfile(profile: BSIProfile): string {
   delete copy.id;
   return JSON.stringify(copy);
 }
-export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[]): Record<string, T> {
+export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(
+  profiles: T[]
+): Record<string, T> {
   const hashed: { [hash: string]: T } = {};
   for (const profile of profiles) {
     hashed[hashProfile(profile)] = profile;
@@ -327,7 +364,9 @@ export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles
   return hashed;
 }
 
-export function getProfilesFromIndex<T extends BSIProfile | BSIGroupedProfile>(index: Record<string, T>): T[] {
+export function getProfilesFromIndex<T extends BSIProfile | BSIGroupedProfile>(
+  index: Record<string, T>
+): T[] {
   const result = [];
   const modifieds = [];
   for (const profile of Object.values(index)) {
@@ -338,7 +377,9 @@ export function getProfilesFromIndex<T extends BSIProfile | BSIGroupedProfile>(i
   return result as any;
 }
 
-export function hashProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[]): T[] {
+export function hashProfiles<T extends BSIProfile | BSIGroupedProfile>(
+  profiles: T[]
+): T[] {
   const hashed = indexProfiles(profiles);
   return getProfilesFromIndex(hashed);
 }
@@ -359,14 +400,20 @@ export function sortBy<T>(array: T[], getKey: (item: T) => Sortable): T[] {
     .sort(keyCmp)
     .map(([, v]) => v);
 }
-export function sortByAscending<T>(array: T[], getKey: (item: T) => Sortable): T[] {
+export function sortByAscending<T>(
+  array: T[],
+  getKey: (item: T) => Sortable
+): T[] {
   return array
     .map((o) => [getKey(o).toString(), o] as [string, T])
     .sort(keyCmp)
     .map(([, v]) => v);
 }
 
-export function sortByDescending<T>(array: T[], getKey: (item: T) => Sortable): T[] {
+export function sortByDescending<T>(
+  array: T[],
+  getKey: (item: T) => Sortable
+): T[] {
   return array
     .map((o) => [getKey(o).toString(), o] as [string, T])
     .sort(keyCmpInversed)
@@ -425,7 +472,12 @@ export class CacheEvent<T> {
   cache!: T;
   no_vue = new NoObserveCache();
   cache_valid = false;
-  constructor(cache: T, max = 1, private fn: (...args: any[]) => unknown, private thisArg: any) {
+  constructor(
+    cache: T,
+    max = 1,
+    private fn: (...args: any[]) => unknown,
+    private thisArg: any
+  ) {
     this.cache = cache;
     this.no_vue.max = max;
     this.id = fn.name;
@@ -533,7 +585,11 @@ export function countKeys(strings: string[]): Record<string, number> {
 
 export type Recursive<T> = { self: T; childs: Recursive<T>[] };
 export type Flattened<T> = Array<{ depth: number; current: T }>;
-export function flattenRecursive<T>(obj: Recursive<T>, depth = 0, result: Flattened<T> = []): Flattened<T> {
+export function flattenRecursive<T>(
+  obj: Recursive<T>,
+  depth = 0,
+  result: Flattened<T> = []
+): Flattened<T> {
   result.push({ depth: depth, current: obj.self });
   for (const child of obj.childs) {
     flattenRecursive(child, depth + 1, result);
@@ -546,7 +602,9 @@ export function recurseThis<T, K extends keyof T, F = T[K]>(
   functionName: K,
   maxDepth = 3,
   depth = 0
-): F extends () => any ? Recursive<ReturnType<F> extends any[] ? ReturnType<F>[0] : never> : never {
+): F extends () => any
+  ? Recursive<ReturnType<F> extends any[] ? ReturnType<F>[0] : never>
+  : never {
   const result = {
     childs: [] as Recursive<T>[],
     self: obj,

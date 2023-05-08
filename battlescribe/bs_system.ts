@@ -1,6 +1,12 @@
-import type { BSICatalogueLink, BSIData, BSICostType } from "./bs_types";
+import type {
+  BSICatalogueLink,
+  BSIData,
+  BSICostType,
+  BSICatalogue,
+  BSIGameSystem,
+} from "./bs_types";
 import type { Catalogue } from "./bs_main_catalogue";
-import type { GameSystem } from "../systems/game_system";
+import type { GameSystem } from "../../ts/systems/game_system";
 import type { BsBook } from "./bs_book";
 import type { NRAssociationInstance } from "./bs_association";
 import type { Instance } from "./bs_instance";
@@ -14,11 +20,17 @@ export class BSCatalogueManager {
 
   // Must implement
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData> {
+  async getData(
+    catalogueLink: BSICatalogueLink,
+    booksDate?: BooksDate
+  ): Promise<BSIData> {
     throw new Error("Method not implemented.");
   }
 
-  getLoadedCatalogue(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Catalogue | undefined {
+  getLoadedCatalogue(
+    catalogueLink: BSICatalogueLink,
+    booksDate?: BooksDate
+  ): Catalogue | undefined {
     const key = catalogueLink.targetId || catalogueLink.name!;
     const date = getBookDate(booksDate, catalogueLink.targetId) || "default";
 
@@ -41,7 +53,11 @@ export class BSCatalogueManager {
     // loaded.process();
     return loaded;
   }
-  async loadCatalogue(catalogueLink: BSICatalogueLink, booksDate?: BooksDate, forceLoad?: boolean): Promise<Catalogue> {
+  async loadCatalogue(
+    catalogueLink: BSICatalogueLink,
+    booksDate?: BooksDate,
+    forceLoad?: boolean
+  ): Promise<Catalogue> {
     const loaded = this.getLoadedCatalogue(catalogueLink, booksDate);
     if (loaded && !forceLoad) return loaded;
     const data = await this.getData(catalogueLink, booksDate);
@@ -58,7 +74,10 @@ export class NRClientCatalogueManager extends BSCatalogueManager {
   constructor(public system: GameSystem, public patch?: PatchIndex) {
     super();
   }
-  async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData> {
+  async getData(
+    catalogueLink: BSICatalogueLink,
+    booksDate?: BooksDate
+  ): Promise<BSIData> {
     const id = this.system.getBookRowByBsid(catalogueLink.targetId)?.id;
     if (!id) {
       throw Error("Could not find cat with id: " + catalogueLink.targetId);
@@ -67,10 +86,29 @@ export class NRClientCatalogueManager extends BSCatalogueManager {
     return json;
   }
 }
-
-export async function loadData(system: BSCatalogueManager, data: BSIData, booksDate?: BooksDate): Promise<Catalogue> {
+export function getDataObject(data: BSIData): BSIGameSystem | BSICatalogue {
+  if (data.gameSystem) return data.gameSystem;
+  if (data.catalogue) return data.catalogue;
+  throw Error("getDataObject data argument is not a valid system or catalogue");
+}
+export function getDataDbId(data: BSIData): string {
+  if (data.catalogue) {
+    return `${data.catalogue.gameSystemId}-${data.catalogue.id}`;
+  }
+  if (data.gameSystem) {
+    return data.gameSystem.id;
+  }
+  throw Error("getDataId data argument is not a valid system or catalogue");
+}
+export async function loadData(
+  system: BSCatalogueManager,
+  data: BSIData,
+  booksDate?: BooksDate
+): Promise<Catalogue> {
   if (!data.catalogue && !data.gameSystem) {
-    throw Error(`invalid loadBsData argument: no .catalogue or .gameSystem in data`);
+    throw Error(
+      `invalid loadBsData argument: no .catalogue or .gameSystem in data`
+    );
   }
 
   const key = data.catalogue ? "catalogue" : "gameSystem";
@@ -124,7 +162,9 @@ export async function loadData(system: BSCatalogueManager, data: BSIData, booksD
         link.target = loadedCatalogue;
         return;
       }
-      return loadData(system, data, booksDate).then((data) => (link.target = data));
+      return loadData(system, data, booksDate).then(
+        (data) => (link.target = data)
+      );
     });
     promises.push(promise);
   }
