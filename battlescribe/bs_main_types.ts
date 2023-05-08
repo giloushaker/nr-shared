@@ -1,4 +1,12 @@
-import { Category, Force, Link, Base, Group, CategoryLink, Rule } from "./bs_main";
+import {
+  Category,
+  Force,
+  Link,
+  Base,
+  Group,
+  CategoryLink,
+  Rule,
+} from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
 
@@ -12,7 +20,7 @@ export function noObserve(): object {
   return new NoObserve();
 }
 export const protoMap = {
-  "*": NoObserve.prototype,
+  "*": Base.prototype,
   // "*": Base.prototype,
   catalogue: Catalogue.prototype,
   catalogueLinks: CatalogueLink.prototype,
@@ -54,7 +62,7 @@ export function getPrototypeFromKey(key: string) {
   if (key in protoMap) {
     return protoMap[key as keyof typeof protoMap]!;
   } else {
-    return undefined;
+    return protoMap["*"];
   }
 }
 
