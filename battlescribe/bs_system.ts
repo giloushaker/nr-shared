@@ -192,7 +192,7 @@ export class Roster extends Base {
   name = "Roster";
 
   associated?: Record<string, any[]>;
-  associations?: NRAssociationInstance[];
+  declare associations?: NRAssociationInstance[];
   danglingUnits = [] as Instance[];
   constructor(json: any, book: BsBook, catalogues: Catalogue[]) {
     super(json);
