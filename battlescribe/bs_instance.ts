@@ -43,10 +43,10 @@ import { ReactiveProflileToBSIProfile, ReactiveRuleToBSIRule } from "./reactive/
 import * as $helpers from "./bs_helpers";
 import { autoCheckCreationChildsAsync } from "./bs_async_autocheck";
 import { BooksDate } from "./bs_versioning";
-import { aos_warscroll_format } from "../../../assets/ts/export/aos_warscroll_formatter";
-import { warhammer_feq_format } from "../../..//assets/ts/export/warhammer_formatter_feq";
-import { default_format } from "../../..//assets/ts/export/default_formatter";
-import { warhammer_wtc_format } from "../../..//assets/ts/export/warhammer_formatter_wtc";
+import { aos_warscroll_format } from "./export/aos_warscroll_formatter";
+import { warhammer_feq_format } from "./export/warhammer_formatter_feq";
+import { default_format } from "./export/default_formatter";
+import { warhammer_wtc_format } from "./export/warhammer_formatter_wtc";
 (globalThis as any).$helpers = $helpers;
 
 export class Instance implements IArmyUnit, IArmyOption, IArmyRoster, IArmyCategory, IArmyEntry {
