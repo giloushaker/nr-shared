@@ -149,10 +149,10 @@ export class Base implements BSModifierBase {
     return "%{main_catalogue|catalogue}/%{id}/%{getName}";
   }
   // Prevent Vue Observers
-  /*   get [Symbol.toStringTag](): string {
+  get [Symbol.toStringTag](): string {
     // Anything can go here really as long as it's not 'Object'
     return "ObjectNoObserve";
-  } */
+  }
   isGroup(): boolean {
     return false;
   }
