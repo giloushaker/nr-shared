@@ -5,7 +5,7 @@ import type {
   BSICatalogue,
   BSIGameSystem,
 } from "./bs_types";
-import type { Catalogue } from "./bs_main_catalogue";
+import { Catalogue } from "./bs_main_catalogue";
 import type { GameSystem } from "../../ts/systems/game_system";
 import type { BsBook } from "./bs_book";
 import type { NRAssociationInstance } from "./bs_association";
@@ -91,7 +91,15 @@ export function getDataObject(data: BSIData): BSIGameSystem | BSICatalogue {
   if (data.catalogue) return data.catalogue;
   throw Error("getDataObject data argument is not a valid system or catalogue");
 }
-export function getDataDbId(data: BSIData): string {
+export function getDataDbId(data: BSIData | Catalogue): string {
+  if (data instanceof Catalogue) {
+    if (data.id && data.gameSystemId) {
+      return `${data.gameSystemId}-${data.id}`;
+    }
+    if (data.id) {
+      return `${data.id}`;
+    }
+  }
   if (data.catalogue) {
     return `${data.catalogue.gameSystemId}-${data.catalogue.id}`;
   }
