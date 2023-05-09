@@ -1,3 +1,4 @@
+import { getRandomInt } from "../util";
 import type { BSIProfile, BSICharacteristic } from "./bs_types";
 
 export type Modify<T, R> = Omit<T, keyof R> & R;
@@ -783,4 +784,15 @@ export function textSearchRegex(query: string) {
   const regexStr = `^(?=.*\\b${words.join(".*)(?=.*\\b")}).*$`;
   const regx = new RegExp(regexStr, "i");
   return regx;
+}
+
+export function generateBattlescribeId(): string {
+  return [
+    getRandomInt(0xffff),
+    getRandomInt(0xffff),
+    getRandomInt(0xffff),
+    getRandomInt(0xffff),
+  ]
+    .map((o) => o.toString(16))
+    .join("-");
 }
