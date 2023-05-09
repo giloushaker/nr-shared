@@ -71,7 +71,6 @@ export class Catalogue extends Base {
 
   // Processed
   gameSystem!: Catalogue;
-  profileTypes?: BSIProfileType[];
   declare loaded?: boolean;
   loaded_wiki?: boolean;
   loaded_editor?: boolean;

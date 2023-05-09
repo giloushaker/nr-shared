@@ -9,6 +9,7 @@ import type {
   BSICost,
   BSIPublication,
   BSINamed,
+  BSIProfileType,
 } from "./bs_types";
 import type { Catalogue } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
@@ -116,6 +117,7 @@ export class Base implements BSModifierBase {
   entryLinks?: Link[];
   categoryEntries?: Category[];
   categoryLinks?: CategoryLink[];
+  profileTypes?: BSIProfileType[];
   forceEntries?: Force[];
   sharedSelectionEntryGroups?: Base[];
   sharedSelectionEntries?: Base[];
@@ -147,10 +149,10 @@ export class Base implements BSModifierBase {
     return "%{main_catalogue|catalogue}/%{id}/%{getName}";
   }
   // Prevent Vue Observers
-  get [Symbol.toStringTag](): string {
+  /*   get [Symbol.toStringTag](): string {
     // Anything can go here really as long as it's not 'Object'
     return "ObjectNoObserve";
-  }
+  } */
   isGroup(): boolean {
     return false;
   }
