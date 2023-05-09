@@ -39,6 +39,10 @@ export interface WikiBase extends Base {
   parent?: WikiBase;
   links?: WikiLink[];
 }
+export interface EditorBase extends Base {
+  parent?: WikiBase;
+  links?: WikiLink[];
+}
 export class CatalogueLink extends Base {
   targetId!: string;
   declare target: Catalogue;
@@ -134,8 +138,8 @@ export class Catalogue extends Base {
       addObj(imported as any, "links", this);
     });
     this.forEachObjectWhitelist((cur, parent) => {
-      (cur as WikiBase).parent = parent as WikiBase;
-      if (cur.target) addObj(cur.target as any, "links", parent as WikiBase);
+      (cur as EditorBase).parent = parent as EditorBase;
+      if (cur.target) addObj(cur.target as any, "links", parent as EditorBase);
     }, goodKeysWiki);
   }
   get url(): string {
