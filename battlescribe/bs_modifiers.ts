@@ -10,6 +10,7 @@ import type {
   BSIRepeat,
 } from "./bs_types";
 import type { Base, Link } from "./bs_main";
+import { Catalogue } from "./bs_main_catalogue";
 
 export function* getAllQueries(queries: SupportedQueries): Iterable<BSIQuery> {
   for (const condition of queries.conditions || []) yield condition;
@@ -29,13 +30,13 @@ export function* getAllInfoGroups(group: BSIInfoGroup): Iterable<BSIInfoGroup> {
     yield* getAllInfoGroups(grp);
   }
   for (const link of group.infoLinks || []) {
-    if (link.type === "infoGroup") yield* getAllInfoGroups(link.target as BSIInfoGroup);
+    if (link.type === "infoGroup")
+      yield* getAllInfoGroups(link.target as BSIInfoGroup);
   }
 }
 
 export function fieldToText(base: Base | Link, field: string): string {
-  // ?? Not sure why we need to do as any here
-  const target = ((base.catalogue || base) as any).findOptionById(field);
+  const target = (base.catalogue || (base as Catalogue)).findOptionById(field);
   if (target) {
     const type = (target as any).type;
     if (type && ["min", "max"].includes(type)) {
@@ -54,12 +55,17 @@ export function fieldToText(base: Base | Link, field: string): string {
   return field;
 }
 
-export function rawConditionToString(base: Base | Link, condition: BSIQuery & { value?: number }): string {
+export function rawConditionToString(
+  base: Base | Link,
+  condition: BSIQuery & { value?: number }
+): string {
   const type = condition.type || "none";
   const value = condition.value === undefined ? 1 : condition.value;
   const ofWhat = fieldToText(base, condition.childId || "any");
   const rawField = fieldToText(base, condition.field);
-  const field = ["selections", "forces"].includes(rawField) ? "" : ` ${rawField} of`;
+  const field = ["selections", "forces"].includes(rawField)
+    ? ""
+    : ` ${rawField} of`;
   const rawScope = fieldToText(base, condition.scope);
   const scope = rawScope === base.getName() ? "" : `${rawScope}`;
   const recursive = condition.includeChildSelections ? " (recursive)" : "";
@@ -69,16 +75,20 @@ export function rawConditionToString(base: Base | Link, condition: BSIQuery & { 
 export function conditionToString(
   base: Base | Link,
   condition: BSIQuery & { value?: number },
-  fieldToString = fieldToText,
-  includeId = false
+  includeId = false,
+  fieldToString = fieldToText
 ): string {
   const type = condition.type || "none";
   const value = condition.value === undefined ? 1 : condition.value;
 
-  const ofWhat = fieldToString(base, condition.childId || "any") + (includeId ? `(${condition.childId || "any"})` : "");
+  const ofWhat =
+    fieldToString(base, condition.childId || "") +
+    (includeId ? `(${condition.childId || "any"})` : "");
 
   const rawField = fieldToString(base, condition.field);
-  const field = ["selections", "forces"].includes(rawField) ? "" : ` ${rawField} of`;
+  const field = ["selections", "forces"].includes(rawField)
+    ? ""
+    : ` ${rawField} of`;
 
   const rawScope = fieldToString(base, condition.scope);
   const scope = rawScope === base.getName() ? "" : `${rawScope}`;
@@ -99,7 +109,9 @@ export function conditionToString(
     case "atMost":
       return `${value}${value === 0 ? "" : "-"}${field} ${ofWhat}${inScope}`;
     case "lessThan":
-      return `${value - 1}${value - 1 === 0 ? "" : "-"}${field} ${ofWhat}${inScope}`;
+      return `${value - 1}${
+        value - 1 === 0 ? "" : "-"
+      }${field} ${ofWhat}${inScope}`;
 
     case "equalTo":
       return `${value}${field} ${ofWhat}${inScope}`;
@@ -114,20 +126,48 @@ export function conditionToString(
   }
 }
 
-export function constraintToText(base: Base | Link, constraint: BSIConstraint, fieldToString = fieldToText) {
-  const field = constraint.field === "selections" ? "" : ` ${fieldToString(base, constraint.field)}`;
-  const scope = constraint.scope === "parent" ? "" : `(${fieldToString(base, constraint.scope)})`;
-  const ofWhat = constraint.childId ? ` ${fieldToString(base, constraint.childId)}` : "";
+export function constraintToText(
+  base: Base | Link,
+  constraint: BSIConstraint,
+  fieldToString = fieldToText
+) {
+  const field =
+    constraint.field === "selections"
+      ? ""
+      : ` ${fieldToString(base, constraint.field)}`;
+  const scope =
+    constraint.scope === "parent"
+      ? ""
+      : `(${fieldToString(base, constraint.scope)})`;
+  const ofWhat = constraint.childId
+    ? ` ${fieldToString(base, constraint.childId)}`
+    : "";
   return `${constraint.type}${field}${ofWhat}${scope}`;
 }
-export function constraintToString(base: Base | Link, constraint: BSIConstraint, fieldToString = fieldToText) {
-  const field = constraint.field === "selections" ? "" : ` ${fieldToString(base, constraint.field)}`;
+export function constraintToString(
+  base: Base | Link,
+  constraint: BSIConstraint,
+  fieldToString = fieldToText
+) {
+  const field =
+    constraint.field === "selections"
+      ? ""
+      : ` ${fieldToString(base, constraint.field)}`;
   const scope =
-    constraint.scope === "parent" ? "" : `<span class=grey>(${fieldToString(base, constraint.scope)})</span>`;
+    constraint.scope === "parent"
+      ? ""
+      : `<span class=grey>(${fieldToString(base, constraint.scope)})</span>`;
   return `${constraint.type}${field}${scope}`;
 }
-export function modifierToString(base: Base | Link, modifier: BSIModifier, fieldToString = fieldToText): string {
-  return `${modifier.type} ${fieldToString(base, modifier.field)} ${fieldToString(base, modifier.value.toString())}`;
+export function modifierToString(
+  base: Base | Link,
+  modifier: BSIModifier,
+  fieldToString = fieldToText
+): string {
+  return `${modifier.type} ${fieldToString(
+    base,
+    modifier.field
+  )} ${fieldToString(base, modifier.value.toString())}`;
 }
 
 export function conditionGroupToString(
@@ -137,7 +177,7 @@ export function conditionGroupToString(
 ): string {
   const result = [] as string[];
   for (const condition of group.conditions || []) {
-    result.push(conditionToString(base, condition, fieldToString));
+    result.push(conditionToString(base, condition, false, fieldToString));
   }
   for (const condition of group.conditionGroups || []) {
     result.push(`(${conditionGroupToString(base, condition, fieldToString)})`);
@@ -171,14 +211,19 @@ export function prepareModifiers(
 
       for (const parent of parents) {
         if (parent.conditions) conditions.push(...parent.conditions);
-        if (parent.conditionGroups) conditionGroups.push(...parent.conditionGroups);
+        if (parent.conditionGroups)
+          conditionGroups.push(...parent.conditionGroups);
       }
 
       if (current.conditions) conditions.push(...current.conditions);
-      if (current.conditionGroups) conditionGroups.push(...current.conditionGroups);
+      if (current.conditionGroups)
+        conditionGroups.push(...current.conditionGroups);
 
       for (const modifier of current.modifiers) {
-        const resultConditionGroups = [...conditionGroups, ...(modifier.conditionGroups || [])];
+        const resultConditionGroups = [
+          ...conditionGroups,
+          ...(modifier.conditionGroups || []),
+        ];
         if (conditions.length || modifier.conditions?.length) {
           resultConditionGroups.push({
             type: "and",
@@ -194,10 +239,14 @@ export function prepareModifiers(
         };
 
         if (resultConditionGroups.length) {
-          prepared.conditionGroups = resultConditionGroups.map((o) => setConditionsText(base, o, fieldToString));
+          prepared.conditionGroups = resultConditionGroups.map((o) =>
+            setConditionsText(base, o, fieldToString)
+          );
         }
         if (modifier.repeats) {
-          prepared.repeats = modifier.repeats.map((o) => setRepeatText(base, o, fieldToString));
+          prepared.repeats = modifier.repeats.map((o) =>
+            setRepeatText(base, o, fieldToString)
+          );
         }
         result.push(prepared);
       }
@@ -249,14 +298,19 @@ export function prepareModifiers2(
 
       for (const parent of parents) {
         if (parent.conditions) conditions.push(...parent.conditions);
-        if (parent.conditionGroups) conditionGroups.push(...parent.conditionGroups);
+        if (parent.conditionGroups)
+          conditionGroups.push(...parent.conditionGroups);
       }
 
       if (current.conditions) conditions.push(...current.conditions);
-      if (current.conditionGroups) conditionGroups.push(...current.conditionGroups);
+      if (current.conditionGroups)
+        conditionGroups.push(...current.conditionGroups);
 
       for (const modifier of current.modifiers) {
-        const resultConditionGroups = [...conditionGroups, ...(modifier.conditionGroups || [])];
+        const resultConditionGroups = [
+          ...conditionGroups,
+          ...(modifier.conditionGroups || []),
+        ];
         if (conditions.length || modifier.conditions?.length) {
           resultConditionGroups.push({
             type: "and",
@@ -269,10 +323,14 @@ export function prepareModifiers2(
         };
 
         if (resultConditionGroups.length) {
-          prepared.conditionGroups = resultConditionGroups.map((o) => setConditionsText(base, o));
+          prepared.conditionGroups = resultConditionGroups.map((o) =>
+            setConditionsText(base, o)
+          );
         }
         if (modifier.repeats) {
-          prepared.repeats = modifier.repeats.map((o) => setRepeatText(base, o));
+          prepared.repeats = modifier.repeats.map((o) =>
+            setRepeatText(base, o)
+          );
         }
         result.push(prepared);
       }
@@ -334,7 +392,7 @@ export function setConditionsText(
     for (const condition of group.conditions) {
       const printable = condition as PrintableCondition;
       if (printable.html) continue;
-      printable.html = conditionToString(base, condition, fieldToString);
+      printable.html = conditionToString(base, condition, false, fieldToString);
     }
   }
   if (group.conditionGroups) {
@@ -345,8 +403,12 @@ export function setConditionsText(
   return group as PrintableConditionGroup;
 }
 
-export function setRepeatText(base: Base | Link, repeat: BSIRepeat, fieldToString = fieldToText): PrintableRepeat {
+export function setRepeatText(
+  base: Base | Link,
+  repeat: BSIRepeat,
+  fieldToString = fieldToText
+): PrintableRepeat {
   const result = repeat as PrintableRepeat;
-  result.html = conditionToString(base, repeat, fieldToString);
+  result.html = conditionToString(base, repeat, false, fieldToString);
   return result;
 }

@@ -11,11 +11,11 @@ import type {
   BSINamed,
   BSIProfileType,
 } from "./bs_types";
-import type { Catalogue } from "./bs_main_catalogue";
+import type { Catalogue, EditorBase } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
 import type { IModel } from "../systems/army_interfaces";
 import type { NRAssociation, AssociationConstraint } from "./bs_association";
-import { clone, isObject } from "./bs_helpers";
+import { addOne, clone, isObject } from "./bs_helpers";
 import { getAllInfoGroups } from "./bs_modifiers";
 const isNonEmptyIfHasOneOf = [
   "modifiers",
@@ -51,9 +51,11 @@ const good1 = [
   "infoLinks",
   "infoGroups",
   "entryLinks",
+  "selectionEntries",
   "selectionEntryLinks",
-  "categoryLinks",
+  "selectionEntryGroups",
 
+  "categoryLinks",
   "costTypes",
   "profileTypes",
   "characteristicTypes",
@@ -66,21 +68,22 @@ const good1 = [
   "sharedProfiles",
   "sharedRules",
   "sharedInfoGroups",
-  "selectionEntries",
-  "selectionEntryGroups",
   "rules",
   "rootRules",
 
   "publications",
   "constraints",
+
+  "characteristics",
+  "costs",
 ];
 
 const good2 = [
   "conditions",
+  "conditionGroups",
   "modifiers",
   "modifierGroups",
   "repeats",
-  "conditionGroups",
 ];
 export const goodKeys = new Set([...good1, ...good2]);
 export const goodKeysWiki = new Set(good1);
@@ -368,11 +371,15 @@ export class Base implements BSModifierBase {
   ) {
     const stack = [this as any];
     // const keys = {} as any;
+
     while (stack.length) {
       const current = stack.pop()!;
       for (const key of Object.keys(current)) {
         const value = current[key];
-        if (!whiteList.has(key)) continue;
+        if (!whiteList.has(key)) {
+          // addOne(keys, key);
+          continue;
+        }
         //  If Array: add each object inside array if (Array.isArray(value)) {
 
         if (isObject(value)) {
@@ -391,6 +398,8 @@ export class Base implements BSModifierBase {
         }
       }
     }
+
+    // console.log("foreachobjectwhitelist", keys);
   }
   forEachObject(
     callbackfn: (value: Base | Link, parent: Base) => unknown,
@@ -633,7 +642,9 @@ export class Link extends Base {
   getName(): string {
     return this.target.name || this.name;
   }
-
+  getParent(): Base | undefined {
+    return (this as EditorBase).parent;
+  }
   getPrimaryCategory(): string {
     for (const categoryLink of this.categoryLinks || []) {
       if (categoryLink.primary) return categoryLink.targetId;
