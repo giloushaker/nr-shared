@@ -140,7 +140,7 @@ export class Catalogue extends Base {
     this.forEachObjectWhitelist((cur, parent) => {
       (cur as EditorBase).parent = parent as EditorBase;
       if (cur.target) addObj(cur.target as any, "links", parent as EditorBase);
-    }, goodKeysWiki);
+    }, goodKeys);
   }
   get url(): string {
     return "%{book}";

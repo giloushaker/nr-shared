@@ -1,16 +1,31 @@
-import type { BSIQuery, BSIRepeat, BSICondition, BSIConditionGroup } from "./bs_types";
+import type {
+  BSIQuery,
+  BSIRepeat,
+  BSICondition,
+  BSIConditionGroup,
+} from "./bs_types";
 import { Instance } from "./bs_instance";
 import { BSNodeScope } from "./reactive/reactive_scope";
 
-export function findSelfOrParentWhere(self: Instance, fn: (node: Instance) => boolean): Instance | undefined {
-  let current = self;
+export interface hasParent<T> {
+  getParent(): T | undefined;
+}
+
+export function findSelfOrParentWhere<T extends hasParent<T>>(
+  self: T,
+  fn: (node: T) => boolean
+): T | undefined {
+  let current = self as T | undefined;
   while (current && !Object.is(current, current.getParent())) {
     if (fn(current)) return current;
     current = current.getParent();
   }
   return undefined;
 }
-function findParentWhere(self: Instance, fn: (node: Instance) => boolean): Instance | undefined {
+export function findParentWhere<T extends hasParent<T>>(
+  self: T,
+  fn: (node: T) => boolean
+): T | undefined {
   let current = self.getParent();
   while (current && !Object.is(current, current.getParent())) {
     if (fn(current)) return current;
@@ -20,7 +35,13 @@ function findParentWhere(self: Instance, fn: (node: Instance) => boolean): Insta
 }
 
 function isEntry(self: Instance): boolean {
-  return !self.isGroup() && !self.isForce() && !self.isCategory() && !self.isCatalogue() && !self.isRoster();
+  return (
+    !self.isGroup() &&
+    !self.isForce() &&
+    !self.isCategory() &&
+    !self.isCatalogue() &&
+    !self.isRoster()
+  );
 }
 
 function arrayNoUndefined<T>(obj?: T): T[] {
@@ -28,7 +49,12 @@ function arrayNoUndefined<T>(obj?: T): T[] {
   return [obj];
 }
 
-export function getInScope(self: Instance, scope: string, shared?: boolean, extra?: boolean): Instance[] {
+export function getInScope(
+  self: Instance,
+  scope: string,
+  shared?: boolean,
+  extra?: boolean
+): Instance[] {
   if (shared === false) {
     // not Shared just seems to ignore scope? lol
     switch (scope) {
@@ -49,15 +75,21 @@ export function getInScope(self: Instance, scope: string, shared?: boolean, extr
     case "self":
       return [self];
     case "parent":
-      return extra ? [self] : arrayNoUndefined(findParentWhere(self, (o) => !o.isGroup()));
+      return extra
+        ? [self]
+        : arrayNoUndefined(findParentWhere(self, (o) => !o.isGroup()));
     case "primary-category":
-      return arrayNoUndefined(findSelfOrParentWhere(self, (o) => o.isCategory()));
+      return arrayNoUndefined(
+        findSelfOrParentWhere(self, (o) => o.isCategory())
+      );
     case "force":
       return arrayNoUndefined(findSelfOrParentWhere(self, (o) => o.isForce()));
     case "roster":
       return arrayNoUndefined(findSelfOrParentWhere(self, (o) => o.isRoster()));
     case "primary-catalogue":
-      return arrayNoUndefined(findSelfOrParentWhere(self, (o) => o.isCatalogue()));
+      return arrayNoUndefined(
+        findSelfOrParentWhere(self, (o) => o.isCatalogue())
+      );
     case "ancestor": {
       const result = [];
       let current = self;
@@ -68,7 +100,9 @@ export function getInScope(self: Instance, scope: string, shared?: boolean, extr
       return result;
     }
     default: /**{Any ID}**/ {
-      const parents = findSelfOrParentWhere(self, (o) => o.getOptionIds().includes(scope));
+      const parents = findSelfOrParentWhere(self, (o) =>
+        o.getOptionIds().includes(scope)
+      );
       if (parents) return [parents];
       const force = findSelfOrParentWhere(self, (o) => o.isForce());
       if (force) {
@@ -85,16 +119,25 @@ export function getField(nodes: Instance[], query: BSIQuery, childId?: string) {
   let result = 0;
   for (const node of nodes) {
     if (!node) continue;
-    const data = getConditionScope(node).get({ ...query, childId: childId || query.childId || "any" });
+    const data = getConditionScope(node).get({
+      ...query,
+      childId: childId || query.childId || "any",
+    });
     if (data) result += data;
   }
   return result;
 }
 
-export function evalQuery(self: Instance, condition: BSIQuery, extra = false): number {
+export function evalQuery(
+  self: Instance,
+  condition: BSIQuery,
+  extra = false
+): number {
   const cIn = getInScope(self, condition.scope, condition.shared, extra);
   if (condition.type === "instanceOf" || condition.type === "notInstanceOf") {
-    return cIn.filter((o) => getConditionScope(o).filters.has(condition.childId!)).length;
+    return cIn.filter((o) =>
+      getConditionScope(o).filters.has(condition.childId!)
+    ).length;
   }
 
   let result = getField(cIn, condition);
@@ -104,7 +147,11 @@ export function evalQuery(self: Instance, condition: BSIQuery, extra = false): n
   return result;
 }
 
-export function getRepeat(repeat: BSIRepeat, queryValue: number, totalValue?: number): number {
+export function getRepeat(
+  repeat: BSIRepeat,
+  queryValue: number,
+  totalValue?: number
+): number {
   if (repeat.percentValue) {
     if (queryValue === 0 || totalValue === 0) {
       queryValue = 0;
@@ -117,17 +164,27 @@ export function getRepeat(repeat: BSIRepeat, queryValue: number, totalValue?: nu
   const result = round * repeat.repeats;
   return result;
 }
-export function evalRepeat(self: Instance, repeat: BSIRepeat, extra = false): number {
+export function evalRepeat(
+  self: Instance,
+  repeat: BSIRepeat,
+  extra = false
+): number {
   return getRepeat(repeat, evalQuery(self, repeat, extra));
 }
 
-export function evalCondition(self: Instance, condition: BSICondition, extra = false) {
+export function evalCondition(
+  self: Instance,
+  condition: BSICondition,
+  extra = false
+) {
   const _eval = evalQuery(self, condition, extra);
   return getCondition(condition.type, _eval, condition.value, condition.scope);
 }
 
 export function getRosterLimit(self: Instance, costId: string) {
-  const found = self.getParentRoster().maxCosts.find((o) => o.typeId === costId);
+  const found = self
+    .getParentRoster()
+    .maxCosts.find((o) => o.typeId === costId);
   if (!found) {
     return -1;
     // throw Error(`Couldn't find ${costId} limit`);
@@ -135,7 +192,11 @@ export function getRosterLimit(self: Instance, costId: string) {
   return found.value;
 }
 
-export function evalConditionGroup(self: Instance, group: BSIConditionGroup, extra = false): boolean {
+export function evalConditionGroup(
+  self: Instance,
+  group: BSIConditionGroup,
+  extra = false
+): boolean {
   switch (group.type) {
     case "and":
     default:
@@ -343,7 +404,12 @@ export function getCondition(
   }
 }
 
-export function getConditionPercent(type: string, value: number, valueFromQuery: number, totalFromQuery: number) {
+export function getConditionPercent(
+  type: string,
+  value: number,
+  valueFromQuery: number,
+  totalFromQuery: number
+) {
   // -1 Could be an infinite limit, %of 0 is 0
   if (valueFromQuery <= 0) return false;
   if (valueFromQuery === 0) {
