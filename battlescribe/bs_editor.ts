@@ -50,6 +50,9 @@ export function getName(obj: any, type: string) {
     case "publications":
     case "profileTypes":
     case "catalogue":
+    case "rules":
+    case "sharedRules":
+    case "costTypes":
       return (obj as any).name;
 
     case "sharedProfiles":
