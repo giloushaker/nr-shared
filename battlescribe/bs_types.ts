@@ -54,7 +54,7 @@ export interface BSIQuery {
     | "roster"
     | "primary-catalogue"
     | "primary-category";
-  childId?: string | "any" | "model" | "unit" | "upgrade";
+  childId?: string | "any" | "model" | "unit" | "upgrade" | "mount" | "crew";
   field: string | "selections" | "forces";
   includeChildSelections?: boolean;
   includeChildForces?: boolean;
