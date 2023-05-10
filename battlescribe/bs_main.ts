@@ -98,11 +98,15 @@ export class Base implements BSModifierBase {
   collective?: boolean;
   defaultSelectionEntryId?: string;
 
+  // Maybe move this to catalogue
+  profileTypes?: BSIProfileType[];
+
   // Data - Modifiable
   name!: string;
   hidden!: boolean;
   value?: number | string | boolean;
   page?: string;
+  publicationId!: string;
 
   profiles?: BSIProfile[];
   rules?: BSIRule[];
@@ -117,7 +121,6 @@ export class Base implements BSModifierBase {
   entryLinks?: Link[];
   categoryEntries?: Category[];
   categoryLinks?: CategoryLink[];
-  profileTypes?: BSIProfileType[];
   forceEntries?: Force[];
   sharedSelectionEntryGroups?: Base[];
   sharedSelectionEntries?: Base[];
@@ -149,10 +152,10 @@ export class Base implements BSModifierBase {
     return "%{main_catalogue|catalogue}/%{id}/%{getName}";
   }
   // Prevent Vue Observers
-  get [Symbol.toStringTag](): string {
+  /*   get [Symbol.toStringTag](): string {
     // Anything can go here really as long as it's not 'Object'
     return "ObjectNoObserve";
-  }
+  } */
   isGroup(): boolean {
     return false;
   }
