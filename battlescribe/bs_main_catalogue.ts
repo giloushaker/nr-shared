@@ -640,7 +640,7 @@ export class Catalogue extends Base {
     resolveChildIds(unresolvedChildIds, indexes);
   }
   updateLink(link: Link) {
-    link.target = this.findOptionById(link.targetId);
+    link.target = this.findOptionById(link.targetId)!;
     return link.target !== undefined;
   }
 }
