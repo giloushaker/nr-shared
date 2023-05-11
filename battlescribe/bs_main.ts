@@ -155,9 +155,9 @@ export class Base implements BSModifierBase {
   get url(): string {
     return "%{main_catalogue|catalogue}/%{id}/%{getName}";
   }
-  _init_() {
+  post_init() {
     if ((this as any as Link).targetId) {
-      Object.setPrototypeOf(this, Link);
+      Object.setPrototypeOf(this, Link.prototype);
     }
   }
   // Prevent Vue Observers
@@ -674,6 +674,7 @@ export class Link extends Base {
     return Object.values(d);
   }
 }
+(Link.prototype as any).keyInfoCache = {};
 export class CategoryLink extends Link {
   declare targetId: string;
   declare target: Category;
@@ -907,7 +908,7 @@ export class Rule extends Base implements BSIRule {
       ? this.description.join("\n")
       : this.description;
   }
-  _init_() {
+  post_init() {
     if (Array.isArray(this.description)) {
       this.description = this.description[0];
     }
