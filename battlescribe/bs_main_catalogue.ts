@@ -5,6 +5,7 @@ import {
   addObj,
   escapeRegex,
   textSearchRegex,
+  generateBattlescribeId,
 } from "./bs_helpers";
 import {
   Base,
@@ -40,8 +41,8 @@ export interface WikiBase extends Base {
   links?: WikiLink[];
 }
 export interface EditorBase extends Base {
-  parent?: WikiBase;
-  links?: WikiLink[];
+  parent?: EditorBase;
+  links?: EditorBase[];
 }
 export class CatalogueLink extends Base {
   targetId!: string;
@@ -242,6 +243,12 @@ export class Catalogue extends Base {
       }
     }
     return result;
+  }
+  generateNonConflictingId(): string {
+    while (true) {
+      const id = generateBattlescribeId();
+      if (this.findOptionById(id) === undefined) return id;
+    }
   }
   generateCostIndex(): Record<string, BSICostType> {
     const result = {} as Record<string, BSICostType>;
@@ -631,6 +638,10 @@ export class Catalogue extends Base {
     resolveLinks(unresolvedLinks, indexes, parents);
     resolvePublications(unresolvedPublications, indexes);
     resolveChildIds(unresolvedChildIds, indexes);
+  }
+  updateLink(link: Link) {
+    link.target = this.findOptionById(link.targetId);
+    return link.target !== undefined;
   }
 }
 
