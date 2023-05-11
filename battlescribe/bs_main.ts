@@ -155,6 +155,11 @@ export class Base implements BSModifierBase {
   get url(): string {
     return "%{main_catalogue|catalogue}/%{id}/%{getName}";
   }
+  _init_() {
+    if ((this as any as Link).targetId) {
+      Object.setPrototypeOf(this, Link);
+    }
+  }
   // Prevent Vue Observers
   /*   get [Symbol.toStringTag](): string {
     // Anything can go here really as long as it's not 'Object'
