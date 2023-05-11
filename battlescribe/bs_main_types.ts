@@ -34,7 +34,7 @@ function getKeyInfoClass(
     get parentKey(): string {
       return parentKey;
     }
-    get typeName(): string {
+    get editorTypeName(): string {
       return getTypeName(parentKey, this);
     }
     toString(): string {

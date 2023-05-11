@@ -1,14 +1,98 @@
-import { Base } from "./bs_main";
+import { Base, Link } from "./bs_main";
+import { Catalogue } from "./bs_main_catalogue";
 import {
   conditionToString,
-  constraintToText,
   fieldToText,
   modifierToString,
 } from "./bs_modifiers";
-import { BSIProfile, BSIRepeat } from "./bs_types";
+import {
+  BSICondition,
+  BSIConditionGroup,
+  BSIConstraint,
+  BSIModifier,
+  BSIModifierGroup,
+  BSIProfile,
+  BSIRepeat,
+} from "./bs_types";
 export interface hasParent<T> {
   parent: T | undefined;
 }
+
+export type ItemTypes = (
+  | Base
+  | Link
+  | Catalogue
+  | BSIModifier
+  | BSIModifierGroup
+  | BSICondition
+  | BSIConditionGroup
+  | BSIConstraint
+) & {
+  parentKey: ItemKeys;
+  editorTypeName: ItemTypeNames;
+};
+
+export type ItemTypeNames =
+  | "catalogue"
+  | "gameSystem"
+  | "selectionEntry"
+  | "selectionEntryGroup"
+  | "category"
+  | "force"
+  | "entryLink"
+  | "categoryLink"
+  | "catalogueLink"
+  | "profile"
+  | "rule"
+  | "profileType"
+  | "characteristic"
+  | "characteristicType"
+  | "publication"
+  | "infoGroup"
+  | "infoLink"
+  | "constraint"
+  | "condition"
+  | "modifier"
+  | "modifierGroup"
+  | "repeat"
+  | "conditionGroup"
+  | "cost"
+  | "costType";
+
+export type ItemKeys =
+  // Entries
+  | "selectionEntries"
+  | "sharedSelectionEntries"
+  | "selectionEntryGroups"
+  | "sharedSelectionEntryGroups"
+  | "entryLinks"
+  | "sharedEntryLinks"
+  | "forceEntries"
+  | "categoryEntries"
+  | "categoryLinks"
+
+  //
+  | "catalogue"
+  | "catalogueLinks"
+  | "publications"
+  | "costTypes"
+  | "profileTypes"
+  | "sharedProfiles"
+  | "sharedRules"
+
+  // Modifiable
+  | "infoLinks"
+  | "profiles"
+  | "rules"
+  | "infoGroups"
+
+  // Constraints and modifiers
+  | "constraints"
+  | "conditions"
+  | "modifiers"
+  | "modifierGroups"
+  | "repeats"
+  | "conditionGroups";
 
 export function findSelfOrParentWhere<T extends hasParent<T>>(
   self: T,
@@ -33,7 +117,8 @@ export function findParentWhere<T extends hasParent<T>>(
   return undefined;
 }
 
-export function getName(obj: any, type: string) {
+export function getName(obj: any) {
+  const type = obj.parentKey;
   switch (type) {
     case "selectionEntries":
     case "sharedSelectionEntries":

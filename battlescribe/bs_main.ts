@@ -18,6 +18,7 @@ import type { NRAssociation, AssociationConstraint } from "./bs_association";
 import { addOne, clone, isObject } from "./bs_helpers";
 import { getAllInfoGroups } from "./bs_modifiers";
 import { strnumOptions } from "fast-xml-parser";
+import { ItemTypeNames } from "./bs_editor";
 const isNonEmptyIfHasOneOf = [
   "modifiers",
   "modifierGroups",
@@ -938,7 +939,7 @@ export function* iterateModifierGroupsRecursive(
   }
 }
 
-export function getTypeName(key: string, obj: any) {
+export function getTypeName(key: string, obj: any): ItemTypeNames {
   switch (key) {
     case "selectionEntries":
       return "selectionEntry";
@@ -981,7 +982,7 @@ export function getTypeName(key: string, obj: any) {
     case "sharedProfiles":
       return "profile";
     case "sharedRules":
-      return "rules";
+      return "rule";
     case "sharedInfoGroups":
       return "infoGroup";
 
@@ -1007,6 +1008,6 @@ export function getTypeName(key: string, obj: any) {
       return key;
     default:
       console.warn("unknown getTypeName key", key);
-      return key;
+      return key as any;
   }
 }
