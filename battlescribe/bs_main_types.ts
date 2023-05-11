@@ -22,9 +22,13 @@ export function noObserve(): object {
 }
 
 const keyInfoCache = {} as Record<string, any>;
-function getKeyInfoClass(parentKey: string, obj: any): any {
-  if (parentKey in keyInfoCache) {
-    return keyInfoCache[parentKey];
+function getKeyInfoClass(
+  cache: Record<string, any>,
+  parentKey: string,
+  obj: any
+): any {
+  if (parentKey in cache) {
+    return cache[parentKey];
   }
   const _key = class {
     get parentKey(): string {
@@ -39,11 +43,11 @@ function getKeyInfoClass(parentKey: string, obj: any): any {
   };
   _key.prototype.parentKey;
   Object.setPrototypeOf(_key.prototype, Object.getPrototypeOf(obj));
-  keyInfoCache[parentKey] = _key.prototype;
+  cache[parentKey] = _key.prototype;
   return _key.prototype;
 }
-function setKeyInfo(key: string, obj: any): void {
-  Object.setPrototypeOf(obj, getKeyInfoClass(key, obj));
+function setKeyInfo(cache: Record<string, any>, key: string, obj: any): void {
+  Object.setPrototypeOf(obj, getKeyInfoClass(cache, key, obj));
 }
 export const protoMap = {
   "*": Base.prototype,
@@ -98,9 +102,9 @@ export function setPrototype<Key extends string>(
   const newProto = getPrototypeFromKey(key);
   if (newProto) {
     Object.setPrototypeOf(obj, newProto);
-    if ((newProto as any)._init) obj._init_();
+    if ((newProto as any).post_init) obj.post_init();
     if (globalThis.isEditor) {
-      setKeyInfo(key, obj);
+      setKeyInfo(obj.keyInfoCache || keyInfoCache, key, obj);
     }
   }
   return obj;
