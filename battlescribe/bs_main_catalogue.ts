@@ -237,7 +237,7 @@ export class Catalogue extends Base {
       const result = [];
       for (const imported of [this, ...this.imports]) {
         for (const val of Object.values(imported.index)) {
-          if (val.name) {
+          if (val.getName) {
             result.push(val);
           }
         }
