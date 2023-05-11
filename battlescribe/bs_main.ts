@@ -889,14 +889,14 @@ export interface BSIExtraConstraint extends BSIConstraint, BSINamed {
 }
 
 // const debugKeys = new Set();
-export class Rule implements BSIRule {
-  id!: string;
-  name!: string;
-  description!: string;
-  hidden!: boolean;
-  page?: string;
-  modifiers?: BSIModifier[] | undefined;
-  modifierGroups?: BSIModifierGroup[] | undefined;
+export class Rule extends Base implements BSIRule {
+  declare id: string;
+  declare name: string;
+  declare description: string;
+  declare hidden: boolean;
+  declare page?: string;
+  declare modifiers?: BSIModifier[] | undefined;
+  declare modifierGroups?: BSIModifierGroup[] | undefined;
   getDescription(): string {
     return Array.isArray(this.description)
       ? this.description.join("\n")
