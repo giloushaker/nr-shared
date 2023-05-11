@@ -653,7 +653,18 @@ export class Catalogue extends Base {
     resolveChildIds(unresolvedChildIds, indexes);
   }
   updateLink(link: Link) {
+    if (link.target) {
+      const target = link.target as EditorBase;
+      if (!target.links) target.links = [];
+      const idx = target.links.indexOf(link);
+      if (idx >= 0) target.links.splice(idx, 1);
+    }
     link.target = this.findOptionById(link.targetId)!;
+    if (link.target) {
+      const target = link.target as EditorBase;
+      if (!target.links) target.links = [];
+      target.links.push(link);
+    }
     return link.target !== undefined;
   }
 }
