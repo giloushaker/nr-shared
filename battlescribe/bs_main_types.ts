@@ -6,6 +6,7 @@ import {
   Group,
   CategoryLink,
   Rule,
+  getTypeName,
 } from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
@@ -28,6 +29,9 @@ function getKeyInfoClass(parentKey: string, obj: any): any {
   const _key = class {
     get parentKey(): string {
       return parentKey;
+    }
+    get typeName(): string {
+      return getTypeName(parentKey, this);
     }
     toString(): string {
       return parentKey;

@@ -232,7 +232,18 @@ export class Catalogue extends Base {
     }
     return result;
   }
-  findOptionsByName(name: string): Base[] {
+  findOptionsByName(name?: string): Base[] {
+    if (!name || !name.trim()) {
+      const result = [];
+      for (const imported of [this, ...this.imports]) {
+        for (const val of Object.values(imported.index)) {
+          if (val.name) {
+            result.push(val);
+          }
+        }
+      }
+      return result;
+    }
     const result = [];
     const regx = textSearchRegex(name);
     for (const imported of [this, ...this.imports]) {
