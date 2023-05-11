@@ -44,7 +44,7 @@ export function getName(obj: any, type: string) {
     case "forceEntries":
     case "categoryLinks":
     case "categoryEntries":
-      return (obj as Base).getName();
+      return (obj as Base).name;
 
     case "catalogueLinks":
     case "publications":
