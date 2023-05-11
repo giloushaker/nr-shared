@@ -17,6 +17,7 @@ import type { IModel } from "../systems/army_interfaces";
 import type { NRAssociation, AssociationConstraint } from "./bs_association";
 import { addOne, clone, isObject } from "./bs_helpers";
 import { getAllInfoGroups } from "./bs_modifiers";
+import { strnumOptions } from "fast-xml-parser";
 const isNonEmptyIfHasOneOf = [
   "modifiers",
   "modifierGroups",
@@ -888,14 +889,14 @@ export interface BSIExtraConstraint extends BSIConstraint, BSINamed {
 }
 
 // const debugKeys = new Set();
-export class Rule implements BSIRule {
-  id!: string;
-  name!: string;
-  description!: string;
-  hidden!: boolean;
-  page?: string;
-  modifiers?: BSIModifier[] | undefined;
-  modifierGroups?: BSIModifierGroup[] | undefined;
+export class Rule extends Base implements BSIRule {
+  declare id: string;
+  declare name: string;
+  declare description: string;
+  declare hidden: boolean;
+  declare page?: string;
+  declare modifiers?: BSIModifier[] | undefined;
+  declare modifierGroups?: BSIModifierGroup[] | undefined;
   getDescription(): string {
     return Array.isArray(this.description)
       ? this.description.join("\n")
@@ -928,5 +929,78 @@ export function* iterateModifierGroupsRecursive(
       yield group;
       yield* iterateModifierGroupsRecursive(group.modifierGroups);
     }
+  }
+}
+
+export function getTypeName(key: string, obj: any) {
+  switch (key) {
+    case "selectionEntries":
+      return "selectionEntry";
+    case "selectionEntryGroups":
+      return "selectionEntryGroup";
+
+    case "sharedSelectionEntries":
+      return obj.targetId ? "entryLink" : "selectionEntry";
+    case "sharedSelectionEntryGroups":
+      return obj.targetId ? "entryLink" : "selectionEntryGroup";
+
+    case "entryLinks":
+      return "entryLink";
+    case "forceEntries":
+      return "force";
+    case "categoryEntries":
+      return "category";
+    case "categoryLinks":
+      return "categoryLink";
+
+    case "catalogueLinks":
+      return "catalogueLink";
+    case "publications":
+      return "publication";
+    case "costTypes":
+      return "costType";
+    case "costs":
+      return "cost";
+
+    case "profileTypes":
+      return "profileType";
+    case "profiles":
+      return "profile";
+    case "rules":
+      return "rule";
+    case "characteristics":
+      return "characteristic";
+    case "characteristicTypes":
+      return "characteristicType";
+    case "sharedProfiles":
+      return "profile";
+    case "sharedRules":
+      return "rules";
+    case "sharedInfoGroups":
+      return "infoGroup";
+
+    case "infoLinks":
+      return "infoLink";
+    case "infoGroups":
+      return "infoGroup";
+
+    case "constraints":
+      return "constraint";
+    case "conditions":
+      return "condition";
+    case "modifiers":
+      return "modifier";
+    case "modifierGroups":
+      return "modifierGroup";
+    case "repeats":
+      return "repeat";
+    case "conditionGroups":
+      return "conditionGroup";
+    case "catalogue":
+    case "gameSystem":
+      return key;
+    default:
+      console.warn("unknown getTypeName key", key);
+      return key;
   }
 }

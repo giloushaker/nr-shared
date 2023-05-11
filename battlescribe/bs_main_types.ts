@@ -6,6 +6,7 @@ import {
   Group,
   CategoryLink,
   Rule,
+  getTypeName,
 } from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
@@ -18,6 +19,31 @@ export class NoObserve {
 }
 export function noObserve(): object {
   return new NoObserve();
+}
+
+const keyInfoCache = {} as Record<string, any>;
+function getKeyInfoClass(parentKey: string, obj: any): any {
+  if (parentKey in keyInfoCache) {
+    return keyInfoCache[parentKey];
+  }
+  const _key = class {
+    get parentKey(): string {
+      return parentKey;
+    }
+    get typeName(): string {
+      return getTypeName(parentKey, this);
+    }
+    toString(): string {
+      return parentKey;
+    }
+  };
+  _key.prototype.parentKey;
+  Object.setPrototypeOf(_key.prototype, Object.getPrototypeOf(obj));
+  keyInfoCache[parentKey] = _key.prototype;
+  return _key.prototype;
+}
+function setKeyInfo(key: string, obj: any): void {
+  Object.setPrototypeOf(obj, getKeyInfoClass(key, obj));
 }
 export const protoMap = {
   "*": Base.prototype,
@@ -37,7 +63,6 @@ export const protoMap = {
   link: Link.prototype,
   infoLinks: Link.prototype,
   categoryLinks: CategoryLink.prototype,
-  entryLinks: Link.prototype,
 
   entry: Base.prototype,
   selectionEntries: Base.prototype,
@@ -73,6 +98,9 @@ export function setPrototype<Key extends string>(
   const newProto = getPrototypeFromKey(key);
   if (newProto) {
     Object.setPrototypeOf(obj, newProto);
+    if (globalThis.isEditor) {
+      setKeyInfo(key, obj);
+    }
     if ((newProto as any)._init) obj._init_();
   }
   return obj;
