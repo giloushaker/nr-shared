@@ -98,10 +98,10 @@ export function setPrototype<Key extends string>(
   const newProto = getPrototypeFromKey(key);
   if (newProto) {
     Object.setPrototypeOf(obj, newProto);
+    if ((newProto as any)._init) obj._init_();
     if (globalThis.isEditor) {
       setKeyInfo(key, obj);
     }
-    if ((newProto as any)._init) obj._init_();
   }
   return obj;
 }
