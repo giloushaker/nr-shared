@@ -92,20 +92,23 @@ export interface BSIConstraint extends BSIQuery, BSIValued, BSIOption {
 }
 
 export interface BSICategory extends BSINamed, BSIOption {}
+
+export type BSIModifierType =
+  | "add"
+  | "remove"
+  | "unset-primary"
+  | "set-primary"
+  | "set"
+  | "decrement"
+  | "increment"
+  | "append";
+
 export interface BSIModifier {
   conditions?: BSICondition[];
   conditionGroups?: BSIConditionGroup[];
   repeats?: BSIRepeat[];
 
-  type:
-    | "add"
-    | "remove"
-    | "unset-primary"
-    | "set-primary"
-    | "set"
-    | "decrement"
-    | "increment"
-    | "append";
+  type: BSIModifierType;
   field: "category" | "name" | "hidden" | string; //costId
   value: number | string | boolean;
   last_value?: number;
