@@ -117,7 +117,7 @@ export function findParentWhere<T extends hasParent<T>>(
   return undefined;
 }
 
-export function getName(obj: any) {
+export function getName(obj: any): string {
   const type = obj.parentKey;
   switch (type) {
     case "selectionEntries":
