@@ -43,6 +43,9 @@ export interface WikiBase extends Base {
 export interface EditorBase extends Base {
   parent?: EditorBase;
   links?: EditorBase[];
+  catalogue: Catalogue;
+  get parentKey(): string;
+  get editorTypeName(): string;
 }
 export class CatalogueLink extends Base {
   targetId!: string;
@@ -140,6 +143,7 @@ export class Catalogue extends Base {
     });
     this.forEachObjectWhitelist((cur, parent) => {
       (cur as EditorBase).parent = parent as EditorBase;
+      (cur as EditorBase).catalogue = this;
       if (cur.target) addObj(cur.target as any, "links", parent as EditorBase);
     }, goodKeys);
   }
@@ -250,7 +254,8 @@ export class Catalogue extends Base {
     const regx = textSearchRegex(name);
     for (const imported of [this, ...this.imports]) {
       for (const val of Object.values(imported.index)) {
-        if (val.name && val.name.match(regx)) {
+        const name = val.getName?.call(val);
+        if (name && String(name).match(regx)) {
           result.push(val);
         }
       }
@@ -652,7 +657,7 @@ export class Catalogue extends Base {
     resolvePublications(unresolvedPublications, indexes);
     resolveChildIds(unresolvedChildIds, indexes);
   }
-  updateLink(link: Link) {
+  updateLink(link: Link & EditorBase) {
     if (link.target) {
       const target = link.target as EditorBase;
       if (!target.links) target.links = [];
@@ -666,6 +671,14 @@ export class Catalogue extends Base {
       target.links.push(link);
     }
     return link.target !== undefined;
+  }
+  unlinkLink(link: Link & EditorBase) {
+    if (link.target) {
+      const target = link.target as EditorBase;
+      if (!target.links) target.links = [];
+      const idx = target.links.indexOf(link);
+      if (idx >= 0) target.links.splice(idx, 1);
+    }
   }
 }
 
