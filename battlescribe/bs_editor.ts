@@ -304,19 +304,17 @@ export function forEachEntryRecursive(
  * Removes an entry and fixes up the index
  * Returns all the removed data for undoing
  */
-export function onRemoveEntry(removed: EditorBase[]) {
-  for (const removedEntry of removed) {
-    const catalogue = removedEntry.catalogue;
-    forEachEntryRecursive(removedEntry, (entry, key, parent) => {
-      catalogue.removeFromIndex(entry);
-      if (entry.isLink()) {
-        catalogue.unlinkLink(entry);
-        delete (entry as any).target;
-      }
-      delete (entry as any).parent;
-      delete (entry as any).catalogue;
-    });
-  }
+export function onRemoveEntry(removed: EditorBase) {
+  const catalogue = removed.catalogue;
+  forEachEntryRecursive(removed, (entry, key, parent) => {
+    catalogue.removeFromIndex(entry);
+    if (entry.isLink()) {
+      catalogue.unlinkLink(entry);
+      delete (entry as any).target;
+    }
+    delete (entry as any).parent;
+    delete (entry as any).catalogue;
+  });
 }
 
 export function onAddEntry(
@@ -361,7 +359,7 @@ export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
 export function setAtEntryPath(
   catalogue: Catalogue,
   path: EntryPathEntry[],
-  entry: EditorBase[]
+  entry: EditorBase
 ) {
   let current = catalogue as any;
   // resolve path up until the last node
@@ -370,13 +368,13 @@ export function setAtEntryPath(
     current = current[node.key][node.index];
   }
   const lastNode = path[path.length - 1];
-  current[lastNode.key].splice(lastNode.index, 0, ...entry);
+  current[lastNode.key].splice(lastNode.index, 0, entry);
   return current;
 }
 export function popAtEntryPath(
   catalogue: Catalogue,
   path: EntryPathEntry[]
-): EditorBase[] {
+): EditorBase {
   let current = catalogue as any;
   // resolve path up until the last node
   for (let i = 0; i < path.length - 1; i++) {
@@ -384,5 +382,12 @@ export function popAtEntryPath(
     current = current[node.key][node.index];
   }
   const lastNode = path[path.length - 1];
-  return current[lastNode.key].splice(lastNode.index, 1);
+  return current[lastNode.key].splice(lastNode.index, 1)[0];
+}
+export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {
+  forEachEntryRecursive(entry, (entry, key, _parent) => {
+    if (entry.id) {
+      entry.id = catalogue.generateNonConflictingId();
+    }
+  });
 }
