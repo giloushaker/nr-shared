@@ -38,7 +38,7 @@ function getKeyInfoClass(
       return getTypeName(parentKey, this);
     }
     toString(): string {
-      return parentKey;
+      return `${this.editorTypeName} - ${this.getName()}`;
     }
   };
   _key.prototype.parentKey;

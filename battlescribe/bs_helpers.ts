@@ -796,3 +796,11 @@ export function generateBattlescribeId(): string {
     .map((o) => o.toString(16))
     .join("-");
 }
+
+// function like pythons zips
+export function* enumerate_zip<T, U>(a: T[], b: U[]) {
+  for (let i = 0; i < Math.min(a.length, b.length); i++) {
+    yield [a[i], b[i]] as [T, U];
+  }
+  return;
+}

@@ -10,6 +10,7 @@ import type {
   BSIPublication,
   BSINamed,
   BSIProfileType,
+  BSIData,
 } from "./bs_types";
 import type { Catalogue, EditorBase } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
@@ -18,7 +19,8 @@ import type { NRAssociation, AssociationConstraint } from "./bs_association";
 import { addOne, clone, isObject } from "./bs_helpers";
 import { getAllInfoGroups } from "./bs_modifiers";
 import { strnumOptions } from "fast-xml-parser";
-import { ItemTypeNames } from "./bs_editor";
+import { ItemTypeNames, findParentWhere } from "./bs_editor";
+import { findSelfOrParentWhere } from "./bs_condition";
 const isNonEmptyIfHasOneOf = [
   "modifiers",
   "modifierGroups",
@@ -1010,4 +1012,62 @@ export function getTypeName(key: string, obj: any): ItemTypeNames {
       console.warn("unknown getTypeName key", key);
       return key as any;
   }
+}
+
+const badKeys = new Set([
+  "loaded",
+  "loaded_wiki",
+  "loaded_editor",
+  "units",
+  "categories",
+  "forces",
+  "childs",
+  "roster_constraints",
+  "extra_constraints",
+  "costIndex",
+  "imports",
+  "index",
+  "catalogue",
+  "gameSystem",
+  "main_catalogue",
+  "collective_recursive",
+  "limited_to_one",
+  "associations",
+  "associationConstraints",
+  "book",
+  "short",
+  "version",
+  "nrversion",
+  "lastUpdated",
+  "costIndex",
+  "target",
+  "parent",
+  "links",
+]);
+export function rootToJson(data: Catalogue, raw: BSIData): string {
+  const root: any = {
+    ...raw,
+    catalogue: undefined,
+    gameSystem: undefined,
+  };
+  const copy = { ...data }; // ensure there is no recursivity by making sure only this copy is put in the json
+  if (data.isGameSystem()) {
+    root.gameSystem = copy;
+    delete root.catalogue;
+  } else if (data.isCatalogue()) {
+    root.catalogue = copy;
+    delete root.gameSystem;
+  }
+  const stringed = JSON.stringify(root, (k, v) => {
+    if (v === copy || !badKeys.has(k)) return v;
+    return undefined;
+  });
+  return stringed;
+}
+export function entryToJson(data: Base): string {
+  const stringed = JSON.stringify(data, (k, v) => {
+    if (!badKeys.has(k)) return v;
+    return undefined;
+  });
+  return stringed;
 }
