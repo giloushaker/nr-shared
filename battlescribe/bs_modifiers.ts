@@ -167,7 +167,7 @@ export function modifierToString(
   return `${modifier.type} ${fieldToString(
     base,
     modifier.field
-  )} ${fieldToString(base, modifier.value.toString())}`;
+  )} ${fieldToString(base, modifier.value?.toString())}`;
 }
 
 export function conditionGroupToString(

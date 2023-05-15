@@ -941,7 +941,7 @@ export function* iterateModifierGroupsRecursive(
   }
 }
 
-export function getTypeName(key: string, obj: any): ItemTypeNames {
+export function getTypeName(key: string, obj?: any): ItemTypeNames {
   switch (key) {
     case "selectionEntries":
       return "selectionEntry";
@@ -949,9 +949,9 @@ export function getTypeName(key: string, obj: any): ItemTypeNames {
       return "selectionEntryGroup";
 
     case "sharedSelectionEntries":
-      return obj.targetId ? "entryLink" : "selectionEntry";
+      return obj?.targetId ? "entryLink" : "selectionEntry";
     case "sharedSelectionEntryGroups":
-      return obj.targetId ? "entryLink" : "selectionEntryGroup";
+      return obj?.targetId ? "entryLink" : "selectionEntryGroup";
 
     case "entryLinks":
       return "entryLink";
@@ -1064,7 +1064,7 @@ export function rootToJson(data: Catalogue, raw: BSIData): string {
   });
   return stringed;
 }
-export function entryToJson(data: Base): string {
+export function entryToJson(data: Base | Record<string, any>): string {
   const stringed = JSON.stringify(data, (k, v) => {
     if (!badKeys.has(k)) return v;
     return undefined;
