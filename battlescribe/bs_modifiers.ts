@@ -87,7 +87,7 @@ export function conditionToString(
 
   const rawField = fieldToString(base, condition.field);
   const field = ["selections", "forces"].includes(rawField)
-    ? ""
+    ? ` ${rawField}`
     : ` ${rawField} of`;
 
   const rawScope = fieldToString(base, condition.scope);
