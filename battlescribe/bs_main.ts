@@ -9,13 +9,18 @@ import type {
   BSICost,
   BSIPublication,
   BSINamed,
+  BSIProfileType,
+  BSIData,
 } from "./bs_types";
-import type { Catalogue } from "./bs_main_catalogue";
+import type { Catalogue, EditorBase } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
 import type { IModel } from "../systems/army_interfaces";
 import type { NRAssociation, AssociationConstraint } from "./bs_association";
-import { clone, isObject } from "./bs_helpers";
+import { addOne, clone, isObject } from "./bs_helpers";
 import { getAllInfoGroups } from "./bs_modifiers";
+import { strnumOptions } from "fast-xml-parser";
+import { ItemTypeNames, findParentWhere } from "./bs_editor";
+import { findSelfOrParentWhere } from "./bs_condition";
 const isNonEmptyIfHasOneOf = [
   "modifiers",
   "modifierGroups",
@@ -50,9 +55,11 @@ const good1 = [
   "infoLinks",
   "infoGroups",
   "entryLinks",
+  "selectionEntries",
   "selectionEntryLinks",
-  "categoryLinks",
+  "selectionEntryGroups",
 
+  "categoryLinks",
   "costTypes",
   "profileTypes",
   "characteristicTypes",
@@ -65,16 +72,23 @@ const good1 = [
   "sharedProfiles",
   "sharedRules",
   "sharedInfoGroups",
-  "selectionEntries",
-  "selectionEntryGroups",
   "rules",
   "rootRules",
 
   "publications",
   "constraints",
+
+  "characteristics",
+  "costs",
 ];
 
-const good2 = ["conditions", "modifiers", "modifierGroups", "repeats", "conditionGroups"];
+const good2 = [
+  "conditions",
+  "conditionGroups",
+  "modifiers",
+  "modifierGroups",
+  "repeats",
+];
 export const goodKeys = new Set([...good1, ...good2]);
 export const goodKeysWiki = new Set(good1);
 
@@ -91,11 +105,15 @@ export class Base implements BSModifierBase {
   collective?: boolean;
   defaultSelectionEntryId?: string;
 
+  // Maybe move this to catalogue
+  profileTypes?: BSIProfileType[];
+
   // Data - Modifiable
   name!: string;
   hidden!: boolean;
   value?: number | string | boolean;
   page?: string;
+  publicationId!: string;
 
   profiles?: BSIProfile[];
   rules?: BSIRule[];
@@ -140,11 +158,16 @@ export class Base implements BSModifierBase {
   get url(): string {
     return "%{main_catalogue|catalogue}/%{id}/%{getName}";
   }
+  post_init() {
+    if ((this as any as Link).targetId) {
+      Object.setPrototypeOf(this, Link.prototype);
+    }
+  }
   // Prevent Vue Observers
-  get [Symbol.toStringTag](): string {
+  /*   get [Symbol.toStringTag](): string {
     // Anything can go here really as long as it's not 'Object'
     return "ObjectNoObserve";
-  }
+  } */
   isGroup(): boolean {
     return false;
   }
@@ -218,7 +241,9 @@ export class Base implements BSModifierBase {
         yield* group.profiles;
       }
       if (group.infoLinks) {
-        yield* group.infoLinks?.filter((o) => o.type === "profile").map((o) => o.target as BSIProfile);
+        yield* group.infoLinks
+          ?.filter((o) => o.type === "profile")
+          .map((o) => o.target as BSIProfile);
       }
     }
   }
@@ -228,7 +253,9 @@ export class Base implements BSModifierBase {
         yield* group.rules;
       }
       if (group.infoLinks) {
-        yield* group.infoLinks?.filter((o) => o.type === "rule").map((o) => o.target as BSIRule);
+        yield* group.infoLinks
+          ?.filter((o) => o.type === "rule")
+          .map((o) => o.target as BSIRule);
       }
     }
   }
@@ -244,7 +271,11 @@ export class Base implements BSModifierBase {
   *modifiersIterator(): Iterable<BSIModifier> {
     if (this.modifiers) yield* this.modifiers;
   }
-  *modifierGroupsIteratorRecursive(): Generator<BSIModifierGroup, void, undefined> {
+  *modifierGroupsIteratorRecursive(): Generator<
+    BSIModifierGroup,
+    void,
+    undefined
+  > {
     yield this;
     if (this.isLink()) yield this.target;
     for (const group of this.modifierGroupsIterator()) {
@@ -295,17 +326,23 @@ export class Base implements BSModifierBase {
   /**
    *If callback returns something other than `undefined`, callback will not be called for the childs of this node
    */
-  forEachCond(callbackfn: (value: Base | Link, depth: number) => any, _depth = 0): void {
+  forEachCond(
+    callbackfn: (value: Base | Link, depth: number) => any,
+    _depth = 0
+  ): void {
     if (callbackfn(this, 0) === undefined)
-      for (const instance of this.selectionsIterator()) instance.forEachCond(callbackfn, _depth + 1);
+      for (const instance of this.selectionsIterator())
+        instance.forEachCond(callbackfn, _depth + 1);
   }
   forEach(callbackfn: (value: Base | Link) => unknown): void {
     callbackfn(this);
-    for (const instance of this.selectionsIterator()) instance.forEach(callbackfn);
+    for (const instance of this.selectionsIterator())
+      instance.forEach(callbackfn);
   }
   forEachNode(callbackfn: (value: Base | Link) => unknown): void {
     callbackfn(this);
-    for (const instance of this.nodesIterator()) instance.forEachNode(callbackfn);
+    for (const instance of this.nodesIterator())
+      instance.forEachNode(callbackfn);
   }
   forEachNodeCb(callbackfn: (value: Base | Link) => unknown): void {
     const stack = [this as Base | Link];
@@ -328,7 +365,8 @@ export class Base implements BSModifierBase {
 
         if (target.selectionEntries) stack.push(...target.selectionEntries);
 
-        if (target.selectionEntryGroups) stack.push(...target.selectionEntryGroups);
+        if (target.selectionEntryGroups)
+          stack.push(...target.selectionEntryGroups);
 
         if (target.entryLinks) stack.push(...target.entryLinks);
       }
@@ -339,14 +377,21 @@ export class Base implements BSModifierBase {
       if (cur.entryLinks) stack.push(...cur.entryLinks);
     }
   }
-  forEachObjectWhitelist(callbackfn: (value: Base | Link, parent: Base) => unknown, whiteList = goodKeys) {
+  forEachObjectWhitelist(
+    callbackfn: (value: Base | Link, parent: Base) => unknown,
+    whiteList = goodKeys
+  ) {
     const stack = [this as any];
     // const keys = {} as any;
+
     while (stack.length) {
       const current = stack.pop()!;
       for (const key of Object.keys(current)) {
         const value = current[key];
-        if (!whiteList.has(key)) continue;
+        if (!whiteList.has(key)) {
+          // addOne(keys, key);
+          continue;
+        }
         //  If Array: add each object inside array if (Array.isArray(value)) {
 
         if (isObject(value)) {
@@ -365,8 +410,13 @@ export class Base implements BSModifierBase {
         }
       }
     }
+
+    // console.log("foreachobjectwhitelist", keys);
   }
-  forEachObject(callbackfn: (value: Base | Link, parent: Base) => unknown, badKeys = new Set()) {
+  forEachObject(
+    callbackfn: (value: Base | Link, parent: Base) => unknown,
+    badKeys = new Set()
+  ) {
     const stack = [this as any];
     // const keys = {} as any;
     while (stack.length) {
@@ -398,7 +448,9 @@ export class Base implements BSModifierBase {
       if (cb(s)) return s;
     }
   }
-  findOptionRecursive(cb: (opt: Base | Link) => boolean): Base | Link | undefined {
+  findOptionRecursive(
+    cb: (opt: Base | Link) => boolean
+  ): Base | Link | undefined {
     const stack = [...this.selectionsIterator()];
     while (stack.length) {
       const current = stack.pop()!;
@@ -428,7 +480,8 @@ export class Base implements BSModifierBase {
 
     result.modifiers = [];
     for (const modifier of this.modifiersIterator()) {
-      if (modifier.field === constraint.id || modifier.field === "hidden") result.modifiers.push(modifier);
+      if (modifier.field === constraint.id || modifier.field === "hidden")
+        result.modifiers.push(modifier);
     }
     result.modifierGroups = [];
     for (const group of this.modifierGroupsIterator()) {
@@ -451,7 +504,8 @@ export class Base implements BSModifierBase {
       if (skipGroup && child.isGroup()) continue;
       for (const constraint of child.constraintsIterator()) {
         if (constraint.type === "min") {
-          if (constraint.scope === "parent") result.push(child.getBoundConstraint(constraint));
+          if (constraint.scope === "parent")
+            result.push(child.getBoundConstraint(constraint));
         }
       }
 
@@ -490,7 +544,7 @@ export class Group extends Base {
 }
 export class Link extends Base {
   targetId!: string;
-  target!: Base;
+  declare target: Base;
   isLink(): this is Link {
     return true;
   }
@@ -600,7 +654,9 @@ export class Link extends Base {
   getName(): string {
     return this.target.name || this.name;
   }
-
+  getParent(): Base | undefined {
+    return (this as EditorBase).parent;
+  }
   getPrimaryCategory(): string {
     for (const categoryLink of this.categoryLinks || []) {
       if (categoryLink.primary) return categoryLink.targetId;
@@ -621,9 +677,10 @@ export class Link extends Base {
     return Object.values(d);
   }
 }
+(Link.prototype as any).keyInfoCache = {};
 export class CategoryLink extends Link {
-  targetId!: string;
-  target!: Category;
+  declare targetId: string;
+  declare target: Category;
   primary?: boolean;
   main_catalogue!: Catalogue;
 
@@ -641,7 +698,7 @@ export class CategoryLink extends Link {
 export const UNCATEGORIZED_ID = "(No Category)";
 export const ILLEGAL_ID = "(Illegal Units)";
 export class Category extends Base {
-  id!: string;
+  declare id: string;
   units!: Array<Base | Link>;
   main_catalogue!: Catalogue;
   isCategory(): this is Category {
@@ -661,8 +718,8 @@ export class Category extends Base {
   }
 }
 export class Force extends Base {
-  name!: string;
-  id!: string;
+  declare name: string;
+  declare id: string;
   categories!: Array<Category | CategoryLink>;
   forces?: Force[];
   main_catalogue!: Catalogue;
@@ -685,7 +742,9 @@ export class Force extends Base {
         yield* group.rules;
       }
       if (group.infoLinks) {
-        yield* group.infoLinks?.filter((o) => o.type === "rule").map((o) => o.target as BSIRule);
+        yield* group.infoLinks
+          ?.filter((o) => o.type === "rule")
+          .map((o) => o.target as BSIRule);
       }
     }
     if (this.main_catalogue) yield* this.main_catalogue.rulesIterator();
@@ -742,13 +801,16 @@ export function getTheoreticalMaxes(
   }
   for (const constraint of constraints) {
     const beginLength = maxConstraints.length;
-    if (constraint.field !== "selections" || constraint.type !== "max") continue;
+    if (constraint.field !== "selections" || constraint.type !== "max")
+      continue;
     if (constraint.value > 1) {
       push(constraint.value);
       continue;
     }
     let constraintValue = constraint.value;
-    for (const modifier_group of iterateModifierGroupsRecursive(modifierGroups)) {
+    for (const modifier_group of iterateModifierGroupsRecursive(
+      modifierGroups
+    )) {
       for (const modifier of modifier_group.modifiers || []) {
         if (modifier.field !== constraint.id) continue;
         if (modifier.type === "increment") {
@@ -762,7 +824,7 @@ export function getTheoreticalMaxes(
             continue;
           }
         }
-        if (modifier.type === "decrement" && modifier.value < 0) {
+        if (modifier.type === "decrement" && (modifier.value as any) < 0) {
           if (modifier_group.repeats?.length || modifier.repeats?.length) {
             push(maxValue);
             continue;
@@ -773,7 +835,7 @@ export function getTheoreticalMaxes(
             continue;
           }
         }
-        if (modifier.type === "set" && modifier.value > 1) {
+        if (modifier.type === "set" && (modifier.value as any) > 1) {
           if (modifier.value === -1) {
             push(maxValue);
             continue;
@@ -836,18 +898,20 @@ export interface BSIExtraConstraint extends BSIConstraint, BSINamed {
 }
 
 // const debugKeys = new Set();
-export class Rule implements BSIRule {
-  id!: string;
-  name!: string;
-  description!: string;
-  hidden!: boolean;
-  page?: string;
-  modifiers?: BSIModifier[] | undefined;
-  modifierGroups?: BSIModifierGroup[] | undefined;
+export class Rule extends Base implements BSIRule {
+  declare id: string;
+  declare name: string;
+  declare description: string;
+  declare hidden: boolean;
+  declare page?: string;
+  declare modifiers?: BSIModifier[] | undefined;
+  declare modifierGroups?: BSIModifierGroup[] | undefined;
   getDescription(): string {
-    return Array.isArray(this.description) ? this.description.join("\n") : this.description;
+    return Array.isArray(this.description)
+      ? this.description.join("\n")
+      : this.description;
   }
-  _init_() {
+  post_init() {
     if (Array.isArray(this.description)) {
       this.description = this.description[0];
     }
@@ -875,4 +939,135 @@ export function* iterateModifierGroupsRecursive(
       yield* iterateModifierGroupsRecursive(group.modifierGroups);
     }
   }
+}
+
+export function getTypeName(key: string, obj: any): ItemTypeNames {
+  switch (key) {
+    case "selectionEntries":
+      return "selectionEntry";
+    case "selectionEntryGroups":
+      return "selectionEntryGroup";
+
+    case "sharedSelectionEntries":
+      return obj.targetId ? "entryLink" : "selectionEntry";
+    case "sharedSelectionEntryGroups":
+      return obj.targetId ? "entryLink" : "selectionEntryGroup";
+
+    case "entryLinks":
+      return "entryLink";
+    case "forceEntries":
+      return "force";
+    case "categoryEntries":
+      return "category";
+    case "categoryLinks":
+      return "categoryLink";
+
+    case "catalogueLinks":
+      return "catalogueLink";
+    case "publications":
+      return "publication";
+    case "costTypes":
+      return "costType";
+    case "costs":
+      return "cost";
+
+    case "profileTypes":
+      return "profileType";
+    case "profiles":
+      return "profile";
+    case "rules":
+      return "rule";
+    case "characteristics":
+      return "characteristic";
+    case "characteristicTypes":
+      return "characteristicType";
+    case "sharedProfiles":
+      return "profile";
+    case "sharedRules":
+      return "rule";
+    case "sharedInfoGroups":
+      return "infoGroup";
+
+    case "infoLinks":
+      return "infoLink";
+    case "infoGroups":
+      return "infoGroup";
+
+    case "constraints":
+      return "constraint";
+    case "conditions":
+      return "condition";
+    case "modifiers":
+      return "modifier";
+    case "modifierGroups":
+      return "modifierGroup";
+    case "repeats":
+      return "repeat";
+    case "conditionGroups":
+      return "conditionGroup";
+    case "catalogue":
+    case "gameSystem":
+      return key;
+    default:
+      console.warn("unknown getTypeName key", key);
+      return key as any;
+  }
+}
+
+const badKeys = new Set([
+  "loaded",
+  "loaded_wiki",
+  "loaded_editor",
+  "units",
+  "categories",
+  "forces",
+  "childs",
+  "roster_constraints",
+  "extra_constraints",
+  "costIndex",
+  "imports",
+  "index",
+  "catalogue",
+  "gameSystem",
+  "main_catalogue",
+  "collective_recursive",
+  "limited_to_one",
+  "associations",
+  "associationConstraints",
+  "book",
+  "short",
+  "version",
+  "nrversion",
+  "lastUpdated",
+  "costIndex",
+  "target",
+  "parent",
+  "links",
+]);
+export function rootToJson(data: Catalogue, raw: BSIData): string {
+  const root: any = {
+    ...raw,
+    catalogue: undefined,
+    gameSystem: undefined,
+  };
+  const copy = { ...data }; // ensure there is no recursivity by making sure only this copy is put in the json
+  if (data.isGameSystem()) {
+    root.gameSystem = copy;
+    delete root.catalogue;
+  } else if (data.isCatalogue()) {
+    root.catalogue = copy;
+    delete root.gameSystem;
+  }
+  const stringed = JSON.stringify(root, (k, v) => {
+    if (v === copy || !badKeys.has(k)) return v;
+    return undefined;
+  });
+  return stringed;
+}
+export function entryToJson(data: Base): string {
+  const stringed = JSON.stringify(data, (k, v) => {
+    if (!badKeys.has(k)) return v;
+    return undefined;
+  });
+  return stringed;
 }

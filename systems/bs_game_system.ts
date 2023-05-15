@@ -1,8 +1,5 @@
 import { arrayToIndex, systemToString } from "../util";
-import {
-  BSCatalogueManager,
-  NRClientCatalogueManager,
-} from "../../shared/battlescribe/bs_system";
+import { BSCatalogueManager } from "../../shared/battlescribe/bs_system";
 import type { PatchIndex } from "../../shared/battlescribe/bs_helpers";
 import type { IArmyBook, SetupCategory } from "./army_interfaces";
 import type {
@@ -90,6 +87,7 @@ export class BsGameSystem {
   manager?: BSCatalogueManager;
 
   lastBooksDate?: string;
+  rules: any;
   settings: {
     name?: string;
     sizes?: Record<string, SystemSettingsSize>;

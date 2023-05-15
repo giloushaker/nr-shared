@@ -1,4 +1,12 @@
-import { groupBy, sortBy, clone, addObj } from "./bs_helpers";
+import {
+  groupBy,
+  sortBy,
+  clone,
+  addObj,
+  escapeRegex,
+  textSearchRegex,
+  generateBattlescribeId,
+} from "./bs_helpers";
 import {
   Base,
   UNCATEGORIZED_ID,
@@ -19,6 +27,7 @@ import type {
   BSIProfile,
   BSIRule,
   BSIPublication,
+  BSIProfileType,
 } from "./bs_types";
 import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { BsBook } from "./bs_book";
@@ -28,24 +37,31 @@ export interface WikiLink extends Link {
   links?: WikiLink[];
 }
 export interface WikiBase extends Base {
-  parent: WikiBase;
+  parent?: WikiBase;
   links?: WikiLink[];
+}
+export interface EditorBase extends Base {
+  parent?: EditorBase;
+  links?: EditorBase[];
+  catalogue: Catalogue;
+  get parentKey(): string;
+  get editorTypeName(): string;
 }
 export class CatalogueLink extends Base {
   targetId!: string;
-  target!: Catalogue;
+  declare target: Catalogue;
   importRootEntries?: boolean;
 }
 export class Publication extends Base implements BSIPublication {
   shortName?: string;
   publisher?: string;
   publicationDate?: string | number;
-  publicationUrl?: string;
+  publisherUrl?: string;
 }
 
 export class Catalogue extends Base {
-  name!: string;
-  id!: string;
+  declare name: string;
+  declare id: string;
   library?: boolean;
   revision?: number;
 
@@ -63,8 +79,9 @@ export class Catalogue extends Base {
 
   // Processed
   gameSystem!: Catalogue;
-  loaded?: boolean;
-  loaded2?: boolean;
+  declare loaded?: boolean;
+  loaded_wiki?: boolean;
+  loaded_editor?: boolean;
 
   imports!: Catalogue[];
   importRootEntries!: Catalogue[];
@@ -93,8 +110,8 @@ export class Catalogue extends Base {
     this.generateCostIndex();
   }
   processForWiki(system: GameSystem) {
-    if (this.loaded2) return;
-    this.loaded2 = true;
+    if (this.loaded_wiki) return;
+    this.loaded_wiki = true;
     this.process();
     const rulesObj: Record<string, any> = system.rules || {};
     (system as any).rules = rulesObj;
@@ -116,6 +133,19 @@ export class Catalogue extends Base {
         (category as any).parent = force;
       }
     }
+  }
+  processForEditor() {
+    if (this.loaded_editor) return;
+    this.loaded_editor = true;
+
+    this.imports.forEach((imported) => {
+      addObj(imported as any, "links", this);
+    });
+    this.forEachObjectWhitelist((cur, parent) => {
+      (cur as EditorBase).parent = parent as EditorBase;
+      (cur as EditorBase).catalogue = this;
+      if (cur.target) addObj(cur.target as any, "links", parent as EditorBase);
+    }, goodKeys);
   }
   get url(): string {
     return "%{book}";
@@ -196,6 +226,47 @@ export class Catalogue extends Base {
       return this.book.system?.books?.array?.find((o) => o.bsid === id) as any;
     }
     return undefined;
+  }
+  findOptionsById(id: string): Base[] {
+    const result = [];
+    for (const imported of [this, ...this.imports]) {
+      for (const val of Object.values(imported.index)) {
+        if (val.id && val.id === id) result.push(val);
+      }
+    }
+    return result;
+  }
+  findOptionsByName(name?: string): Base[] {
+    if (!name || !name.trim()) {
+      const result = [];
+      for (const imported of [this, ...this.imports]) {
+        for (const val of Object.values(imported.index)) {
+          if ((val as any).getName) {
+            result.push(val);
+          } else {
+            console.log(val);
+          }
+        }
+      }
+      return result;
+    }
+    const result = [];
+    const regx = textSearchRegex(name);
+    for (const imported of [this, ...this.imports]) {
+      for (const val of Object.values(imported.index)) {
+        const name = val.getName?.call(val);
+        if (name && String(name).match(regx)) {
+          result.push(val);
+        }
+      }
+    }
+    return result;
+  }
+  generateNonConflictingId(): string {
+    while (true) {
+      const id = generateBattlescribeId();
+      if (this.findOptionById(id) === undefined) return id;
+    }
   }
   generateCostIndex(): Record<string, BSICostType> {
     const result = {} as Record<string, BSICostType>;
@@ -309,7 +380,10 @@ export class Catalogue extends Base {
       childs: uncategorizedUnits,
       catalogue: this,
     };
-    result[UNCATEGORIZED_ID] = Object.setPrototypeOf(uncategorized, Category.prototype);
+    result[UNCATEGORIZED_ID] = Object.setPrototypeOf(
+      uncategorized,
+      Category.prototype
+    );
     const illegal = {
       name: "Illegal Units",
       id: ILLEGAL_ID,
@@ -348,10 +422,13 @@ export class Catalogue extends Base {
     const force_constraints = [] as Array<BSIExtraConstraint>;
     const by_id_constraints = {} as Record<string, Array<BSIExtraConstraint>>;
     const force_or_category_ids = new Set<string>();
-    const by_category_force_constraints = {} as Record<string, Array<BSIExtraConstraint>>;
+    const by_category_force_constraints = {} as Record<
+      string,
+      Array<BSIExtraConstraint>
+    >;
 
     function localAddBoundCategoryConstraints(
-      _this: Catalogue,
+      catalogue: Catalogue,
       category: Category,
       constraints: Iterable<BSIConstraint>
     ) {
@@ -373,23 +450,35 @@ export class Catalogue extends Base {
           case "primary-category":
           case "primary-catalogue":
             console.warn(
-              `unsupported scope:${constraint.scope} from category ${category.getName()} ${category.getId()}`
+              `unsupported scope:${
+                constraint.scope
+              } from category ${category.getName()} ${category.getId()}`
             );
             break;
           default:
             if (force_or_category_ids.has(constraint.scope)) {
-              addObj(by_id_constraints, constraint.scope, target.getBoundConstraint(constraint));
+              addObj(
+                by_id_constraints,
+                constraint.scope,
+                target.getBoundConstraint(constraint)
+              );
               break;
             }
-            const fromIndex = _this.index[constraint.scope];
+            const fromIndex = catalogue.index[constraint.scope];
             if (fromIndex) {
-              const from_id_extra_constraints = fromIndex.extra_constraints || [];
-              from_id_extra_constraints.push(category.getBoundConstraint(constraint));
+              const from_id_extra_constraints =
+                fromIndex.extra_constraints || [];
+              from_id_extra_constraints.push(
+                category.getBoundConstraint(constraint)
+              );
+
               fromIndex.extra_constraints = from_id_extra_constraints;
               break;
             }
             console.warn(
-              `unsupported scope:${constraint.scope} from category ${category.getName()} ${category.getId()}`
+              `unsupported scope:${
+                constraint.scope
+              } from category ${category.getName()} ${category.getId()}`
             );
 
             break;
@@ -413,7 +502,11 @@ export class Catalogue extends Base {
       force_or_category_ids.add(category.id);
     }
     for (const category of this.categories) {
-      localAddBoundCategoryConstraints(this, category, category.constraintsIterator());
+      localAddBoundCategoryConstraints(
+        this,
+        category,
+        category.constraintsIterator()
+      );
       const force_extra_constraints = {} as Record<string, BSIExtraConstraint>;
       category.forEachNodeCb((node) => {
         if (node.isForce()) return;
@@ -437,31 +530,49 @@ export class Catalogue extends Base {
                 roster_constraints[hash] = node.getBoundConstraint(constraint);
                 break;
               case "force":
-                force_extra_constraints[hash] = node.getBoundConstraint(constraint);
+                force_extra_constraints[hash] =
+                  node.getBoundConstraint(constraint);
                 break;
               case "primary-category":
               case "primary-catalogue":
-                console.warn(`unsupported scope:${constraint.scope} from ${node.getName()} ${node.id}`);
+                console.warn(
+                  `unsupported scope:${
+                    constraint.scope
+                  } from ${node.getName()} ${node.id}`
+                );
                 break;
               default:
                 if (force_or_category_ids.has(constraint.scope)) {
-                  addObj(by_id_constraints, constraint.scope, node.getBoundConstraint(constraint));
+                  addObj(
+                    by_id_constraints,
+                    constraint.scope,
+                    node.getBoundConstraint(constraint)
+                  );
                   break;
                 }
                 const fromIndex = this.index[constraint.scope];
                 if (fromIndex) {
-                  const from_id_extra_constraints = fromIndex.extra_constraints || [];
-                  from_id_extra_constraints.push(node.getBoundConstraint(constraint));
+                  const from_id_extra_constraints =
+                    fromIndex.extra_constraints || [];
+                  from_id_extra_constraints.push(
+                    node.getBoundConstraint(constraint)
+                  );
                   fromIndex.extra_constraints = from_id_extra_constraints;
                   break;
                 }
-                console.warn(`unsupported scope:${constraint.scope} from ${node.getName()}${node.id}`);
+                console.warn(
+                  `unsupported scope:${
+                    constraint.scope
+                  } from ${node.getName()}${node.id}`
+                );
                 break;
             }
           }
         }
       });
-      by_category_force_constraints[category.getId()] = Object.values(force_extra_constraints);
+      by_category_force_constraints[category.getId()] = Object.values(
+        force_extra_constraints
+      );
     }
 
     for (const force of this.forcesIteratorRecursive()) {
@@ -475,7 +586,9 @@ export class Catalogue extends Base {
       }
       for (const category of force.categories) {
         if (category.getId() in by_category_force_constraints) {
-          force_extra_constraints.push(...by_category_force_constraints[category.getId()]);
+          force_extra_constraints.push(
+            ...by_category_force_constraints[category.getId()]
+          );
         }
       }
       if (force_extra_constraints.length) {
@@ -495,25 +608,34 @@ export class Catalogue extends Base {
 
     this.roster_constraints = Object.values(roster_constraints);
   }
+  addToIndex(cur: Base) {
+    if (cur instanceof Publication) {
+      this.index[cur.id] = cur;
+      return;
+    }
+    if (cur.id) {
+      cur.catalogue = this;
+      this.index[cur.id] = cur;
+    }
+  }
+  removeFromIndex(cur: Base) {
+    if (cur.id && this.index[cur.id] === cur) {
+      delete this.index[cur.id];
+    }
+  }
   resolveAllLinks(imports: Catalogue[]) {
     const catalogue = this as Catalogue;
     const unresolvedLinks: Array<Link> = [];
-    const unresolvedPublications: Array<BSIInfoLink | BSIRule | BSIProfile> = [];
+    const unresolvedPublications: Array<BSIInfoLink | BSIRule | BSIProfile> =
+      [];
     const unresolvedChildIds: Array<BSICondition> = [];
     const parents: Array<Base> = [];
     const indexes = [];
 
     if (!this.index) {
-      const index = {} as Record<string, Base>;
-      this.forEachObjectWhitelist(function (cur, parent) {
-        if (cur instanceof Publication) {
-          index[cur.id] = cur;
-          return;
-        }
-        if (cur.id) {
-          cur.catalogue = catalogue;
-          index[cur.id] = cur;
-        }
+      this.index = {};
+      this.forEachObjectWhitelist((cur, parent) => {
+        this.addToIndex(cur);
         if ((cur as any).publicationId) {
           unresolvedPublications.push(cur as any);
         }
@@ -525,7 +647,6 @@ export class Catalogue extends Base {
           unresolvedChildIds.push(cur);
         }
       }, goodKeys);
-      this.index = index;
     }
     indexes.push(this.index);
 
@@ -536,6 +657,29 @@ export class Catalogue extends Base {
     resolvePublications(unresolvedPublications, indexes);
     resolveChildIds(unresolvedChildIds, indexes);
   }
+  updateLink(link: Link & EditorBase) {
+    if (link.target) {
+      const target = link.target as EditorBase;
+      if (!target.links) target.links = [];
+      const idx = target.links.indexOf(link);
+      if (idx >= 0) target.links.splice(idx, 1);
+    }
+    link.target = this.findOptionById(link.targetId)!;
+    if (link.target) {
+      const target = link.target as EditorBase;
+      if (!target.links) target.links = [];
+      target.links.push(link);
+    }
+    return link.target !== undefined;
+  }
+  unlinkLink(link: Link & EditorBase) {
+    if (link.target) {
+      const target = link.target as EditorBase;
+      if (!target.links) target.links = [];
+      const idx = target.links.indexOf(link);
+      if (idx >= 0) target.links.splice(idx, 1);
+    }
+  }
 }
 
 /**
@@ -544,7 +688,11 @@ export class Catalogue extends Base {
  * @param unresolved The links to resolve
  * @param indexes Array of indexes which match an id to a node
  */
-export function resolveLinks(unresolved: Link[] = [], indexes: Record<string, Base>[], parents: Base[]) {
+export function resolveLinks(
+  unresolved: Link[] = [],
+  indexes: Record<string, Base>[],
+  parents: Base[]
+) {
   const length = unresolved.length;
   const resolved = [];
 
@@ -587,7 +735,9 @@ export function resolveLinks(unresolved: Link[] = [], indexes: Record<string, Ba
   // Delete unresolved links
   if (unresolved.length) {
     console.warn(`${length - unresolved.length}/${length} links resolved`);
-    console.warn(`unresolved links: ${unresolved.map((o) => `${o.id} -> ${o.targetId}`)}`);
+    console.warn(
+      `unresolved links: ${unresolved.map((o) => `${o.id} -> ${o.targetId}`)}`
+    );
     for (let i = 0; i < unresolved.length; i++) {
       const link = unresolved[i];
       const parent = parents[i];
@@ -628,7 +778,10 @@ export function resolvePublications(
     nextUnresolved.push(current);
   }
 }
-export function resolveChildIds(unresolvedChildIds: BSICondition[] = [], indexes: Record<string, Base>[]) {
+export function resolveChildIds(
+  unresolvedChildIds: BSICondition[] = [],
+  indexes: Record<string, Base>[]
+) {
   for (const current of unresolvedChildIds) {
     // Find the target, stopping at first found
     const id = current.childId!;

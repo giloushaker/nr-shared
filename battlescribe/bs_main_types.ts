@@ -1,4 +1,13 @@
-import { Category, Force, Link, Base, Group, CategoryLink, Rule } from "./bs_main";
+import {
+  Category,
+  Force,
+  Link,
+  Base,
+  Group,
+  CategoryLink,
+  Rule,
+  getTypeName,
+} from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
 
@@ -11,8 +20,37 @@ export class NoObserve {
 export function noObserve(): object {
   return new NoObserve();
 }
+
+const keyInfoCache = {} as Record<string, any>;
+function getKeyInfoClass(
+  cache: Record<string, any>,
+  parentKey: string,
+  obj: any
+): any {
+  if (parentKey in cache) {
+    return cache[parentKey];
+  }
+  const _key = class {
+    get parentKey(): string {
+      return parentKey;
+    }
+    get editorTypeName(): string {
+      return getTypeName(parentKey, this);
+    }
+    toString(): string {
+      return `${this.editorTypeName} - ${this.getName()}`;
+    }
+  };
+  _key.prototype.parentKey;
+  Object.setPrototypeOf(_key.prototype, Object.getPrototypeOf(obj));
+  cache[parentKey] = _key.prototype;
+  return _key.prototype;
+}
+function setKeyInfo(cache: Record<string, any>, key: string, obj: any): void {
+  Object.setPrototypeOf(obj, getKeyInfoClass(cache, key, obj));
+}
 export const protoMap = {
-  "*": NoObserve.prototype,
+  "*": Base.prototype,
   // "*": Base.prototype,
   catalogue: Catalogue.prototype,
   catalogueLinks: CatalogueLink.prototype,
@@ -29,7 +67,6 @@ export const protoMap = {
   link: Link.prototype,
   infoLinks: Link.prototype,
   categoryLinks: CategoryLink.prototype,
-  entryLinks: Link.prototype,
 
   entry: Base.prototype,
   selectionEntries: Base.prototype,
@@ -54,7 +91,7 @@ export function getPrototypeFromKey(key: string) {
   if (key in protoMap) {
     return protoMap[key as keyof typeof protoMap]!;
   } else {
-    return undefined;
+    return protoMap["*"];
   }
 }
 
@@ -65,7 +102,10 @@ export function setPrototype<Key extends string>(
   const newProto = getPrototypeFromKey(key);
   if (newProto) {
     Object.setPrototypeOf(obj, newProto);
-    if ((newProto as any)._init) obj._init_();
+    if ((newProto as any).post_init) obj.post_init();
+    if (globalThis.isEditor) {
+      setKeyInfo(obj.keyInfoCache || keyInfoCache, key, obj);
+    }
   }
   return obj;
 }

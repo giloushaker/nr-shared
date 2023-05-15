@@ -1,3 +1,4 @@
+import { getRandomInt } from "../util";
 import type { BSIProfile, BSICharacteristic } from "./bs_types";
 
 export type Modify<T, R> = Omit<T, keyof R> & R;
@@ -82,6 +83,9 @@ export function pushAfterLastOfAssumingSorted<T>(array: T[], value: T, _function
   const index = findLastIndexOfAssumingSorted(array, _function);
   if (index === -1) array.push(value);
   else array.splice(index + 1, 0, value);
+}
+export function escapeRegex(str: string) {
+  return str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
 }
 
 export function groupBy<V>(
@@ -737,4 +741,30 @@ export function arraysEqual(a: any[], b: any[]) {
     if (a[i] !== b[i]) return false;
   }
   return true;
+}
+
+export function textSearchRegex(query: string) {
+  const words = escapeRegex(query).split(" ");
+  const regexStr = `^(?=.*\\b${words.join(".*)(?=.*\\b")}).*$`;
+  const regx = new RegExp(regexStr, "i");
+  return regx;
+}
+
+export function generateBattlescribeId(): string {
+  return [
+    getRandomInt(0xffff),
+    getRandomInt(0xffff),
+    getRandomInt(0xffff),
+    getRandomInt(0xffff),
+  ]
+    .map((o) => o.toString(16))
+    .join("-");
+}
+
+// function like pythons zips
+export function* enumerate_zip<T, U>(a: T[], b: U[]) {
+  for (let i = 0; i < Math.min(a.length, b.length); i++) {
+    yield [a[i], b[i]] as [T, U];
+  }
+  return;
 }

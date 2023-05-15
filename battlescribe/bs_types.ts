@@ -3,6 +3,7 @@ export interface BSINamed {
 }
 export interface BSIOption {
   id: string;
+  comment?: string;
 }
 export interface BSIHidden {
   hidden: boolean;
@@ -46,8 +47,14 @@ export interface BSIValued {
 }
 
 export interface BSIQuery {
-  scope: string | "parent" | "force" | "roster" | "primary-catalogue" | "primary-category";
-  childId?: string | "any" | "model" | "unit" | "upgrade";
+  scope:
+    | string
+    | "parent"
+    | "force"
+    | "roster"
+    | "primary-catalogue"
+    | "primary-category";
+  childId?: string | "any" | "model" | "unit" | "upgrade" | "mount" | "crew";
   field: string | "selections" | "forces";
   includeChildSelections?: boolean;
   includeChildForces?: boolean;
@@ -62,7 +69,15 @@ export interface BSIRepeat extends BSIQuery, BSIValued {
 }
 
 export interface BSICondition extends BSIQuery, BSIValued {
-  type: "instanceOf" | "notInstanceOf" | "atLeast" | "greaterThan" | "atMost" | "lessThan" | "equalTo" | "notEqualTo";
+  type:
+    | "instanceOf"
+    | "notInstanceOf"
+    | "atLeast"
+    | "greaterThan"
+    | "atMost"
+    | "lessThan"
+    | "equalTo"
+    | "notEqualTo";
 }
 export interface BSIConditionGroup {
   type?: "and" | "or";
@@ -77,12 +92,23 @@ export interface BSIConstraint extends BSIQuery, BSIValued, BSIOption {
 }
 
 export interface BSICategory extends BSINamed, BSIOption {}
+
+export type BSIModifierType =
+  | "add"
+  | "remove"
+  | "unset-primary"
+  | "set-primary"
+  | "set"
+  | "decrement"
+  | "increment"
+  | "append";
+
 export interface BSIModifier {
   conditions?: BSICondition[];
   conditionGroups?: BSIConditionGroup[];
   repeats?: BSIRepeat[];
 
-  type: "add" | "remove" | "unset-primary" | "set-primary" | "set" | "decrement" | "increment" | "append";
+  type: BSIModifierType;
   field: "category" | "name" | "hidden" | string; //costId
   value: number | string | boolean;
   last_value?: number;
@@ -258,7 +284,11 @@ export interface BSIRule {
 }
 
 export interface BSIInfoLink<
-  T extends BSIInfoGroup | BSIRule | BSIProfile | BSIInfoGroup = BSIInfoGroup | BSIRule | BSIProfile | BSIInfoGroup
+  T extends BSIInfoGroup | BSIRule | BSIProfile | BSIInfoGroup =
+    | BSIInfoGroup
+    | BSIRule
+    | BSIProfile
+    | BSIInfoGroup
 > {
   id: string;
   name: string;
@@ -293,5 +323,5 @@ export interface BSIPublication {
   shortName?: string;
   publisher?: string;
   publicationDate?: string | number;
-  publicationUrl?: string;
+  publisherUrl?: string;
 }
