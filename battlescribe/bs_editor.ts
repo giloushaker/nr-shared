@@ -15,7 +15,7 @@ import {
   BSIRepeat,
 } from "./bs_types";
 export interface hasParent<T> {
-  parent: T | undefined;
+  parent?: T | undefined;
 }
 export interface CategoryEntry {
   name: string;
@@ -221,7 +221,18 @@ export function findParentWhere<T extends hasParent<T>>(
   }
   return undefined;
 }
-
+export function forEachParent<T extends hasParent<T>>(
+  self: T,
+  cb: (node: T) => unknown
+) {
+  let current = self.parent;
+  while (current) {
+    if (!current || cb(current) === false) {
+      break;
+    }
+    current = current.parent;
+  }
+}
 export function getName(obj: any): string {
   const type = obj.parentKey;
   switch (type) {
@@ -234,7 +245,7 @@ export function getName(obj: any): string {
     case "forceEntries":
     case "categoryLinks":
     case "categoryEntries":
-      return (obj as Base).name;
+      return (obj as Base).getName();
 
     case "catalogueLinks":
     case "publications":
@@ -272,8 +283,11 @@ export function getName(obj: any): string {
       );
 
     case "modifierGroups":
-      return `(${obj.type})`;
     case "conditionGroups":
+      return `(${obj.type})`;
+
+    case "infoLinks":
+      return obj.target ? getName(obj.target) : obj.getName();
     default:
       console.log(type, obj);
       return type;
