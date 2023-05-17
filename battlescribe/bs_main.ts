@@ -941,79 +941,6 @@ export function* iterateModifierGroupsRecursive(
   }
 }
 
-export function getTypeName(key: string, obj?: any): ItemTypeNames {
-  switch (key) {
-    case "selectionEntries":
-      return "selectionEntry";
-    case "selectionEntryGroups":
-      return "selectionEntryGroup";
-
-    case "sharedSelectionEntries":
-      return obj?.targetId ? "entryLink" : "selectionEntry";
-    case "sharedSelectionEntryGroups":
-      return obj?.targetId ? "entryLink" : "selectionEntryGroup";
-
-    case "entryLinks":
-      return "entryLink";
-    case "forceEntries":
-      return "force";
-    case "categoryEntries":
-      return "category";
-    case "categoryLinks":
-      return "categoryLink";
-
-    case "catalogueLinks":
-      return "catalogueLink";
-    case "publications":
-      return "publication";
-    case "costTypes":
-      return "costType";
-    case "costs":
-      return "cost";
-
-    case "profileTypes":
-      return "profileType";
-    case "profiles":
-      return "profile";
-    case "rules":
-      return "rule";
-    case "characteristics":
-      return "characteristic";
-    case "characteristicTypes":
-      return "characteristicType";
-    case "sharedProfiles":
-      return "profile";
-    case "sharedRules":
-      return "rule";
-    case "sharedInfoGroups":
-      return "infoGroup";
-
-    case "infoLinks":
-      return "infoLink";
-    case "infoGroups":
-      return "infoGroup";
-
-    case "constraints":
-      return "constraint";
-    case "conditions":
-      return "condition";
-    case "modifiers":
-      return "modifier";
-    case "modifierGroups":
-      return "modifierGroup";
-    case "repeats":
-      return "repeat";
-    case "conditionGroups":
-      return "conditionGroup";
-    case "catalogue":
-    case "gameSystem":
-      return key;
-    default:
-      console.warn("unknown getTypeName key", key);
-      return key as any;
-  }
-}
-
 const badKeys = new Set([
   "loaded",
   "loaded_wiki",
@@ -1043,6 +970,7 @@ const badKeys = new Set([
   "target",
   "parent",
   "links",
+  "showInEditor",
 ]);
 export function rootToJson(data: Catalogue, raw: BSIData): string {
   const root: any = {
@@ -1059,7 +987,7 @@ export function rootToJson(data: Catalogue, raw: BSIData): string {
     delete root.gameSystem;
   }
   const stringed = JSON.stringify(root, (k, v) => {
-    if (v === copy || !badKeys.has(k)) return v;
+    if (v === copy || (!badKeys.has(k) && !k.startsWith("_"))) return v;
     return undefined;
   });
   return stringed;

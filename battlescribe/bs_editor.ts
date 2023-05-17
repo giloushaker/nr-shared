@@ -233,6 +233,79 @@ export function forEachParent<T extends hasParent<T>>(
     current = current.parent;
   }
 }
+export function getTypeName(key: string, obj?: any): ItemTypeNames {
+  switch (key) {
+    case "selectionEntries":
+      return "selectionEntry";
+    case "selectionEntryGroups":
+      return "selectionEntryGroup";
+
+    case "sharedSelectionEntries":
+      return obj?.targetId ? "entryLink" : "selectionEntry";
+    case "sharedSelectionEntryGroups":
+      return obj?.targetId ? "entryLink" : "selectionEntryGroup";
+
+    case "entryLinks":
+      return "entryLink";
+    case "forceEntries":
+      return "force";
+    case "categoryEntries":
+      return "category";
+    case "categoryLinks":
+      return "categoryLink";
+
+    case "catalogueLinks":
+      return "catalogueLink";
+    case "publications":
+      return "publication";
+    case "costTypes":
+      return "costType";
+    case "costs":
+      return "cost";
+
+    case "profileTypes":
+      return "profileType";
+    case "profiles":
+      return "profile";
+    case "rules":
+      return "rule";
+    case "characteristics":
+      return "characteristic";
+    case "characteristicTypes":
+      return "characteristicType";
+    case "sharedProfiles":
+      return "profile";
+    case "sharedRules":
+      return "rule";
+    case "sharedInfoGroups":
+      return "infoGroup";
+
+    case "infoLinks":
+      return "infoLink";
+    case "infoGroups":
+      return "infoGroup";
+
+    case "constraints":
+      return "constraint";
+    case "conditions":
+      return "condition";
+    case "modifiers":
+      return "modifier";
+    case "modifierGroups":
+      return "modifierGroup";
+    case "repeats":
+      return "repeat";
+    case "conditionGroups":
+      return "conditionGroup";
+    case "catalogue":
+    case "gameSystem":
+      return key;
+    default:
+      console.warn("unknown getTypeName key", key);
+      return key as any;
+  }
+}
+
 export function getName(obj: any): string {
   const type = obj.parentKey;
   switch (type) {
@@ -245,6 +318,8 @@ export function getName(obj: any): string {
     case "forceEntries":
     case "categoryLinks":
     case "categoryEntries":
+    case "sharedInfoGroups":
+    case "infoGroups":
       return (obj as Base).getName();
 
     case "catalogueLinks":
@@ -283,6 +358,9 @@ export function getName(obj: any): string {
       );
 
     case "modifierGroups":
+      return `Modifier Group (${
+        obj.modifiers?.length || 0 + obj.modifierGroup?.length || 0
+      })`;
     case "conditionGroups":
       return `(${obj.type})`;
 

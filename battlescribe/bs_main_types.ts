@@ -6,10 +6,10 @@ import {
   Group,
   CategoryLink,
   Rule,
-  getTypeName,
 } from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
+import { getTypeName } from "./bs_editor";
 
 export class NoObserve {
   get [Symbol.toStringTag](): string {
@@ -30,7 +30,7 @@ function getKeyInfoClass(
   if (parentKey in cache) {
     return cache[parentKey];
   }
-  const _key = class {
+  const _key = class extends Base {
     get parentKey(): string {
       return parentKey;
     }
