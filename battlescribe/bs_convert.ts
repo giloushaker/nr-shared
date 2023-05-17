@@ -1,12 +1,25 @@
 import { ZipEntry, unzip } from "unzipit";
-import { X2jOptionsOptional, XMLParser } from "fast-xml-parser";
+import {
+  X2jOptionsOptional,
+  XMLParser,
+  XMLBuilder,
+  XmlBuilderOptions,
+  XmlBuilderOptionsOptional,
+} from "fast-xml-parser";
 import {
   fix_xml_object,
+  forEachValueRecursive,
   hashFnv32a,
+  isObject,
   removePrefix,
   removeSuffix,
   to_snake_case,
 } from "./bs_helpers";
+import { rootToJson } from "./bs_main";
+import { build } from "nuxt";
+import { buildErrorMessage } from "./bs_error";
+import { getData } from "../blossomJs/belt_Map";
+import { getDataObject } from "./bs_system";
 
 export function xmlToJson(data: string) {
   try {
@@ -124,4 +137,62 @@ export async function convertToJson(data: any, extension: string) {
     default:
       throw new Error("Extension not supported " + extension);
   }
+}
+const typeMap = {} as Record<string, string>;
+function toSingle(key: string) {
+  if (key in typeMap) {
+    return typeMap[key];
+  }
+  if (key.endsWith("ies")) {
+    return key.substr(0, key.length - 3) + "y";
+  }
+  if (key.endsWith("s")) {
+    return key.substr(0, key.length - 1);
+  } else {
+    throw Error(`Couldn't convert "${key}" to non-plural (modify toSingle)`);
+  }
+}
+const skipKeys = new Set(["?xml", "readme", "comment", "$text", "_"]);
+function renestChilds(obj: any) {
+  for (const [key, value] of Object.entries(obj)) {
+    if (Array.isArray(value) && !skipKeys.has(key)) {
+      obj[key] = [{ [toSingle(key)]: value }];
+    } else if (key in typeMap) {
+      obj[key] = [value];
+    }
+  }
+}
+function putAttributesIn$(first: any) {
+  forEachValueRecursive(first, (current) => {
+    if (typeof current === "object") {
+      renestChilds(current);
+    }
+  });
+  forEachValueRecursive(first, (current) => {
+    if (typeof current === "object") {
+      for (const [key, value] of Object.entries(current)) {
+        if (Array.isArray(value)) continue;
+        if (skipKeys.has(key)) continue;
+        if (isObject(value)) continue;
+        current[`_${key}`] = value;
+        delete current[key];
+      }
+    }
+  });
+  return first;
+}
+
+export function convertToXml(data: any) {
+  const json = JSON.parse(rootToJson(getDataObject(data), {}));
+  putAttributesIn$(getDataObject(json));
+  const options: XmlBuilderOptionsOptional = {
+    textNodeName: "$text",
+    format: true,
+    attributeNamePrefix: "_",
+    ignoreAttributes: false,
+    suppressBooleanAttributes: false,
+  };
+  const builder = new XMLBuilder(options);
+  const xml = builder.build(json);
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n` + xml;
 }

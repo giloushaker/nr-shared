@@ -953,6 +953,7 @@ const badKeys = new Set([
   "extra_constraints",
   "costIndex",
   "imports",
+  "importRootEntries",
   "index",
   "catalogue",
   "gameSystem",
@@ -972,17 +973,20 @@ const badKeys = new Set([
   "links",
   "showInEditor",
 ]);
-export function rootToJson(data: Catalogue, raw: BSIData): string {
+export function rootToJson(
+  data: Catalogue | Record<string, any>,
+  raw: BSIData
+): string {
   const root: any = {
     ...raw,
     catalogue: undefined,
     gameSystem: undefined,
   };
   const copy = { ...data }; // ensure there is no recursivity by making sure only this copy is put in the json
-  if (data.isGameSystem()) {
+  if (!data.gameSystemId) {
     root.gameSystem = copy;
     delete root.catalogue;
-  } else if (data.isCatalogue()) {
+  } else {
     root.catalogue = copy;
     delete root.gameSystem;
   }
