@@ -320,7 +320,9 @@ export function getName(obj: any): string {
     case "categoryEntries":
     case "sharedInfoGroups":
     case "infoGroups":
-      return (obj as Base).getName();
+      if (!(obj as EditorBase)?.links?.length) return obj.getName();
+      const s = obj.links.length === 1 ? "" : "s";
+      return `${obj.getName()} (${obj.links.length} ref${s})`;
 
     case "catalogueLinks":
     case "publications":
