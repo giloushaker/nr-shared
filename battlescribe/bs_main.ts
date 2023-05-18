@@ -397,7 +397,7 @@ export class Base implements BSModifierBase {
         if (isObject(value)) {
           if (Array.isArray(value)) {
             if (value.length && isObject(value[0])) {
-              for (let i = value.length; i--; ) {
+              for (let i = value.length; i--;) {
                 const cur = value[i];
                 callbackfn(cur, current);
                 stack.push(cur);
@@ -429,7 +429,7 @@ export class Base implements BSModifierBase {
         if (isObject(value)) {
           if (Array.isArray(value)) {
             if (value.length && isObject(value[0])) {
-              for (let i = value.length; i--; ) {
+              for (let i = value.length; i--;) {
                 const cur = value[i];
                 callbackfn(cur, current);
                 stack.push(cur);
@@ -655,7 +655,7 @@ export class Link extends Base {
     return this.target.name || this.name;
   }
   getParent(): Base | undefined {
-    return (this as EditorBase).parent;
+    return (this as any as EditorBase).parent;
   }
   getPrimaryCategory(): string {
     for (const categoryLink of this.categoryLinks || []) {

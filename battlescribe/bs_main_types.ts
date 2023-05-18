@@ -103,7 +103,7 @@ export function setPrototype<Key extends string>(
   if (newProto) {
     Object.setPrototypeOf(obj, newProto);
     if ((newProto as any).post_init) obj.post_init();
-    if (globalThis.isEditor) {
+    if ((globalThis as any).isEditor) {
       setKeyInfo(obj.keyInfoCache || keyInfoCache, key, obj);
     }
   }
@@ -121,7 +121,7 @@ export function setPrototypeRecursive(obj: any): void {
         //  If Array: Set Prototypes on each object inside array (assumes all objects if first is)
         if (Array.isArray(value)) {
           if (value.length && isObject(value[0])) {
-            for (let i = value.length; i--; ) {
+            for (let i = value.length; i--;) {
               const cur = value[i];
               if (isDefaultObject(cur)) {
                 setPrototype(cur, key);

@@ -342,12 +342,11 @@ export function getName(obj: any): string {
     case "repeats":
       const repeat = obj as BSIRepeat;
       const parent = findSelfOrParentWhere(obj, (o) => o.id)!;
-      return `Repeat ${repeat.repeats} times for every ${
-        repeat.value
-      } ${fieldToText(parent, repeat.field)} in ${fieldToText(
-        parent,
-        repeat.scope
-      )} of ${repeat.childId ? fieldToText(parent, repeat.childId) : " any"}`;
+      return `Repeat ${repeat.repeats} times for every ${repeat.value
+        } ${fieldToText(parent, repeat.field)} in ${fieldToText(
+          parent,
+          repeat.scope
+        )} of ${repeat.childId ? fieldToText(parent, repeat.childId) : " any"}`;
     case "conditions":
       return conditionToString(
         findSelfOrParentWhere(obj, (o) => o.id),
@@ -360,9 +359,8 @@ export function getName(obj: any): string {
       );
 
     case "modifierGroups":
-      return `Modifier Group (${
-        obj.modifiers?.length || 0 + obj.modifierGroup?.length || 0
-      })`;
+      return `Modifier Group (${obj.modifiers?.length || 0 + obj.modifierGroup?.length || 0
+        })`;
     case "conditionGroups":
       return `(${obj.type})`;
 
@@ -439,12 +437,12 @@ export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
     const parent = entry.parent as any;
     result.push({
       key: entry.parentKey,
-      index: parent[entry.parentKey].findIndex((o: EditorBase) => o === entry),
+      index: parent[(entry as any).parentKey].findIndex((o: EditorBase) => o === entry),
     });
     entry = entry.parent;
   }
   result.reverse();
-  return result;
+  return result as any;
 }
 /**
  *  Sets an entry at the specified path

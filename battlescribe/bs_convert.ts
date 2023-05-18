@@ -1,9 +1,8 @@
-import { ZipEntry, unzip } from "unzipit";
+import { unzip } from "unzipit";
 import {
   X2jOptionsOptional,
   XMLParser,
   XMLBuilder,
-  XmlBuilderOptions,
   XmlBuilderOptionsOptional,
 } from "fast-xml-parser";
 import {
@@ -12,20 +11,16 @@ import {
   hashFnv32a,
   isObject,
   removePrefix,
-  removeSuffix,
   to_snake_case,
 } from "./bs_helpers";
 import { rootToJson } from "./bs_main";
-import { build } from "nuxt";
-import { buildErrorMessage } from "./bs_error";
-import { getData } from "../blossomJs/belt_Map";
 import { getDataObject } from "./bs_system";
 
 export function xmlToJson(data: string) {
   try {
     // remove self-closing tags (<image />)
     data = data.replace(/<[a-zA-Z0-9]+ *[/]>/g, "");
-  } catch {}
+  } catch { }
   const options: X2jOptionsOptional = {
     ignoreAttributes: false,
     attributeNamePrefix: "",
@@ -183,7 +178,7 @@ function putAttributesIn$(first: any) {
 }
 
 export function convertToXml(data: any) {
-  const json = JSON.parse(rootToJson(getDataObject(data), {}));
+  const json = JSON.parse(rootToJson(getDataObject(data), {} as any));
   putAttributesIn$(getDataObject(json));
   const options: XmlBuilderOptionsOptional = {
     textNodeName: "$text",

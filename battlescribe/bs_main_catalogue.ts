@@ -44,8 +44,8 @@ export interface EditorBase extends Base {
   parent?: EditorBase;
   links?: EditorBase[];
   catalogue: Catalogue;
-  get parentKey(): string;
-  get editorTypeName(): string;
+  parentKey(): string;
+  editorTypeName(): string;
 }
 export class CatalogueLink extends Base {
   targetId!: string;
@@ -450,8 +450,7 @@ export class Catalogue extends Base {
           case "primary-category":
           case "primary-catalogue":
             console.warn(
-              `unsupported scope:${
-                constraint.scope
+              `unsupported scope:${constraint.scope
               } from category ${category.getName()} ${category.getId()}`
             );
             break;
@@ -476,8 +475,7 @@ export class Catalogue extends Base {
               break;
             }
             console.warn(
-              `unsupported scope:${
-                constraint.scope
+              `unsupported scope:${constraint.scope
               } from category ${category.getName()} ${category.getId()}`
             );
 
@@ -536,8 +534,7 @@ export class Catalogue extends Base {
               case "primary-category":
               case "primary-catalogue":
                 console.warn(
-                  `unsupported scope:${
-                    constraint.scope
+                  `unsupported scope:${constraint.scope
                   } from ${node.getName()} ${node.id}`
                 );
                 break;
@@ -561,8 +558,7 @@ export class Catalogue extends Base {
                   break;
                 }
                 console.warn(
-                  `unsupported scope:${
-                    constraint.scope
+                  `unsupported scope:${constraint.scope
                   } from ${node.getName()}${node.id}`
                 );
                 break;
