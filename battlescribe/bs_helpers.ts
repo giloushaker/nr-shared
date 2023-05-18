@@ -107,7 +107,7 @@ export function groupBy<V>(
   return result;
 }
 let gitSha1: (content: string | Buffer | ArrayBuffer) => Promise<string>;
-if (process.server) {
+if (typeof window === 'undefined') {
   gitSha1 = (async (content: string | Buffer) => {
     const gitstring = `blob ${content.length}\0`;
     const shasum = require("crypto").createHash("sha1");
