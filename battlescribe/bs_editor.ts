@@ -411,6 +411,7 @@ export function onAddEntry(entries: EditorBase[] | EditorBase, catalogue: Catalo
 export interface EntryPathEntry {
   key: string;
   index: number;
+  id: string;
 }
 
 export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
@@ -420,6 +421,7 @@ export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
     result.push({
       key: entry.parentKey,
       index: parent[(entry as any).parentKey].findIndex((o: EditorBase) => o === entry),
+      id: entry.id,
     });
     entry = entry.parent;
   }
