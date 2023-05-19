@@ -1,4 +1,12 @@
-import { groupBy, sortBy, clone, addObj, escapeRegex, textSearchRegex, generateBattlescribeId } from "./bs_helpers";
+import {
+  groupBy,
+  sortBy,
+  clone,
+  addObj,
+  escapeRegex,
+  textSearchRegex,
+  generateBattlescribeId,
+} from "./bs_helpers";
 import {
   Base,
   UNCATEGORIZED_ID,
@@ -372,7 +380,10 @@ export class Catalogue extends Base {
       childs: uncategorizedUnits,
       catalogue: this,
     };
-    result[UNCATEGORIZED_ID] = Object.setPrototypeOf(uncategorized, Category.prototype);
+    result[UNCATEGORIZED_ID] = Object.setPrototypeOf(
+      uncategorized,
+      Category.prototype
+    );
     const illegal = {
       name: "Illegal Units",
       id: ILLEGAL_ID,
@@ -411,7 +422,10 @@ export class Catalogue extends Base {
     const force_constraints = [] as Array<BSIExtraConstraint>;
     const by_id_constraints = {} as Record<string, Array<BSIExtraConstraint>>;
     const force_or_category_ids = new Set<string>();
-    const by_category_force_constraints = {} as Record<string, Array<BSIExtraConstraint>>;
+    const by_category_force_constraints = {} as Record<
+      string,
+      Array<BSIExtraConstraint>
+    >;
 
     function localAddBoundCategoryConstraints(
       catalogue: Catalogue,
@@ -436,24 +450,35 @@ export class Catalogue extends Base {
           case "primary-category":
           case "primary-catalogue":
             console.warn(
-              `unsupported scope:${constraint.scope} from category ${category.getName()} ${category.getId()}`
+              `unsupported scope:${
+                constraint.scope
+              } from category ${category.getName()} ${category.getId()}`
             );
             break;
           default:
             if (force_or_category_ids.has(constraint.scope)) {
-              addObj(by_id_constraints, constraint.scope, target.getBoundConstraint(constraint));
+              addObj(
+                by_id_constraints,
+                constraint.scope,
+                target.getBoundConstraint(constraint)
+              );
               break;
             }
             const fromIndex = catalogue.index[constraint.scope];
             if (fromIndex) {
-              const from_id_extra_constraints = fromIndex.extra_constraints || [];
-              from_id_extra_constraints.push(category.getBoundConstraint(constraint));
+              const from_id_extra_constraints =
+                fromIndex.extra_constraints || [];
+              from_id_extra_constraints.push(
+                category.getBoundConstraint(constraint)
+              );
 
               fromIndex.extra_constraints = from_id_extra_constraints;
               break;
             }
             console.warn(
-              `unsupported scope:${constraint.scope} from category ${category.getName()} ${category.getId()}`
+              `unsupported scope:${
+                constraint.scope
+              } from category ${category.getName()} ${category.getId()}`
             );
 
             break;
@@ -477,7 +502,11 @@ export class Catalogue extends Base {
       force_or_category_ids.add(category.id);
     }
     for (const category of this.categories) {
-      localAddBoundCategoryConstraints(this, category, category.constraintsIterator());
+      localAddBoundCategoryConstraints(
+        this,
+        category,
+        category.constraintsIterator()
+      );
       const force_extra_constraints = {} as Record<string, BSIExtraConstraint>;
       category.forEachNodeCb((node) => {
         if (node.isForce()) return;
@@ -500,31 +529,49 @@ export class Catalogue extends Base {
                 roster_constraints[hash] = node.getBoundConstraint(constraint);
                 break;
               case "force":
-                force_extra_constraints[hash] = node.getBoundConstraint(constraint);
+                force_extra_constraints[hash] =
+                  node.getBoundConstraint(constraint);
                 break;
               case "primary-category":
               case "primary-catalogue":
-                console.warn(`unsupported scope:${constraint.scope} from ${node.getName()} ${node.id}`);
+                console.warn(
+                  `unsupported scope:${
+                    constraint.scope
+                  } from ${node.getName()} ${node.id}`
+                );
                 break;
               default:
                 if (force_or_category_ids.has(constraint.scope)) {
-                  addObj(by_id_constraints, constraint.scope, node.getBoundConstraint(constraint));
+                  addObj(
+                    by_id_constraints,
+                    constraint.scope,
+                    node.getBoundConstraint(constraint)
+                  );
                   break;
                 }
                 const fromIndex = this.index[constraint.scope];
                 if (fromIndex) {
-                  const from_id_extra_constraints = fromIndex.extra_constraints || [];
-                  from_id_extra_constraints.push(node.getBoundConstraint(constraint));
+                  const from_id_extra_constraints =
+                    fromIndex.extra_constraints || [];
+                  from_id_extra_constraints.push(
+                    node.getBoundConstraint(constraint)
+                  );
                   fromIndex.extra_constraints = from_id_extra_constraints;
                   break;
                 }
-                console.warn(`unsupported scope:${constraint.scope} from ${node.getName()}${node.id}`);
+                console.warn(
+                  `unsupported scope:${
+                    constraint.scope
+                  } from ${node.getName()}${node.id}`
+                );
                 break;
             }
           }
         }
       });
-      by_category_force_constraints[category.getId()] = Object.values(force_extra_constraints);
+      by_category_force_constraints[category.getId()] = Object.values(
+        force_extra_constraints
+      );
     }
 
     for (const force of this.forcesIteratorRecursive()) {
@@ -538,7 +585,9 @@ export class Catalogue extends Base {
       }
       for (const category of force.categories) {
         if (category.getId() in by_category_force_constraints) {
-          force_extra_constraints.push(...by_category_force_constraints[category.getId()]);
+          force_extra_constraints.push(
+            ...by_category_force_constraints[category.getId()]
+          );
         }
       }
       if (force_extra_constraints.length) {
@@ -576,7 +625,8 @@ export class Catalogue extends Base {
   resolveAllLinks(imports: Catalogue[]) {
     const catalogue = this as Catalogue;
     const unresolvedLinks: Array<Link> = [];
-    const unresolvedPublications: Array<BSIInfoLink | BSIRule | BSIProfile> = [];
+    const unresolvedPublications: Array<BSIInfoLink | BSIRule | BSIProfile> =
+      [];
     const unresolvedChildIds: Array<BSICondition> = [];
     const parents: Array<Base> = [];
     const indexes = [];
@@ -621,6 +671,9 @@ export class Catalogue extends Base {
     }
     return link.target !== undefined;
   }
+
+  updateCondition(condition: (BSICondition | BSIConstraint) & EditorBase) {}
+
   unlinkLink(link: Link & EditorBase) {
     if (link.target) {
       const target = link.target as EditorBase;
@@ -637,7 +690,11 @@ export class Catalogue extends Base {
  * @param unresolved The links to resolve
  * @param indexes Array of indexes which match an id to a node
  */
-export function resolveLinks(unresolved: Link[] = [], indexes: Record<string, Base>[], parents: Base[]) {
+export function resolveLinks(
+  unresolved: Link[] = [],
+  indexes: Record<string, Base>[],
+  parents: Base[]
+) {
   const length = unresolved.length;
   const resolved = [];
 
@@ -680,7 +737,9 @@ export function resolveLinks(unresolved: Link[] = [], indexes: Record<string, Ba
   // Delete unresolved links
   if (unresolved.length) {
     console.warn(`${length - unresolved.length}/${length} links resolved`);
-    console.warn(`unresolved links: ${unresolved.map((o) => `${o.id} -> ${o.targetId}`)}`);
+    console.warn(
+      `unresolved links: ${unresolved.map((o) => `${o.id} -> ${o.targetId}`)}`
+    );
     for (let i = 0; i < unresolved.length; i++) {
       const link = unresolved[i];
       const parent = parents[i];
@@ -721,7 +780,10 @@ export function resolvePublications(
     nextUnresolved.push(current);
   }
 }
-export function resolveChildIds(unresolvedChildIds: BSICondition[] = [], indexes: Record<string, Base>[]) {
+export function resolveChildIds(
+  unresolvedChildIds: BSICondition[] = [],
+  indexes: Record<string, Base>[]
+) {
   for (const current of unresolvedChildIds) {
     // Find the target, stopping at first found
     const id = current.childId!;
