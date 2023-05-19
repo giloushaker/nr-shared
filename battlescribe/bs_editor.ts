@@ -1,10 +1,6 @@
 import { Base, Link } from "./bs_main";
 import { Catalogue, EditorBase } from "./bs_main_catalogue";
-import {
-  conditionToString,
-  fieldToText,
-  modifierToString,
-} from "./bs_modifiers";
+import { conditionToString, fieldToText, modifierToString } from "./bs_modifiers";
 import {
   BSICondition,
   BSIConditionGroup,
@@ -145,6 +141,7 @@ export type ItemTypeNames =
   | "category"
   | "force"
   | "entryLink"
+  | "entryGroupLink"
   | "categoryLink"
   | "catalogueLink"
   | "profile"
@@ -199,10 +196,7 @@ export type ItemKeys =
   | "repeats"
   | "conditionGroups";
 
-export function findSelfOrParentWhere<T extends hasParent<T>>(
-  self: T,
-  fn: (node: T) => boolean
-): T | undefined {
+export function findSelfOrParentWhere<T extends hasParent<T>>(self: T, fn: (node: T) => boolean): T | undefined {
   let current = self as T | undefined;
   while (current && !Object.is(current, current.parent)) {
     if (fn(current)) return current;
@@ -210,10 +204,7 @@ export function findSelfOrParentWhere<T extends hasParent<T>>(
   }
   return undefined;
 }
-export function findParentWhere<T extends hasParent<T>>(
-  self: T,
-  fn: (node: T) => boolean
-): T | undefined {
+export function findParentWhere<T extends hasParent<T>>(self: T, fn: (node: T) => boolean): T | undefined {
   let current = self.parent;
   while (current && !Object.is(current, current.parent)) {
     if (fn(current)) return current;
@@ -221,10 +212,7 @@ export function findParentWhere<T extends hasParent<T>>(
   }
   return undefined;
 }
-export function forEachParent<T extends hasParent<T>>(
-  self: T,
-  cb: (node: T) => unknown
-) {
+export function forEachParent<T extends hasParent<T>>(self: T, cb: (node: T) => unknown) {
   let current = self.parent;
   while (current) {
     if (!current || cb(current) === false) {
@@ -246,7 +234,7 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
       return obj?.targetId ? "entryLink" : "selectionEntryGroup";
 
     case "entryLinks":
-      return "entryLink";
+      return ("e" + `${obj.type}Link`.replace(/selection/, "").substring(1)) as ItemTypeNames;
     case "forceEntries":
       return "force";
     case "categoryEntries":
@@ -342,11 +330,10 @@ export function getName(obj: any): string {
     case "repeats":
       const repeat = obj as BSIRepeat;
       const parent = findSelfOrParentWhere(obj, (o) => o.id)!;
-      return `Repeat ${repeat.repeats} times for every ${repeat.value
-        } ${fieldToText(parent, repeat.field)} in ${fieldToText(
-          parent,
-          repeat.scope
-        )} of ${repeat.childId ? fieldToText(parent, repeat.childId) : " any"}`;
+      return `Repeat ${repeat.repeats} times for every ${repeat.value} ${fieldToText(
+        parent,
+        repeat.field
+      )} in ${fieldToText(parent, repeat.scope)} of ${repeat.childId ? fieldToText(parent, repeat.childId) : " any"}`;
     case "conditions":
       return conditionToString(
         findSelfOrParentWhere(obj, (o) => o.id),
@@ -359,8 +346,7 @@ export function getName(obj: any): string {
       );
 
     case "modifierGroups":
-      return `Modifier Group (${obj.modifiers?.length || 0 + obj.modifierGroup?.length || 0
-        })`;
+      return `Modifier Group (${obj.modifiers?.length || 0 + obj.modifierGroup?.length || 0})`;
     case "conditionGroups":
       return `(${obj.type})`;
 
@@ -409,11 +395,7 @@ export function onRemoveEntry(removed: EditorBase) {
   });
 }
 
-export function onAddEntry(
-  entries: EditorBase[] | EditorBase,
-  catalogue: Catalogue,
-  parent?: EditorBase
-) {
+export function onAddEntry(entries: EditorBase[] | EditorBase, catalogue: Catalogue, parent?: EditorBase) {
   for (const removedEntry of Array.isArray(entries) ? entries : [entries]) {
     forEachEntryRecursive(removedEntry, (entry, key, _parent) => {
       entry.parent = _parent || parent;
@@ -448,11 +430,7 @@ export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
  *  Sets an entry at the specified path
  *  returns the parent
  */
-export function setAtEntryPath(
-  catalogue: Catalogue,
-  path: EntryPathEntry[],
-  entry: EditorBase
-) {
+export function setAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[], entry: EditorBase) {
   let current = catalogue as any;
   // resolve path up until the last node
   for (let i = 0; i < path.length - 1; i++) {
@@ -463,10 +441,7 @@ export function setAtEntryPath(
   current[lastNode.key].splice(lastNode.index, 0, entry);
   return current;
 }
-export function popAtEntryPath(
-  catalogue: Catalogue,
-  path: EntryPathEntry[]
-): EditorBase {
+export function popAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[]): EditorBase {
   let current = catalogue as any;
   // resolve path up until the last node
   for (let i = 0; i < path.length - 1; i++) {
