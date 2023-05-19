@@ -20,7 +20,7 @@ export function xmlToJson(data: string) {
   try {
     // remove self-closing tags (<image />)
     data = data.replace(/<[a-zA-Z0-9]+ *[/]>/g, "");
-  } catch { }
+  } catch {}
   const options: X2jOptionsOptional = {
     ignoreAttributes: false,
     attributeNamePrefix: "",
@@ -147,7 +147,14 @@ function toSingle(key: string) {
     throw Error(`Couldn't convert "${key}" to non-plural (modify toSingle)`);
   }
 }
-const skipKeys = new Set(["?xml", "readme", "comment", "$text", "_"]);
+const skipKeys = new Set([
+  "?xml",
+  "readme",
+  "comment",
+  "$text",
+  "description",
+  "_",
+]);
 function renestChilds(obj: any) {
   for (const [key, value] of Object.entries(obj)) {
     if (Array.isArray(value) && !skipKeys.has(key)) {
