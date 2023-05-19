@@ -140,7 +140,7 @@ export class BsBook implements IArmyBook {
                 getAvailableUnits() {
                   return this.units;
                 },
-                units: category.units?.map((unit) => {
+                units: category.units.map((unit) => {
                   return {
                     id: unit.id,
                     uid: unit.getName(),
