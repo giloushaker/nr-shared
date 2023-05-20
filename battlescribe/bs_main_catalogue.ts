@@ -174,7 +174,7 @@ export class Catalogue extends Base {
     if (this.forces) {
       for (const force of this.forces) {
         yield force;
-        yield* force.forcesIterator();
+        yield* force.forcesIteratorRecursive();
       }
     }
   }
@@ -419,7 +419,6 @@ export class Catalogue extends Base {
       constraints: Iterable<BSIConstraint>
     ) {
       const target = category.target || category;
-
       for (const constraint of constraints) {
         const hash = `${constraint.id}::${category.id}`;
 
@@ -431,7 +430,6 @@ export class Catalogue extends Base {
             break;
           case "force":
             force_constraints.push(category.getBoundConstraint(constraint));
-
             break;
           case "primary-category":
           case "primary-catalogue":
@@ -448,7 +446,6 @@ export class Catalogue extends Base {
             if (fromIndex) {
               const from_id_extra_constraints = fromIndex.extra_constraints || [];
               from_id_extra_constraints.push(category.getBoundConstraint(constraint));
-
               fromIndex.extra_constraints = from_id_extra_constraints;
               break;
             }
@@ -487,7 +484,7 @@ export class Catalogue extends Base {
         if (!node.isGroup() && !node.extra_constraints) {
           node.extra_constraints = node.getChildBoundConstraints(true);
         }
-        if (node.isLink()) return;
+        if (node.isCategory() && node.isLink()) return;
         if (!node.constraints && !node.target?.constraints) return;
 
         for (const constraint of node.constraintsIterator()) {
@@ -588,7 +585,7 @@ export class Catalogue extends Base {
         if ((cur as any).publicationId) {
           unresolvedPublications.push(cur as any);
         }
-        if (cur instanceof Link) {
+        if (cur.isLink()) {
           unresolvedLinks.push(cur);
           parents.push(parent);
         }
