@@ -36,8 +36,12 @@ export interface EditorBase extends Base {
   parent?: EditorBase;
   links?: EditorBase[];
   catalogue: Catalogue;
+
   parentKey(): string;
   editorTypeName(): string;
+
+  showInEditor?: boolean;
+  openInEditor?: boolean;
 }
 export class CatalogueLink extends Base {
   targetId!: string;
@@ -203,7 +207,7 @@ export class Catalogue extends Base {
     callbackfn(this);
     if (this.childs) for (const e of this.childs) e.forEachNode(callbackfn);
   }
-  *selectionsIterator(): Generator<Base, void, undefined> {
+  *selectionsIterator(): Iterable<Base> {
     yield* this.forces;
   }
   // findOptionById(id: string) {
@@ -618,6 +622,9 @@ export class Catalogue extends Base {
     }
     return link.target !== undefined;
   }
+
+  updateCondition(condition: (BSICondition | BSIConstraint) & EditorBase) {}
+
   unlinkLink(link: Link & EditorBase) {
     if (link.target) {
       const target = link.target as EditorBase;

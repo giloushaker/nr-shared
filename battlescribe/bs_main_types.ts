@@ -1,12 +1,4 @@
-import {
-  Category,
-  Force,
-  Link,
-  Base,
-  Group,
-  CategoryLink,
-  Rule,
-} from "./bs_main";
+import { Category, Force, Link, Base, Group, CategoryLink, Rule } from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
 import { getTypeName } from "./bs_editor";
@@ -22,11 +14,7 @@ export function noObserve(): object {
 }
 
 const keyInfoCache = {} as Record<string, any>;
-function getKeyInfoClass(
-  cache: Record<string, any>,
-  parentKey: string,
-  obj: any
-): any {
+function getKeyInfoClass(cache: Record<string, any>, parentKey: string, obj: any): any {
   if (parentKey in cache) {
     return cache[parentKey];
   }
@@ -121,7 +109,7 @@ export function setPrototypeRecursive(obj: any): void {
         //  If Array: Set Prototypes on each object inside array (assumes all objects if first is)
         if (Array.isArray(value)) {
           if (value.length && isObject(value[0])) {
-            for (let i = value.length; i--;) {
+            for (let i = value.length; i--; ) {
               const cur = value[i];
               if (isDefaultObject(cur)) {
                 setPrototype(cur, key);
