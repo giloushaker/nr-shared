@@ -364,7 +364,7 @@ export class Catalogue extends Base {
       const foundUnits = units[copied.id] || [];
       copied.units = foundUnits;
       copied.childs = foundUnits;
-      this.index[copied.id] = copied;
+      this.index[category.id] = category;
       result[copied.id] = copied;
     }
     const uncategorizedUnits = units[UNCATEGORIZED_ID] || [];
