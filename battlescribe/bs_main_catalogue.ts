@@ -37,11 +37,11 @@ export interface EditorBase extends Base {
   links?: EditorBase[];
   catalogue: Catalogue;
 
-  parentKey(): string;
-  editorTypeName(): string;
+  parentKey: string;
+  editorTypeName: string;
 
   showInEditor?: boolean;
-  openInEditor?: boolean;
+  showChildsInEditor?: boolean;
 }
 export class CatalogueLink extends Base {
   targetId!: string;
