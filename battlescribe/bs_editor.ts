@@ -446,12 +446,15 @@ export function setAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[], ent
 export function popAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[]): EditorBase {
   let current = catalogue as any;
   // resolve path up until the last node
-  for (let i = 0; i < path.length - 1; i++) {
-    const node = path[i];
+  const lastNode = path[path.length - 1];
+  for (const node of path) {
+    if (node === lastNode) continue;
     current = current[node.key][node.index];
   }
-  const lastNode = path[path.length - 1];
-  return current[lastNode.key].splice(lastNode.index, 1)[0];
+  const result = current[lastNode.key].splice(lastNode.index, 1)[0];
+  if (!result) throw new Error("popAtEntryPath failed");
+
+  return result;
 }
 export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {
   forEachEntryRecursive(entry, (entry, key, _parent) => {
