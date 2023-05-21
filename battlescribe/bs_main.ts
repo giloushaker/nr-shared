@@ -930,6 +930,7 @@ const badKeys = new Set([
   "parent",
   "links",
   "showInEditor",
+  "showChildsInEditor",
 ]);
 export function rootToJson(data: Catalogue | Record<string, any>, raw: BSIData): string {
   const root: any = {
