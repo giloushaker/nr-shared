@@ -222,6 +222,73 @@ export function forEachParent<T extends hasParent<T>>(self: T, cb: (node: T) => 
     current = current.parent;
   }
 }
+export function getTypeLabel(key: string, obj?: any): string {
+  switch (key) {
+    case "selectionEntry":
+      return "Entry";
+    case "selectionEntryGroup":
+      return "Group";
+    case "selectionEntryLink":
+      return "Entry (link)";
+    case "selectionEntryGroupLink":
+      return "Group (link)";
+
+    case "force":
+      return "Force";
+    case "category":
+      return "Category";
+    case "categoryLink":
+      return "Category (link)";
+
+    case "catalogueLink":
+      return "Catalogue (link)";
+    case "publication":
+      return "Publication";
+    case "costType":
+      return "Cost Type";
+    case "costs":
+      return "Cost";
+
+    case "profileType":
+      return "Profile Type";
+    case "profile":
+      return "Profile";
+    case "rule":
+      return "Rule";
+    case "infoGroup":
+      return "Info Group";
+    case "profileLink":
+      return "Profile";
+    case "ruleLink":
+      return "Rule (link)";
+    case "infoGroupLink":
+      return "Info Group (link)";
+    case "characteristic":
+      return "Characteristic";
+    case "characteristicType":
+      return "Characteristic Type";
+
+    case "constraint":
+      return "Constraint";
+    case "condition":
+      return "Condition";
+    case "modifier":
+      return "Modifier";
+    case "modifierGroup":
+      return "Modifier Group";
+    case "repeat":
+      return "Repeat";
+    case "conditionGroup":
+      return "Condition Group";
+    case "catalogue":
+      return "Catalogue";
+    case "gameSystem":
+      return "Game System";
+    default:
+      console.warn("unknown getTypeLabel key", key);
+      return key as any;
+  }
+}
 export function getTypeName(key: string, obj?: any): ItemTypeNames {
   switch (key) {
     case "selectionEntries":
