@@ -620,6 +620,15 @@ export class Catalogue extends Base {
       if (!target.links) target.links = [];
       target.links.push(link);
     }
+    if (link.target == null) {
+    } else {
+      const targetType = (link.target as EditorBase).editorTypeName;
+      if (targetType == "category") {
+        delete link.type;
+      } else {
+        link.type = targetType;
+      }
+    }
     return link.target !== undefined;
   }
 

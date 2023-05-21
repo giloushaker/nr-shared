@@ -617,7 +617,7 @@ export class Link extends Base {
     yield* super.infoProfilesIterator();
   }
   getName(): string {
-    return this.target.name || this.name;
+    return this.target?.name || this.name;
   }
   getParent(): Base | undefined {
     return (this as any as EditorBase).parent;

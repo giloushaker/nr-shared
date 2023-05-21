@@ -98,7 +98,7 @@ export const categories: CategoryEntry[] = [
   {
     type: "sharedSelectionEntries",
     name: "Shared Selection Entries",
-    icon: "entryLink.png",
+    icon: "selectionEntryLink.png",
   },
   {
     type: "sharedSelectionEntryGroups",
@@ -159,7 +159,8 @@ export type ItemTypeNames =
   | "repeat"
   | "conditionGroup"
   | "cost"
-  | "costType";
+  | "costType"
+  | "link";
 
 export type ItemKeys =
   // Entries
@@ -234,7 +235,7 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
       return obj?.targetId ? "entryLink" : "selectionEntryGroup";
 
     case "entryLinks":
-      return ("e" + `${obj.type}Link`.replace(/selection/, "").substring(1)) as ItemTypeNames;
+      return obj.target ? ((obj.target.editorTypeName + "Link") as any) : "link";
     case "forceEntries":
       return "force";
     case "categoryEntries":
@@ -269,7 +270,7 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
       return "infoGroup";
 
     case "infoLinks":
-      return "infoLink";
+      return obj ? (`${obj.type}Link` as ItemTypeNames) : "infoLink";
     case "infoGroups":
       return "infoGroup";
 
