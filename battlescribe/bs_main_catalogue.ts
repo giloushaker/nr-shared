@@ -95,7 +95,7 @@ export class Catalogue extends Base {
   lastUpdated: string | undefined;
   costIndex!: Record<string, BSICostType>;
 
-  process() {
+  process(loadOptions?: any) {
     if (this.loaded) return;
     this.loaded = true;
     const units = this.generateUnits();
@@ -133,6 +133,7 @@ export class Catalogue extends Base {
   processForEditor() {
     if (this.loaded_editor) return;
     this.loaded_editor = true;
+    this.generateCostIndex();
 
     this.imports.forEach((imported) => {
       addObj(imported as any, "links", this);
