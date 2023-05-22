@@ -35,7 +35,6 @@ export type ItemTypes = (
 };
 export const possibleChildren: ItemKeys[] = [
   // Catalogue stuff
-  "catalogueLinks",
   "publications",
   "costTypes",
   "profileTypes",
@@ -50,7 +49,7 @@ export const possibleChildren: ItemKeys[] = [
 
   // Children
   "categoryEntries",
-  "categoryLinks",
+  // "categoryLinks", BS does not show category links
   "forceEntries",
   "selectionEntries",
   "selectionEntryGroups",
@@ -302,7 +301,7 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
       return obj?.targetId ? "entryLink" : "selectionEntryGroup";
 
     case "entryLinks":
-      return obj.target ? ((obj.target.editorTypeName + "Link") as any) : "link";
+      return obj?.target ? ((obj.target.editorTypeName + "Link") as any) : "link";
     case "forceEntries":
       return "force";
     case "categoryEntries":
@@ -337,7 +336,7 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
       return "infoGroup";
 
     case "infoLinks":
-      return obj ? (`${obj.type}Link` as ItemTypeNames) : "infoLink";
+      return obj ? (`${obj.type || "info"}Link` as ItemTypeNames) : "infoLink";
     case "infoGroups":
       return "infoGroup";
 
@@ -362,7 +361,7 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
   }
 }
 
-export function getName(obj: any): string {
+export function getName(obj: any, html = false): string {
   const type = obj.parentKey;
   switch (type) {
     case "selectionEntries":
@@ -376,9 +375,9 @@ export function getName(obj: any): string {
     case "categoryEntries":
     case "sharedInfoGroups":
     case "infoGroups":
-      if (!(obj as EditorBase)?.links?.length) return obj.getName();
+      if (!(obj as EditorBase)?.links?.length) return obj.name;
       const s = obj.links.length === 1 ? "" : "s";
-      return `${obj.getName()} (${obj.links.length} ref${s})`;
+      return `${obj.name} (${obj.links.length} ref${s})`;
 
     case "catalogueLinks":
     case "publications":
@@ -392,7 +391,9 @@ export function getName(obj: any): string {
     case "sharedProfiles":
     case "profiles":
       const profile = obj as BSIProfile;
-      return `${profile.typeName}: ${profile.name}`;
+      return (
+        `${profile.name}` + (html && profile.typeName ? ` <span class='gray italic'>(${profile.typeName})</span>` : "")
+      );
     case "modifiers":
       return modifierToString(findSelfOrParentWhere(obj, (o) => o.id)!, obj);
     case "repeats":
