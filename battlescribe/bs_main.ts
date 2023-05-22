@@ -984,8 +984,6 @@ export const goodJsonKeys = new Set([
   "gameSystemId",
   "gameSystemRevision",
   "xmlns",
-  "catalogue",
-  "gameSystem",
   "",
 ]);
 export function rootToJson(data: Catalogue | Record<string, any>, raw: BSIData): string {
@@ -1003,14 +1001,14 @@ export function rootToJson(data: Catalogue | Record<string, any>, raw: BSIData):
     delete root.gameSystem;
   }
   const stringed = JSON.stringify(root, (k, v) => {
-    if (v === copy || goodJsonKeys.has(k)) return v;
+    if (v === copy || goodJsonKeys.has(k) || isFinite(k)) return v;
     return undefined;
   });
   return stringed;
 }
 export function entryToJson(data: Base | Record<string, any>): string {
   const stringed = JSON.stringify(data, (k, v) => {
-    if (goodJsonKeys.has(k)) return v;
+    if (goodJsonKeys.has(k) || isFinite(k)) return v;
     return undefined;
   });
   return stringed;
