@@ -73,6 +73,7 @@ const good1 = [
   "rootRules",
 
   "publications",
+
   "constraints",
 
   "characteristics",
@@ -984,7 +985,12 @@ export const goodJsonKeys = new Set([
   "gameSystemId",
   "gameSystemRevision",
   "xmlns",
-  "",
+  "readme",
+  "comment",
+  "publicationDate",
+  "publisher",
+  "publisherUrl",
+  "shortName",
 ]);
 export function rootToJson(data: Catalogue | Record<string, any>, raw: BSIData): string {
   const root: any = {
