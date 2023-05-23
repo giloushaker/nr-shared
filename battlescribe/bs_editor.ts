@@ -35,7 +35,6 @@ export type ItemTypes = (
 };
 export const possibleChildren: ItemKeys[] = [
   // Catalogue stuff
-  "catalogueLinks",
   "publications",
   "costTypes",
   "profileTypes",
@@ -50,7 +49,7 @@ export const possibleChildren: ItemKeys[] = [
 
   // Children
   "categoryEntries",
-  "categoryLinks",
+  // "categoryLinks", BS does not show category links
   "forceEntries",
   "selectionEntries",
   "selectionEntryGroups",
@@ -98,7 +97,7 @@ export const categories: CategoryEntry[] = [
   {
     type: "sharedSelectionEntries",
     name: "Shared Selection Entries",
-    icon: "entryLink.png",
+    icon: "selectionEntryLink.png",
   },
   {
     type: "sharedSelectionEntryGroups",
@@ -159,7 +158,8 @@ export type ItemTypeNames =
   | "repeat"
   | "conditionGroup"
   | "cost"
-  | "costType";
+  | "costType"
+  | "link";
 
 export type ItemKeys =
   // Entries
@@ -221,6 +221,73 @@ export function forEachParent<T extends hasParent<T>>(self: T, cb: (node: T) => 
     current = current.parent;
   }
 }
+export function getTypeLabel(key: string, obj?: any): string {
+  switch (key) {
+    case "selectionEntry":
+      return "Entry";
+    case "selectionEntryGroup":
+      return "Group";
+    case "selectionEntryLink":
+      return "Entry (link)";
+    case "selectionEntryGroupLink":
+      return "Group (link)";
+
+    case "force":
+      return "Force";
+    case "category":
+      return "Category";
+    case "categoryLink":
+      return "Category (link)";
+
+    case "catalogueLink":
+      return "Catalogue (link)";
+    case "publication":
+      return "Publication";
+    case "costType":
+      return "Cost Type";
+    case "costs":
+      return "Cost";
+
+    case "profileType":
+      return "Profile Type";
+    case "profile":
+      return "Profile";
+    case "rule":
+      return "Rule";
+    case "infoGroup":
+      return "Info Group";
+    case "profileLink":
+      return "Profile";
+    case "ruleLink":
+      return "Rule (link)";
+    case "infoGroupLink":
+      return "Info Group (link)";
+    case "characteristic":
+      return "Characteristic";
+    case "characteristicType":
+      return "Characteristic Type";
+
+    case "constraint":
+      return "Constraint";
+    case "condition":
+      return "Condition";
+    case "modifier":
+      return "Modifier";
+    case "modifierGroup":
+      return "Modifier Group";
+    case "repeat":
+      return "Repeat";
+    case "conditionGroup":
+      return "Condition Group";
+    case "catalogue":
+      return "Catalogue";
+    case "gameSystem":
+      return "Game System";
+    default:
+      console.warn("unknown getTypeLabel key", key);
+      return key as any;
+  }
+}
 export function getTypeName(key: string, obj?: any): ItemTypeNames {
   switch (key) {
     case "selectionEntries":
@@ -234,7 +301,7 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
       return obj?.targetId ? "entryLink" : "selectionEntryGroup";
 
     case "entryLinks":
-      return ("e" + `${obj.type}Link`.replace(/selection/, "").substring(1)) as ItemTypeNames;
+      return obj?.target ? ((obj.target.editorTypeName + "Link") as any) : "link";
     case "forceEntries":
       return "force";
     case "categoryEntries":
@@ -269,7 +336,7 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
       return "infoGroup";
 
     case "infoLinks":
-      return "infoLink";
+      return obj ? (`${obj.type || "info"}Link` as ItemTypeNames) : "infoLink";
     case "infoGroups":
       return "infoGroup";
 
@@ -294,7 +361,7 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
   }
 }
 
-export function getName(obj: any): string {
+export function getName(obj: any, html = false): string {
   const type = obj.parentKey;
   switch (type) {
     case "selectionEntries":
@@ -308,9 +375,9 @@ export function getName(obj: any): string {
     case "categoryEntries":
     case "sharedInfoGroups":
     case "infoGroups":
-      if (!(obj as EditorBase)?.links?.length) return obj.getName();
+      if (!(obj as EditorBase)?.links?.length) return obj.name;
       const s = obj.links.length === 1 ? "" : "s";
-      return `${obj.getName()} (${obj.links.length} ref${s})`;
+      return `${obj.name} (${obj.links.length} ref${s})`;
 
     case "catalogueLinks":
     case "publications":
@@ -324,7 +391,9 @@ export function getName(obj: any): string {
     case "sharedProfiles":
     case "profiles":
       const profile = obj as BSIProfile;
-      return `${profile.typeName}: ${profile.name}`;
+      return (
+        `${profile.name}` + (html && profile.typeName ? ` <span class='gray italic'>(${profile.typeName})</span>` : "")
+      );
     case "modifiers":
       return modifierToString(findSelfOrParentWhere(obj, (o) => o.id)!, obj);
     case "repeats":
@@ -446,12 +515,15 @@ export function setAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[], ent
 export function popAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[]): EditorBase {
   let current = catalogue as any;
   // resolve path up until the last node
-  for (let i = 0; i < path.length - 1; i++) {
-    const node = path[i];
+  const lastNode = path[path.length - 1];
+  for (const node of path) {
+    if (node === lastNode) continue;
     current = current[node.key][node.index];
   }
-  const lastNode = path[path.length - 1];
-  return current[lastNode.key].splice(lastNode.index, 1)[0];
+  const result = current[lastNode.key].splice(lastNode.index, 1)[0];
+  if (!result) throw new Error("popAtEntryPath failed");
+
+  return result;
 }
 export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {
   forEachEntryRecursive(entry, (entry, key, _parent) => {

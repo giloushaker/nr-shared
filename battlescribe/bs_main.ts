@@ -73,6 +73,7 @@ const good1 = [
   "rootRules",
 
   "publications",
+
   "constraints",
 
   "characteristics",
@@ -617,7 +618,7 @@ export class Link extends Base {
     yield* super.infoProfilesIterator();
   }
   getName(): string {
-    return this.target.name || this.name;
+    return this.target?.name || this.name;
   }
   getParent(): Base | undefined {
     return (this as any as EditorBase).parent;
@@ -899,37 +900,97 @@ export function* iterateModifierGroupsRecursive(
   }
 }
 
-const badKeys = new Set([
-  "loaded",
-  "loaded_wiki",
-  "loaded_editor",
-  "units",
-  "categories",
-  "forces",
-  "childs",
-  "roster_constraints",
-  "extra_constraints",
-  "costIndex",
-  "imports",
-  "importRootEntries",
-  "index",
-  "catalogue",
-  "gameSystem",
-  "main_catalogue",
-  "collective_recursive",
-  "limited_to_one",
-  "associations",
-  "associationConstraints",
-  "book",
-  "short",
-  "version",
-  "nrversion",
-  "lastUpdated",
-  "costIndex",
-  "target",
-  "parent",
-  "links",
-  "showInEditor",
+export const goodJsonKeys = new Set([
+  "publications",
+  "publication",
+  "costTypes",
+  "costType",
+  "profileTypes",
+  "profileType",
+  "categoryEntries",
+  "categoryEntry",
+  "forceEntries",
+  "forceEntry",
+  "selectionEntries",
+  "selectionEntry",
+  "entryLinks",
+  "entryLink",
+  "sharedSelectionEntries",
+  "selectionEntry",
+  "sharedSelectionEntryGroups",
+  "selectionEntryGroup",
+  "sharedProfiles",
+  "profile",
+  "characteristics",
+  "characteristic",
+  "modifiers",
+  "modifier",
+  "constraints",
+  "constraint",
+  "profiles",
+  "profile",
+  "categoryLinks",
+  "categoryLink",
+  "costs",
+  "cost",
+  "conditionGroups",
+  "conditionGroup",
+  "conditions",
+  "condition",
+  "repeats",
+  "repeat",
+  "selectionEntryGroups",
+  "selectionEntryGroup",
+  "infoLinks",
+  "infoLink",
+  "characteristicTypes",
+  "characteristicType",
+  "catalogueLinks",
+  "catalogueLink",
+  "modifierGroups",
+  "modifierGroup",
+  "rules",
+  "rule",
+  "sharedRules",
+  "rule",
+  "infoGroups",
+  "infoGroup",
+  "id",
+  "name",
+  "hidden",
+  "field",
+  "scope",
+  "value",
+  "percentValue",
+  "shared",
+  "includeChildSelections",
+  "includeChildForces",
+  "childId",
+  "type",
+  "targetId",
+  "primary",
+  "typeId",
+  "collective",
+  "import",
+  "$text",
+  "page",
+  "typeName",
+  "defaultSelectionEntryId",
+  "revision",
+  "battleScribeVersion",
+  "authorName",
+  "authorContact",
+  "authorUrl",
+  "library",
+  "gameSystemId",
+  "gameSystemRevision",
+  "xmlns",
+  "readme",
+  "comment",
+  "publicationDate",
+  "publisher",
+  "publisherUrl",
+  "shortName",
 ]);
 export function rootToJson(data: Catalogue | Record<string, any>, raw: BSIData): string {
   const root: any = {
@@ -946,14 +1007,14 @@ export function rootToJson(data: Catalogue | Record<string, any>, raw: BSIData):
     delete root.gameSystem;
   }
   const stringed = JSON.stringify(root, (k, v) => {
-    if (v === copy || (!badKeys.has(k) && !k.startsWith("_"))) return v;
+    if (v === copy || goodJsonKeys.has(k) || isFinite(k)) return v;
     return undefined;
   });
   return stringed;
 }
 export function entryToJson(data: Base | Record<string, any>): string {
   const stringed = JSON.stringify(data, (k, v) => {
-    if (!badKeys.has(k)) return v;
+    if (goodJsonKeys.has(k) || isFinite(k)) return v;
     return undefined;
   });
   return stringed;

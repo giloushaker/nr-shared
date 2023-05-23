@@ -37,11 +37,11 @@ export interface EditorBase extends Base {
   links?: EditorBase[];
   catalogue: Catalogue;
 
-  parentKey(): string;
-  editorTypeName(): string;
+  parentKey: string;
+  editorTypeName: string;
 
   showInEditor?: boolean;
-  openInEditor?: boolean;
+  showChildsInEditor?: boolean;
 }
 export class CatalogueLink extends Base {
   targetId!: string;
@@ -95,7 +95,7 @@ export class Catalogue extends Base {
   lastUpdated: string | undefined;
   costIndex!: Record<string, BSICostType>;
 
-  process() {
+  process(loadOptions?: any) {
     if (this.loaded) return;
     this.loaded = true;
     const units = this.generateUnits();
@@ -133,6 +133,7 @@ export class Catalogue extends Base {
   processForEditor() {
     if (this.loaded_editor) return;
     this.loaded_editor = true;
+    this.generateCostIndex();
 
     this.imports.forEach((imported) => {
       addObj(imported as any, "links", this);
@@ -364,7 +365,7 @@ export class Catalogue extends Base {
       const foundUnits = units[copied.id] || [];
       copied.units = foundUnits;
       copied.childs = foundUnits;
-      this.index[copied.id] = copied;
+      this.index[category.id] = category;
       result[copied.id] = copied;
     }
     const uncategorizedUnits = units[UNCATEGORIZED_ID] || [];
@@ -619,6 +620,15 @@ export class Catalogue extends Base {
       const target = link.target as EditorBase;
       if (!target.links) target.links = [];
       target.links.push(link);
+    }
+    if (link.target == null) {
+    } else {
+      const targetType = (link.target as EditorBase).editorTypeName;
+      if (targetType == "category") {
+        delete link.type;
+      } else {
+        link.type = targetType;
+      }
     }
     return link.target !== undefined;
   }
