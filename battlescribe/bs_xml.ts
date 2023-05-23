@@ -1,6 +1,6 @@
 import type { BSIData } from "./bs_types";
 import type { CatalogueExtraInfo } from "./bs_book";
-import { parseString } from "xml2js";
+import { XMLParser } from "fast-xml-parser";
 import { fix_xml_object, hashFnv32a, to_snake_case } from "./bs_helpers";
 
 export function xml_to_json(string: string): any {
@@ -12,20 +12,18 @@ export function xml_to_json(string: string): any {
     console.log("?");
     console.log(string);
   }
-  parseString(
-    string,
-    {
-      valueProcessors: [parseValue],
-      attrValueProcessors: [parseValue],
-      emptyTag: [],
-      xmlns: false,
-      charkey: "$text",
+  const parser = new XMLParser({
+    attributeValueProcessor: parseValue,
+    ignoreAttributes: false,
+    attributeNamePrefix: "",
+    textNodeName: "$text",
+    parseAttributeValue: true,
+    trimValues: true,
+    isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
+      return !isAttribute && tagName !== "catalogue" && tagName !== "gameSystem";
     },
-    function (err, result) {
-      // processed data
-      sresult = result;
-    }
-  );
+  });
+  sresult = parser.parse(string);
   fix_xml_object(sresult);
   return sresult;
 }
