@@ -12,19 +12,19 @@ export class Selector {
   root!: Roster;
   parent!: Instance;
 
-  instances: Instance[] = [];
+  instances: Instance[];
   source: Link | Base;
-  extra_instances: Instance[] = [];
+  extra_instances: Instance[];
 
   isInstanced: boolean; // if false will initialize an instance
   isUnit: boolean;
   isSubUnit: boolean; //adds an extra HeaderInstance for selecting the number of units
   isQuantifiable: boolean;
-  isLimitedTo1 = false;
+  isLimitedTo1: boolean;
   id: string;
-  ids: string[] = []; // for matching with id of link & target
+  ids: string[]; // for matching with id of link & target
 
-  uid = getRandomKey();
+  uid: string;
   hidden = 0;
   book?: any;
   booksDate?: BooksDate;
@@ -33,6 +33,11 @@ export class Selector {
 
   constructor(source: Base | Link, parent_instance?: Instance, root?: Roster) {
     source.process();
+    this.instances = [];
+    this.extra_instances = [];
+    this.isLimitedTo1 = false;
+    this.hidden = 0;
+    this.uid = getRandomKey();
     this.ids = [source.id];
     this.hidden += source.hidden ? 1 : 0;
     if (source.isLink()) {
@@ -271,8 +276,8 @@ export interface ExportedRoot extends ExportedNode {
 
 export class RootSelector extends Selector {
   is_loading!: boolean;
-  root!: Roster;
-  instances!: RootInstance[];
+  declare root: Roster;
+  declare instances: RootInstance[];
   constructor(mainBook: BsBook) {
     const source = new Roster({}, mainBook, [mainBook.getMainCatalogue()]);
     super(source, undefined);

@@ -360,10 +360,10 @@ export class ReactiveExtraConstraint extends ReactiveConstraint implements HasMo
   modifiers?: ReactiveModifier[];
   modifierGroups?: ReactiveModifierGroup[];
   reactiveModifiers = [] as ReactiveModifier[];
-  parent?: HasConstraintCallback & HasExtraConstraintCallback;
+  declare parent?: HasConstraintCallback & HasExtraConstraintCallback;
   queries?: QueryReactive[];
   hidden: boolean;
-  source!: BSIExtraConstraint;
+  declare source: BSIExtraConstraint;
   constructor(constraint: BSIExtraConstraint, parent?: HasExtraConstraintCallback) {
     super(constraint, parent as any as HasConstraintCallback);
     this.hidden = constraint.parent.getHidden() || false;

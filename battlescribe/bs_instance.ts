@@ -2025,8 +2025,8 @@ export class RootInstance extends Instance {
     const prev = addOne(this.cataloguesUsage, catalogue.id);
     if (prev === 0) this.onCatalogueAdded(catalogue);
   }
-  source!: Roster;
-  selector!: RootSelector;
+  declare source: Roster;
+  declare selector: RootSelector;
   canAutocheck?: boolean;
   canModifyOtherUnit?: boolean;
   lastChecked?: string;
