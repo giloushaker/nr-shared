@@ -1,16 +1,5 @@
-import { groupBy, sortBy, clone, addObj, escapeRegex, textSearchRegex, generateBattlescribeId } from "./bs_helpers";
-import {
-  Base,
-  UNCATEGORIZED_ID,
-  ILLEGAL_ID,
-  Category,
-  Link,
-  Group,
-  CategoryLink,
-  goodKeys,
-  Rule,
-  goodKeysWiki,
-} from "./bs_main";
+import { groupBy, sortBy, clone, addObj, textSearchRegex, generateBattlescribeId } from "./bs_helpers";
+import { Base, UNCATEGORIZED_ID, ILLEGAL_ID, Category, Link, goodKeys, Rule, goodKeysWiki } from "./bs_main";
 import type {
   BSICostType,
   BSICondition,
@@ -19,7 +8,6 @@ import type {
   BSIProfile,
   BSIRule,
   BSIPublication,
-  BSIProfileType,
 } from "./bs_types";
 import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { BsBook } from "./bs_book";
