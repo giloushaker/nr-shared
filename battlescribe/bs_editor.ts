@@ -1,3 +1,4 @@
+import { escapeXml } from "./bs_export_xml";
 import { Base, Link } from "./bs_main";
 import { Catalogue, EditorBase } from "./bs_main_catalogue";
 import { conditionToString, fieldToText, modifierToString } from "./bs_modifiers";
@@ -361,7 +362,18 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
   }
 }
 
-export function getName(obj: any, html = false): string {
+export function getNameExtra(obj: any): string {
+  const type = obj.parentKey;
+  switch (type) {
+    case "sharedProfiles":
+    case "profiles":
+      const profile = obj as BSIProfile;
+      return profile.typeName;
+    default:
+      return "";
+  }
+}
+export function getName(obj: any): string {
   const type = obj.parentKey;
   switch (type) {
     case "selectionEntries":
@@ -386,14 +398,9 @@ export function getName(obj: any, html = false): string {
     case "rules":
     case "sharedRules":
     case "costTypes":
-      return (obj as any).name;
-
     case "sharedProfiles":
     case "profiles":
-      const profile = obj as BSIProfile;
-      return (
-        `${profile.name}` + (html && profile.typeName ? ` <span class='gray italic'>(${profile.typeName})</span>` : "")
-      );
+      return obj.name;
     case "modifiers":
       return modifierToString(findSelfOrParentWhere(obj, (o) => o.id)!, obj);
     case "repeats":
