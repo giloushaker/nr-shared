@@ -158,6 +158,9 @@ export class Base implements BSModifierBase {
       Object.setPrototypeOf(this, Link.prototype);
     }
   }
+  toJson() {
+    return entryToJson(this);
+  }
   // Prevent Vue Observers
   get [Symbol.toStringTag](): string {
     // Anything can go here really as long as it's not 'Object'
@@ -995,7 +998,7 @@ export const goodJsonKeys = new Set([
   "publisherUrl",
   "shortName",
 ]);
-export function rootToJson(data: Catalogue | Record<string, any>, raw: BSIData): string {
+export function rootToJson(data: Catalogue | Record<string, any>, raw: BSIData | Catalogue): string {
   const root: any = {
     ...raw,
     catalogue: undefined,
@@ -1010,14 +1013,14 @@ export function rootToJson(data: Catalogue | Record<string, any>, raw: BSIData):
     delete root.gameSystem;
   }
   const stringed = JSON.stringify(root, (k, v) => {
-    if (v === copy || goodJsonKeys.has(k) || isFinite(k)) return v;
+    if (v === copy || goodJsonKeys.has(k) || isFinite(Number(k))) return v;
     return undefined;
   });
   return stringed;
 }
 export function entryToJson(data: Base | Record<string, any>, extraFields?: Set<string>): string {
   const stringed = JSON.stringify(data, (k, v) => {
-    if (goodJsonKeys.has(k) || isFinite(k) || extraFields?.has(k)) return v;
+    if (goodJsonKeys.has(k) || isFinite(Number(k)) || extraFields?.has(k)) return v;
     return undefined;
   });
   return stringed;

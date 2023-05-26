@@ -367,13 +367,27 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
   }
 }
 
-export function getNameExtra(obj: any): string {
+export function getNameExtra(obj: EditorBase): string {
   const type = obj.parentKey;
   switch (type) {
     case "sharedProfiles":
     case "profiles":
-      const profile = obj as BSIProfile;
-      return profile.typeName;
+      return (obj as unknown as BSIProfile).typeName;
+
+    case "selectionEntries":
+    case "sharedSelectionEntries":
+    case "selectionEntryGroups":
+    case "sharedSelectionEntryGroups":
+    case "entryLinks":
+    case "sharedEntryLinks":
+    case "forceEntries":
+    case "categoryLinks":
+    case "categoryEntries":
+    case "sharedInfoGroups":
+    case "infoGroups":
+      if (!obj.links?.length) return "";
+      const s = obj.links.length === 1 ? "" : "s";
+      return `(${obj.links.length} ref${s})`;
     default:
       return "";
   }
@@ -392,10 +406,6 @@ export function getName(obj: any): string {
     case "categoryEntries":
     case "sharedInfoGroups":
     case "infoGroups":
-      if (!(obj as EditorBase)?.links?.length) return obj.name;
-      const s = obj.links.length === 1 ? "" : "s";
-      return `${obj.name} (${obj.links.length} ref${s})`;
-
     case "catalogueLinks":
     case "publications":
     case "profileTypes":
@@ -405,7 +415,7 @@ export function getName(obj: any): string {
     case "costTypes":
     case "sharedProfiles":
     case "profiles":
-      return obj.name;
+      return obj.getName();
     case "modifiers":
       return modifierToString(findSelfOrParentWhere(obj, (o) => o.id)!, obj);
     case "repeats":
