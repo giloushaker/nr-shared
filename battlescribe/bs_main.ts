@@ -164,7 +164,7 @@ export class Base implements BSModifierBase {
   // Prevent Vue Observers
   get [Symbol.toStringTag](): string {
     // Anything can go here really as long as it's not 'Object'
-    return "ObjectNoObserve";
+    return globalThis.isEditor ? "Object" : "ObjectNoObserve";
   }
   isGroup(): boolean {
     return false;
