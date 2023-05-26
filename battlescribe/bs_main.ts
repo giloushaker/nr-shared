@@ -121,8 +121,11 @@ export class Base implements BSModifierBase {
   categoryEntries?: Category[];
   categoryLinks?: CategoryLink[];
   forceEntries?: Force[];
-  sharedSelectionEntryGroups?: Base[];
+  sharedSelectionEntryGroups?: Group[];
   sharedSelectionEntries?: Base[];
+  sharedProfiles?: Base[];
+  sharedRules?: Rule[];
+  sharedInfoGroups?: Base[];
   target?: Base;
 
   // Modifiers
@@ -370,7 +373,7 @@ export class Base implements BSModifierBase {
         if (isObject(value)) {
           if (Array.isArray(value)) {
             if (value.length && isObject(value[0])) {
-              for (let i = value.length; i--;) {
+              for (let i = value.length; i--; ) {
                 const cur = value[i];
                 callbackfn(cur, current);
                 stack.push(cur);
@@ -399,7 +402,7 @@ export class Base implements BSModifierBase {
         if (isObject(value)) {
           if (Array.isArray(value)) {
             if (value.length && isObject(value[0])) {
-              for (let i = value.length; i--;) {
+              for (let i = value.length; i--; ) {
                 const cur = value[i];
                 callbackfn(cur, current);
                 stack.push(cur);
@@ -1012,9 +1015,9 @@ export function rootToJson(data: Catalogue | Record<string, any>, raw: BSIData):
   });
   return stringed;
 }
-export function entryToJson(data: Base | Record<string, any>): string {
+export function entryToJson(data: Base | Record<string, any>, extraFields?: Set<string>): string {
   const stringed = JSON.stringify(data, (k, v) => {
-    if (goodJsonKeys.has(k) || isFinite(k)) return v;
+    if (goodJsonKeys.has(k) || isFinite(k) || extraFields?.has(k)) return v;
     return undefined;
   });
   return stringed;

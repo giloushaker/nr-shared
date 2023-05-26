@@ -1,5 +1,5 @@
 import { escapeXml } from "./bs_export_xml";
-import { Base, Link } from "./bs_main";
+import { Base, Link, goodJsonKeys } from "./bs_main";
 import { Catalogue, EditorBase } from "./bs_main_catalogue";
 import { conditionToString, fieldToText, modifierToString } from "./bs_modifiers";
 import {
@@ -128,6 +128,7 @@ export const categories: CategoryEntry[] = [
   },
   {
     type: "rules",
+    links: "infoLinks",
     name: "Root Rules",
     icon: "rule.png",
   },
@@ -249,12 +250,16 @@ export function getTypeLabel(key: string, obj?: any): string {
     case "costs":
       return "Cost";
 
+    case "link":
+      return "Link";
     case "profileType":
       return "Profile Type";
     case "profile":
       return "Profile";
     case "rule":
       return "Rule";
+    case "infoLink":
+      return "Info (link)";
     case "infoGroup":
       return "Info Group";
     case "profileLink":
@@ -442,7 +447,8 @@ export function forEachEntryRecursive(
   const stack = [entry];
   while (stack.length) {
     const cur = stack.pop()!;
-    for (const key of possibleChildren) {
+    for (const key of Object.keys(cur)) {
+      if (!goodJsonKeys.has(key)) continue;
       const val = (cur as any)[key] as EditorBase[] | undefined;
       if (val && Array.isArray(val)) {
         for (const e of val) {
@@ -471,10 +477,10 @@ export function onRemoveEntry(removed: EditorBase) {
   });
 }
 
-export function onAddEntry(entries: EditorBase[] | EditorBase, catalogue: Catalogue, parent?: EditorBase) {
+export function onAddEntry(entries: EditorBase[] | EditorBase, catalogue: Catalogue, parent?: EditorBase | Catalogue) {
   for (const removedEntry of Array.isArray(entries) ? entries : [entries]) {
     forEachEntryRecursive(removedEntry, (entry, key, _parent) => {
-      entry.parent = _parent || parent;
+      entry.parent = _parent || (parent as any);
 
       entry.catalogue = catalogue;
       catalogue.addToIndex(entry);
@@ -516,7 +522,8 @@ export function setAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[], ent
     current = current[node.key][node.index];
   }
   const lastNode = path[path.length - 1];
-  current[lastNode.key].splice(lastNode.index, 0, entry);
+  const arr = current[lastNode.key] as EditorBase[];
+  arr.splice(lastNode.index, 0, entry);
   return current;
 }
 export function popAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[]): EditorBase {
@@ -527,9 +534,23 @@ export function popAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[]): Ed
     if (node === lastNode) continue;
     current = current[node.key][node.index];
   }
-  const result = current[lastNode.key].splice(lastNode.index, 1)[0];
+  const arr = current[lastNode.key] as EditorBase[];
+  const result = arr.splice(lastNode.index, 1)[0];
   if (!result) throw new Error("popAtEntryPath failed");
 
+  return result;
+}
+export function replaceAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[], value: EditorBase): EditorBase {
+  let current = catalogue as any;
+  // resolve path up until the last node
+  const lastNode = path[path.length - 1];
+  for (const node of path) {
+    if (node === lastNode) continue;
+    current = current[node.key][node.index];
+  }
+  const arr = current[lastNode.key] as EditorBase[];
+  const result = arr.splice(lastNode.index, 1, value)[0];
+  if (!result) throw new Error("replaceAtEntryPath failed");
   return result;
 }
 export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {

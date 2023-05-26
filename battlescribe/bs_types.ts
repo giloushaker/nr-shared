@@ -1,3 +1,6 @@
+import { Base, Group, Rule } from "./bs_main";
+import { Publication } from "./bs_main_catalogue";
+
 export interface BSINamed {
   name: string;
 }
@@ -28,32 +31,13 @@ export interface BSICost extends BSINamed {
   typeId: string;
 }
 
-export interface BSIBaseEntry extends BSIOption, BSINamed, BSIHidden {
-  parentCatalogue?: BSIBaseEntry;
-  root: any;
-  parentRoster?: BSIBaseEntry;
-  parentForce?: BSIBaseEntry;
-  parentCategory?: BSIBaseEntry;
-  defaultSelectionEntryId?: string;
-  parent: BSIBaseEntry | null;
-  collective: boolean;
-  type?: string;
-  import?: boolean;
-}
-
 export interface BSIValued {
   value: number;
   percentValue?: boolean;
 }
 
 export interface BSIQuery {
-  scope:
-    | string
-    | "parent"
-    | "force"
-    | "roster"
-    | "primary-catalogue"
-    | "primary-category";
+  scope: string | "parent" | "force" | "roster" | "primary-catalogue" | "primary-category";
   childId?: string | "any" | "model" | "unit" | "upgrade" | "mount" | "crew";
   field: string | "selections" | "forces";
   includeChildSelections?: boolean;
@@ -69,15 +53,7 @@ export interface BSIRepeat extends BSIQuery, BSIValued {
 }
 
 export interface BSICondition extends BSIQuery, BSIValued {
-  type:
-    | "instanceOf"
-    | "notInstanceOf"
-    | "atLeast"
-    | "greaterThan"
-    | "atMost"
-    | "lessThan"
-    | "equalTo"
-    | "notEqualTo";
+  type: "instanceOf" | "notInstanceOf" | "atLeast" | "greaterThan" | "atMost" | "lessThan" | "equalTo" | "notEqualTo";
 }
 export interface BSIConditionGroup {
   type?: "and" | "or";
@@ -160,6 +136,19 @@ export interface BSICatalogue {
   gameSystemId: string;
   gameSystemRevision: number;
   catalogueLinks?: BSICatalogueLink[];
+  publications?: Publication[];
+  costTypes?: BSICostType[];
+  profileTypes?: BSIProfileType[];
+  categoryEntries?: BSICategory[];
+  forceEntries?: Publication[];
+  sharedSelectionEntries?: Base[];
+  sharedSelectionEntryGroups?: Group[];
+  sharedProfiles?: BSIProfile[];
+  sharedRules?: BSIRule[];
+  sharedInfoGroups?: BSIInfoGroup[];
+  selectionEntries?: Base[];
+  rules?: Rule[];
+
   xmlns: string;
 }
 export interface BSIDataCatalogue extends bookFileMetaData {
@@ -284,11 +273,7 @@ export interface BSIRule {
 }
 
 export interface BSIInfoLink<
-  T extends BSIInfoGroup | BSIRule | BSIProfile | BSIInfoGroup =
-    | BSIInfoGroup
-    | BSIRule
-    | BSIProfile
-    | BSIInfoGroup
+  T extends BSIInfoGroup | BSIRule | BSIProfile | BSIInfoGroup = BSIInfoGroup | BSIRule | BSIProfile | BSIInfoGroup
 > {
   id: string;
   name: string;

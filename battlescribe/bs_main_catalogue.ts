@@ -12,6 +12,7 @@ import type {
 import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { BsBook } from "./bs_book";
 import type { GameSystem } from "../../ts/systems/game_system";
+import type { ItemTypeNames } from "./bs_editor";
 export interface WikiLink extends Link {
   parent: WikiBase;
   links?: WikiLink[];
@@ -26,7 +27,7 @@ export interface EditorBase extends Base {
   catalogue: Catalogue;
 
   parentKey: string;
-  editorTypeName: string;
+  editorTypeName: ItemTypeNames;
 
   showInEditor?: boolean;
   showChildsInEditor?: boolean;

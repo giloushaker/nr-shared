@@ -72,8 +72,6 @@ export const protoMap = {
   publication: Publication.prototype,
 };
 export const protoMapValues = Object.values(protoMap);
-
-export const linkKeys = new Set(["infoLinks", "entryLinks", "categoryLinks"]);
 export type ProtoMap = typeof protoMap;
 export function getPrototypeFromKey(key: string) {
   if (key in protoMap) {
@@ -90,7 +88,7 @@ export function setPrototype<Key extends string>(
   const newProto = getPrototypeFromKey(key);
   if (newProto) {
     Object.setPrototypeOf(obj, newProto);
-    if ((newProto as any).post_init) obj.post_init();
+    if ((obj as any).post_init) obj.post_init();
     if ((globalThis as any).isEditor) {
       setKeyInfo(obj.keyInfoCache || keyInfoCache, key, obj);
     }

@@ -100,8 +100,6 @@ export async function loadData(system: BSCatalogueManager, data: BSIData, booksD
   const asCatalogue = obj as unknown as Catalogue;
   if (asCatalogue.loaded) return asCatalogue;
 
-  // const links = setPrototypeRecursive(content, linkKeys);
-
   // Prevent infinite loops by checking if prototype is already set
   setPrototypeRecursive(obj);
   const content = setPrototype(obj, key);
