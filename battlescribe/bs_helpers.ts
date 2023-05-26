@@ -107,7 +107,7 @@ export function groupBy<V>(
   return result;
 }
 let gitSha1: (content: string | Buffer | ArrayBuffer) => Promise<string>;
-if (typeof window === 'undefined') {
+if (typeof window === "undefined") {
   gitSha1 = (async (content: string | Buffer) => {
     const gitstring = `blob ${content.length}\0`;
     const shasum = require("crypto").createHash("sha1");
@@ -629,11 +629,19 @@ export function arrayRemove<T>(arr: T[], obj: T): boolean {
   }
   return false;
 }
-
-export function addObj<T>(obj: Record<string, T[]>, key: string, val: T) {
-  const found = obj[key];
-  if (found) found.push(val);
-  else obj[key] = [val];
+type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends readonly (infer ElementType)[]
+  ? ElementType
+  : never;
+type ArrayPropertyType<O, KT extends keyof O> = NonNullable<O[KT]> extends unknown[]
+  ? ArrayElement<NonNullable<O[KT]>>
+  : never;
+export function addObj<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
+  const found = obj[key] as T[];
+  if (found) {
+    found.push(val);
+    return;
+  }
+  (obj[key] as T[]) = [val];
 }
 
 export function add(obj: any, key: string, amount = 1) {
@@ -751,12 +759,7 @@ export function textSearchRegex(query: string) {
 }
 
 export function generateBattlescribeId(): string {
-  return [
-    getRandomInt(0xffff),
-    getRandomInt(0xffff),
-    getRandomInt(0xffff),
-    getRandomInt(0xffff),
-  ]
+  return [getRandomInt(0xffff), getRandomInt(0xffff), getRandomInt(0xffff), getRandomInt(0xffff)]
     .map((o) => o.toString(16))
     .join("-");
 }

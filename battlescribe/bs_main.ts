@@ -356,7 +356,7 @@ export class Base implements BSModifierBase {
       if (cur.entryLinks) stack.push(...cur.entryLinks);
     }
   }
-  forEachObjectWhitelist(callbackfn: (value: Base | Link, parent: Base) => unknown, whiteList = goodKeys) {
+  forEachObjectWhitelist<T extends Base>(callbackfn: (value: T, parent: T) => unknown, whiteList = goodKeys) {
     const stack = [this as any];
     // const keys = {} as any;
 

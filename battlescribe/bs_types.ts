@@ -185,6 +185,8 @@ export interface BSIGameSystem {
   authorUrl?: string;
   library: boolean;
   xmlns: string;
+  gameSystemId: undefined;
+  catalogueLinks: undefined;
 }
 export interface BSIDataSystem extends bookFileMetaData {
   gameSystem: BSIGameSystem;

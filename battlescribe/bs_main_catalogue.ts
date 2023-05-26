@@ -8,6 +8,7 @@ import type {
   BSIProfile,
   BSIRule,
   BSIPublication,
+  BSIModifier,
 } from "./bs_types";
 import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { BsBook } from "./bs_book";
@@ -24,6 +25,7 @@ export interface WikiBase extends Base {
 export interface EditorBase extends Base {
   parent?: EditorBase;
   links?: EditorBase[];
+  other_links?: EditorBase[];
   catalogue: Catalogue;
 
   parentKey: string;
@@ -127,10 +129,26 @@ export class Catalogue extends Base {
     this.imports.forEach((imported) => {
       addObj(imported as any, "links", this);
     });
-    this.forEachObjectWhitelist((cur, parent) => {
-      (cur as EditorBase).parent = parent as EditorBase;
-      (cur as EditorBase).catalogue = this;
-      if (cur.target) addObj(cur.target as any, "links", parent as EditorBase);
+    this.forEachObjectWhitelist<EditorBase>((cur, parent) => {
+      cur.parent = parent;
+      cur.catalogue = this;
+      if (cur.target) {
+        addObj(cur.target as EditorBase, "links", parent);
+      }
+      const childId = (cur as any).childId;
+      if (childId) {
+        const target = this.findOptionById(childId) as EditorBase;
+        if (target) {
+          addObj(target, "other_links", parent);
+        }
+      }
+      const value = (cur as any).value;
+      if (value) {
+        const target = this.findOptionById(value) as EditorBase;
+        if (target) {
+          addObj(target, "other_links", parent);
+        }
+      }
     }, goodKeys);
   }
   get url(): string {
