@@ -133,20 +133,20 @@ export class Catalogue extends Base {
       cur.parent = parent;
       cur.catalogue = this;
       if (cur.target) {
-        addObj(cur.target as EditorBase, "links", parent);
+        addObj(cur.target as EditorBase, "links", cur);
       }
       const childId = (cur as any).childId;
       if (childId) {
         const target = this.findOptionById(childId) as EditorBase;
         if (target) {
-          addObj(target, "other_links", parent);
+          addObj(target, "other_links", cur);
         }
       }
       const value = (cur as any).value;
       if (value) {
         const target = this.findOptionById(value) as EditorBase;
         if (target) {
-          addObj(target, "other_links", parent);
+          addObj(target, "other_links", cur);
         }
       }
     }, goodKeys);
