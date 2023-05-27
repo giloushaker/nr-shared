@@ -206,7 +206,7 @@ export function findSelfOrParentWhere<T extends hasParent<T>>(self: T, fn: (node
   }
   return undefined;
 }
-export function findParentWhere<T extends hasParent<T>>(self: T, fn: (node: T) => boolean): T | undefined {
+export function findParentWhere<T extends hasParent<T>>(self: T, fn: (node: T) => any): T | undefined {
   let current = self.parent;
   while (current && !Object.is(current, current.parent)) {
     if (fn(current)) return current;
