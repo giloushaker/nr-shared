@@ -86,6 +86,7 @@ export class Catalogue extends Base {
   lastUpdated: string | undefined;
   costIndex!: Record<string, BSICostType>;
 
+  fullFilePath?: string;
   process(loadOptions?: any) {
     if (this.loaded) return;
     this.loaded = true;

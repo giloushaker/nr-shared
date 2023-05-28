@@ -1,18 +1,6 @@
 import { unzip } from "unzipit";
-import {
-  X2jOptionsOptional,
-  XMLParser,
-  XMLBuilder,
-  XmlBuilderOptionsOptional,
-} from "fast-xml-parser";
-import {
-  fix_xml_object,
-  forEachValueRecursive,
-  hashFnv32a,
-  isObject,
-  removePrefix,
-  to_snake_case,
-} from "./bs_helpers";
+import { X2jOptionsOptional, XMLParser, XMLBuilder, XmlBuilderOptionsOptional } from "fast-xml-parser";
+import { fix_xml_object, forEachValueRecursive, hashFnv32a, isObject, removePrefix, to_snake_case } from "./bs_helpers";
 import { rootToJson } from "./bs_main";
 import { getDataObject } from "./bs_system";
 
@@ -27,24 +15,14 @@ export function xmlToJson(data: string) {
     textNodeName: "$text",
     parseAttributeValue: true,
     trimValues: true,
-    isArray: (
-      tagName: string,
-      jPath: string,
-      isLeafNode: boolean,
-      isAttribute: boolean
-    ) => {
-      return (
-        !isAttribute && tagName !== "catalogue" && tagName !== "gameSystem"
-      );
+    isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
+      return !isAttribute && tagName !== "catalogue" && tagName !== "gameSystem";
     },
   };
   return new XMLParser(options).parse(data);
 }
 
-export async function unzipFolder(
-  file: string | ArrayBuffer | Blob,
-  path: string
-) {
+export async function unzipFolder(file: string | ArrayBuffer | Blob, path: string) {
   const unzipped = await unzip(file);
   const result = {} as Record<string, ArrayBuffer | string>;
   console.log("unzipping folder", unzipped, "path", path);
@@ -59,17 +37,13 @@ export async function unzipFolder(
       // git file
       continue;
     }
-    const data = isZipExtension(file)
-      ? await value.arrayBuffer()
-      : await value.text();
+    const data = isZipExtension(file) ? await value.arrayBuffer() : await value.text();
     result[file] = data;
   }
   return result;
 }
 
-export async function unzipFile(
-  file: string | ArrayBuffer | Blob
-): Promise<string> {
+export async function unzipFile(file: string | ArrayBuffer | Blob): Promise<string> {
   const unzipped = await unzip(file);
   for (const entry of Object.values(unzipped.entries)) {
     const data = await entry.text();
@@ -147,14 +121,7 @@ function toSingle(key: string) {
     throw Error(`Couldn't convert "${key}" to non-plural (modify toSingle)`);
   }
 }
-const skipKeys = new Set([
-  "?xml",
-  "readme",
-  "comment",
-  "$text",
-  "description",
-  "_",
-]);
+const skipKeys = new Set(["?xml", "readme", "comment", "$text", "description", "_"]);
 function renestChilds(obj: any) {
   for (const [key, value] of Object.entries(obj)) {
     if (Array.isArray(value) && !skipKeys.has(key)) {
