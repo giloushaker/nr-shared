@@ -1,5 +1,5 @@
 import { ObjectId } from "bson";
-import JSZip from "jszip";
+import JSZip, { OutputType } from "jszip";
 
 export function getRandomKey(): string {
   return new ObjectId().toString();
@@ -368,10 +368,10 @@ export function download(filename: string, mimeType: any, content: BlobPart) {
   a.click(); // Start downloading
 }
 
-export async function zip(filename: string, content: string): Promise<Blob> {
+export async function zip<T extends OutputType>(filename: string, content: string, type: T = "blob") {
   const zip = new JSZip();
   zip.file(filename, content);
-  const result = await zip.generateAsync({ type: "blob" });
+  const result = await zip.generateAsync({ type: type });
   return result;
 }
 

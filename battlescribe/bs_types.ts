@@ -150,6 +150,7 @@ export interface BSICatalogue {
   rules?: Rule[];
 
   xmlns: string;
+  fullFilePath?: string;
 }
 export interface BSIDataCatalogue extends bookFileMetaData {
   catalogue: BSICatalogue;
@@ -187,6 +188,8 @@ export interface BSIGameSystem {
   xmlns: string;
   gameSystemId: undefined;
   catalogueLinks: undefined;
+
+  fullFilePath?: string;
 }
 export interface BSIDataSystem extends bookFileMetaData {
   gameSystem: BSIGameSystem;

@@ -11,6 +11,7 @@ import type {
   BSINamed,
   BSIProfileType,
   BSIData,
+  BSICatalogue,
 } from "./bs_types";
 import type { Catalogue, EditorBase } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
@@ -998,9 +999,8 @@ export const goodJsonKeys = new Set([
   "publisherUrl",
   "shortName",
 ]);
-export function rootToJson(data: Catalogue | Record<string, any>, raw: BSIData | Catalogue): string {
+export function rootToJson(data: Catalogue | Record<string, any> | BSICatalogue): string {
   const root: any = {
-    ...raw,
     catalogue: undefined,
     gameSystem: undefined,
   };
