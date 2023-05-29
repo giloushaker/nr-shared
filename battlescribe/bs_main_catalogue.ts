@@ -236,7 +236,7 @@ export class Catalogue extends Base {
     }
     return result;
   }
-  findOptionsByName(name?: string): Base[] {
+  findOptionsByText(name?: string): Base[] {
     if (!name || !name.trim()) {
       const result = [];
       for (const imported of [this, ...this.imports]) {
