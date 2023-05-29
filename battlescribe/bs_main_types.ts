@@ -1,4 +1,4 @@
-import { Category, Force, Link, Base, Group, CategoryLink, Rule } from "./bs_main";
+import { Category, Force, Link, Base, Group, CategoryLink, Rule, Entry, Profile, InfoLink, InfoGroup } from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
 import { getTypeName } from "./bs_editor";
@@ -53,12 +53,13 @@ export const protoMap = {
   categories: Category.prototype,
 
   link: Link.prototype,
-  infoLinks: Link.prototype,
+  infoLinks: InfoLink.prototype,
   categoryLinks: CategoryLink.prototype,
 
-  entry: Base.prototype,
-  selectionEntries: Base.prototype,
-  sharedSelectionEntries: Base.prototype,
+  entry: Entry.prototype,
+  selectionEntries: Entry.prototype,
+  entryLinks: Link.prototype,
+  sharedSelectionEntries: Entry.prototype,
 
   group: Group.prototype,
   selectionEntryGroups: Group.prototype,
@@ -67,6 +68,14 @@ export const protoMap = {
   sharedRules: Rule.prototype,
   rules: Rule.prototype,
   rule: Rule.prototype,
+
+  sharedProfiles: Profile.prototype,
+  profiles: Profile.prototype,
+  profile: Profile.prototype,
+
+  sharedInfoGroups: InfoGroup.prototype,
+  infoGroups: InfoGroup.prototype,
+  infoGroup: InfoGroup.prototype,
 
   publications: Publication.prototype,
   publication: Publication.prototype,

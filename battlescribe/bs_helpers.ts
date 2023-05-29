@@ -566,11 +566,17 @@ export function flattenRecursive<T>(obj: Recursive<T>, depth = 0, result: Flatte
   }
   return result;
 }
+export function forEachRecursive<T>(obj: Recursive<T>, cb: (o: Recursive<T>) => unknown) {
+  for (const child of obj.childs) {
+    forEachRecursive(child, cb);
+  }
+  cb(obj);
+}
 
 export function recurseThis<T, K extends keyof T, F = T[K]>(
   obj: T,
   functionName: K,
-  maxDepth = 3,
+  maxDepth = 100,
   depth = 0
 ): F extends () => any ? Recursive<ReturnType<F> extends any[] ? ReturnType<F>[0] : never> : never {
   const result = {
@@ -581,7 +587,7 @@ export function recurseThis<T, K extends keyof T, F = T[K]>(
   if (depth < maxDepth) {
     const results = (obj[functionName] as any)() as any[];
     for (const cur of results) {
-      result.childs.push(recurseThis(cur, functionName, depth + 1));
+      result.childs.push(recurseThis(cur, functionName, maxDepth, depth + 1));
     }
   }
 
@@ -591,8 +597,8 @@ export function recurseThis<T, K extends keyof T, F = T[K]>(
 type WithParent<T> = T & { parent: WithParent<T> | undefined };
 export function recurseFn<T, RT = Recursive<WithParent<T>>>(
   obj: T,
-  _function: (obj: T) => T[] | undefined,
-  maxDepth = 3,
+  _function: (obj: T, depth: number) => T[] | undefined,
+  maxDepth = 100,
   depth = 0
 ): RT {
   const result = {
@@ -601,10 +607,10 @@ export function recurseFn<T, RT = Recursive<WithParent<T>>>(
   };
 
   if (depth < maxDepth) {
-    const results = _function(obj);
+    const results = _function(obj, depth);
     if (results !== undefined) {
       for (const cur of results) {
-        const next = recurseFn(cur, _function, depth + 1) as any;
+        const next = recurseFn(cur, _function, maxDepth, depth + 1) as any;
         next.self.parent = obj;
         result.childs.push(next as RT);
       }

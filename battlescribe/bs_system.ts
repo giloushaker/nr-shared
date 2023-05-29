@@ -190,12 +190,6 @@ export class Roster extends Base {
   isRoster(): this is Roster {
     return true;
   }
-  isQuantifiable(): boolean {
-    return false;
-  }
-  isEntry(): boolean {
-    return false;
-  }
   categoryIndex!: Record<string, any>;
   generateCategoryIndex(): Record<string, Category> {
     const uncategorized = {

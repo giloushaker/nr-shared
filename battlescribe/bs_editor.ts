@@ -503,7 +503,7 @@ export function onAddEntry(entries: EditorBase[] | EditorBase, catalogue: Catalo
 export interface EntryPathEntry {
   key: string;
   index: number;
-  id: string;
+  id?: string;
 }
 
 export function getEntryPath(entry: EditorBase): EntryPathEntry[] {

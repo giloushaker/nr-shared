@@ -12,6 +12,7 @@ import type {
   BSIProfileType,
   BSIData,
   BSICatalogue,
+  BSICharacteristic,
 } from "./bs_types";
 import type { Catalogue, EditorBase } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
@@ -19,6 +20,7 @@ import type { IModel } from "../systems/army_interfaces";
 import type { NRAssociation, AssociationConstraint } from "./bs_association";
 import { clone, isObject } from "./bs_helpers";
 import { getAllInfoGroups } from "./bs_modifiers";
+import { Info } from "electron";
 const isNonEmptyIfHasOneOf = [
   "modifiers",
   "modifierGroups",
@@ -108,25 +110,25 @@ export class Base implements BSModifierBase {
   page?: string;
   publicationId!: string;
 
-  profiles?: BSIProfile[];
-  rules?: BSIRule[];
-  infoLinks?: BSIInfoLink[];
-  infoGroups?: BSIInfoGroup[];
+  profiles?: Profile[];
+  rules?: Rule[];
+  infoLinks?: InfoLink[];
+  infoGroups?: InfoGroup[];
   publications?: BSIPublication[];
   costs?: BSICost[];
 
   // Childs
-  selectionEntries?: Base[];
-  selectionEntryGroups?: Base[];
+  selectionEntries?: Entry[];
+  selectionEntryGroups?: Group[];
   entryLinks?: Link[];
   categoryEntries?: Category[];
   categoryLinks?: CategoryLink[];
   forceEntries?: Force[];
   sharedSelectionEntryGroups?: Group[];
-  sharedSelectionEntries?: Base[];
-  sharedProfiles?: Base[];
+  sharedSelectionEntries?: Entry[];
+  sharedProfiles?: Profile[];
   sharedRules?: Rule[];
-  sharedInfoGroups?: Base[];
+  sharedInfoGroups?: InfoGroup[];
   target?: Base;
 
   // Modifiers
@@ -159,6 +161,13 @@ export class Base implements BSModifierBase {
       Object.setPrototypeOf(this, Link.prototype);
     }
   }
+
+  process() {
+    if (this.loaded) return;
+    this.collective_recursive = this.isCollectiveRecursive();
+    this.limited_to_one = !this.canAmountBeAbove1();
+    this.loaded = true;
+  }
   toJson() {
     return entryToJson(this);
   }
@@ -167,7 +176,7 @@ export class Base implements BSModifierBase {
     // Anything can go here really as long as it's not 'Object'
     return globalThis.isEditor ? "Object" : "ObjectNoObserve";
   }
-  isGroup(): boolean {
+  isGroup(): this is Group {
     return false;
   }
   isForce(): this is Force {
@@ -186,10 +195,16 @@ export class Base implements BSModifierBase {
     return false;
   }
   isQuantifiable(): boolean {
-    return true;
+    return false;
   }
-  isEntry(): boolean {
-    return true;
+  isEntry(): this is Entry {
+    return false;
+  }
+  isProfile(): this is Profile | InfoLink<Profile> {
+    return false;
+  }
+  isInfoGroup(): this is InfoGroup | InfoLink<InfoGroup> {
+    return false;
   }
   isUnit(): boolean {
     for (const categoryLink of this.categoryLinks || []) {
@@ -225,12 +240,6 @@ export class Base implements BSModifierBase {
     return true;
   }
 
-  process() {
-    if (this.loaded) return;
-    this.collective_recursive = this.isCollectiveRecursive();
-    this.limited_to_one = !this.canAmountBeAbove1();
-    this.loaded = true;
-  }
   *forcesIterator(): Iterable<Force> {
     return;
   }
@@ -504,24 +513,26 @@ export class Base implements BSModifierBase {
   }
 }
 
+export class Entry extends Base {
+  isEntry() {
+    return true;
+  }
+  isQuantifiable(): boolean {
+    return true;
+  }
+}
 export class Group extends Base {
   isGroup() {
     return true;
   }
-  isQuantifiable(): boolean {
-    return false;
-  }
-  isEntry(): boolean {
-    return false;
-  }
 }
-export class Link extends Base {
+export class Link<T extends Base = Group | Entry> extends Base {
   targetId!: string;
-  declare target: Base;
-  isLink(): this is Link {
+  declare target: T;
+  isLink() {
     return true;
   }
-  isGroup(): boolean {
+  isGroup() {
     return this.target.isGroup();
   }
   isCategory() {
@@ -530,7 +541,7 @@ export class Link extends Base {
   isQuantifiable(): boolean {
     return this.target.isQuantifiable();
   }
-  isEntry(): boolean {
+  isEntry() {
     return this.target.isEntry();
   }
   isUnit(): boolean {
@@ -651,6 +662,10 @@ export class Link extends Base {
   }
 }
 (Link.prototype as any).keyInfoCache = {};
+
+export class InfoLink<T extends Base = Rule | InfoGroup | Profile> extends Link {
+  declare target: T;
+}
 export class CategoryLink extends Link {
   declare targetId: string;
   declare target: Category;
@@ -677,12 +692,7 @@ export class Category extends Base {
   isCategory(): this is Category {
     return true;
   }
-  isQuantifiable(): boolean {
-    return false;
-  }
-  isEntry(): boolean {
-    return false;
-  }
+
   *selectionsIterator(): Iterable<Base> {
     yield* this.units;
   }
@@ -697,12 +707,6 @@ export class Force extends Base {
   forces?: Force[];
   main_catalogue!: Catalogue;
   isForce(): this is Force {
-    return true;
-  }
-  isQuantifiable(): boolean {
-    return false;
-  }
-  isEntry(): boolean {
     return true;
   }
   *selectionsIterator(): Iterable<Base> {
@@ -866,6 +870,18 @@ export interface BSIExtraConstraint extends BSIConstraint, BSINamed {
 }
 
 // const debugKeys = new Set();
+export class Profile extends Base implements BSIProfile {
+  declare characteristics: BSICharacteristic[];
+  declare typeId: string;
+  declare typeName: string;
+  declare publication?: BSIPublication | undefined;
+}
+export class InfoGroup extends Base {
+  declare characteristics: BSICharacteristic[];
+  declare typeId: string;
+  declare typeName: string;
+  declare publication?: BSIPublication | undefined;
+}
 export class Rule extends Base implements BSIRule {
   declare id: string;
   declare name: string;

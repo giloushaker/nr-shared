@@ -49,8 +49,8 @@ if (typeof $delete === "undefined") {
 }
 function getType(source: Base) {
   if (source.isForce()) return "force";
-  if (source.isGroup()) return "group";
   if (source.isEntry()) return "entry";
+  if (source.isGroup()) return "group";
   return "other";
 }
 export interface BSNodeStateEvents {

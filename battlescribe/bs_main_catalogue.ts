@@ -14,6 +14,7 @@ import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { BsBook } from "./bs_book";
 import type { GameSystem } from "../../ts/systems/game_system";
 import type { ItemTypeNames } from "./bs_editor";
+
 export interface WikiLink extends Link {
   parent: WikiBase;
   links?: WikiLink[];
@@ -28,7 +29,7 @@ export interface EditorBase extends Base {
   other_links?: EditorBase[];
   catalogue: Catalogue;
 
-  parentKey: string;
+  parentKey: keyof EditorBase;
   editorTypeName: ItemTypeNames;
 
   showInEditor?: boolean;
@@ -160,12 +161,6 @@ export class Catalogue extends Base {
   }
   isGameSystem(): boolean {
     return this.gameSystemId === this.id || !this.gameSystemId;
-  }
-  isQuantifiable(): boolean {
-    return false;
-  }
-  isEntry(): boolean {
-    return false;
   }
   *iterateCategoryEntries(): Iterable<Category> {
     for (const catalogue of this.imports) {
