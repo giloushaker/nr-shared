@@ -536,6 +536,14 @@ export function setAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[], ent
   arr.splice(lastNode.index, 0, entry);
   return current;
 }
+export function getAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[]): EditorBase {
+  let current = catalogue as any;
+  // resolve path up until the last node
+  for (const node of path) {
+    current = current[node.key][node.index];
+  }
+  return current;
+}
 export function popAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[]): EditorBase {
   let current = catalogue as any;
   // resolve path up until the last node

@@ -29,7 +29,7 @@ export interface EditorBase extends Base {
   other_links?: EditorBase[];
   catalogue: Catalogue;
 
-  parentKey: keyof EditorBase;
+  parentKey: string & keyof EditorBase;
   editorTypeName: ItemTypeNames;
 
   showInEditor?: boolean;
