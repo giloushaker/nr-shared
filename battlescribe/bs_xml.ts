@@ -3,6 +3,7 @@ import type { CatalogueExtraInfo } from "./bs_book";
 import { XMLParser } from "fast-xml-parser";
 import { fix_xml_object, hashFnv32a, to_snake_case } from "./bs_helpers";
 
+const set = new Set(["catalogue", "gameSystem", "xmlns", "?xml", "roster", "description", "readme"]);
 export function xml_to_json(string: string): any {
   let sresult;
   string = string.toString();
@@ -20,7 +21,7 @@ export function xml_to_json(string: string): any {
     parseAttributeValue: true,
     trimValues: true,
     isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
-      return !isAttribute && tagName !== "catalogue" && tagName !== "gameSystem";
+      return !isAttribute && !set.has(tagName);
     },
   });
   sresult = parser.parse(string);
@@ -28,7 +29,7 @@ export function xml_to_json(string: string): any {
   return sresult;
 }
 
-function parseValue(str: string): any {
+function parseValue(key: string, str: string): any {
   switch (str) {
     case "True":
     case "true":

@@ -49,8 +49,8 @@ if (typeof $delete === "undefined") {
 }
 function getType(source: Base) {
   if (source.isForce()) return "force";
-  if (source.isEntry()) return "entry";
   if (source.isGroup()) return "group";
+  if (source.isEntry()) return "entry";
   return "other";
 }
 export interface BSNodeStateEvents {
@@ -624,12 +624,17 @@ export class BSNodeState
         switch (modifier.source.type) {
           case "set-primary":
           case "unset-primary":
-            const previousPrimary = this.primary!;
-            this.primary = modify(this.source.getPrimaryCategory(), this.modifiers.primary);
-            if (previousPrimary !== this.primary) {
-              this.onCategoriesChanged();
-              if (this.events?.primaryChanged) {
-                this.events.primaryChanged(this.primary!, previousPrimary);
+            const previousPrimary = this.primary;
+            if (previousPrimary) {
+              // If primary is undefined, it likely means this option cannot have a primary, otherwise it would have a default value
+
+              this.primary = modify(this.source.getPrimaryCategory(), this.modifiers.primary);
+              if (previousPrimary !== this.primary) {
+                this.onCategoriesChanged();
+                console.log(this.name, "category");
+                if (this.events?.primaryChanged) {
+                  this.events.primaryChanged(this.primary!, previousPrimary);
+                }
               }
             }
             break;
@@ -713,6 +718,9 @@ export class BSNodeState
       const force = this.find("force") as BSNodeState;
       const total = force.scope.index[`s::${cost}::${this.source.getId()}`];
       total ? $set(this.totalCosts, cost, total) : $delete(this.totalCosts, cost);
+      if (this.name === "Other") {
+        console.log(total);
+      }
     } else {
       const selfcost = (this.costs[cost] || 0) * this.scope.amount;
       const childcost = (this.scope.index[`sf::${cost}::any`] || 0) * this.scope.amount;

@@ -20,7 +20,6 @@ import type { IModel } from "../systems/army_interfaces";
 import type { NRAssociation, AssociationConstraint } from "./bs_association";
 import { clone, isObject } from "./bs_helpers";
 import { getAllInfoGroups } from "./bs_modifiers";
-import { Info } from "electron";
 const isNonEmptyIfHasOneOf = [
   "modifiers",
   "modifierGroups",
@@ -174,7 +173,7 @@ export class Base implements BSModifierBase {
   // Prevent Vue Observers
   get [Symbol.toStringTag](): string {
     // Anything can go here really as long as it's not 'Object'
-    return globalThis.isEditor ? "Object" : "ObjectNoObserve";
+    return (globalThis as any).isEditor ? "Object" : "ObjectNoObserve";
   }
   isGroup(): this is Group {
     return false;
@@ -243,23 +242,23 @@ export class Base implements BSModifierBase {
   *forcesIterator(): Iterable<Force> {
     return;
   }
-  *profilesIterator(): Iterable<BSIProfile> {
+  *profilesIterator(): Iterable<Profile> {
     for (const group of getAllInfoGroups(this)) {
       if (group.profiles) {
         yield* group.profiles;
       }
       if (group.infoLinks) {
-        yield* group.infoLinks?.filter((o) => o.type === "profile").map((o) => o.target as BSIProfile);
+        yield* group.infoLinks?.filter((o) => o.type === "profile").map((o) => o.target as Profile);
       }
     }
   }
-  *rulesIterator(): Iterable<BSIRule> {
+  *rulesIterator(): Iterable<Rule> {
     for (const group of getAllInfoGroups(this)) {
       if (group.rules) {
         yield* group.rules;
       }
       if (group.infoLinks) {
-        yield* group.infoLinks?.filter((o) => o.type === "rule").map((o) => o.target as BSIRule);
+        yield* group.infoLinks?.filter((o) => o.type === "rule").map((o) => o.target as Rule);
       }
     }
   }
@@ -275,7 +274,7 @@ export class Base implements BSModifierBase {
   *modifiersIterator(): Iterable<BSIModifier> {
     if (this.modifiers) yield* this.modifiers;
   }
-  *modifierGroupsIteratorRecursive(): Generator<BSIModifierGroup, void, undefined> {
+  *modifierGroupsIteratorRecursive(): Iterable<BSIModifierGroup> {
     yield this;
     if (this.isLink()) yield this.target;
     for (const group of this.modifierGroupsIterator()) {
@@ -309,16 +308,16 @@ export class Base implements BSModifierBase {
   *categoryLinksIterator(): Iterable<CategoryLink> {
     if (this.categoryLinks) yield* this.categoryLinks;
   }
-  *infoLinksIterator(): Iterable<BSIInfoLink> {
+  *infoLinksIterator(): Iterable<InfoLink> {
     if (this.infoLinks) yield* this.infoLinks;
   }
-  *infoGroupsIterator(): Iterable<BSIInfoGroup> {
+  *infoGroupsIterator(): Iterable<InfoGroup> {
     if (this.infoGroups) yield* this.infoGroups;
   }
-  *infoRulesIterator(): Iterable<BSIRule> {
+  *infoRulesIterator(): Iterable<Rule> {
     if (this.rules) yield* this.rules;
   }
-  *infoProfilesIterator(): Iterable<BSIProfile> {
+  *infoProfilesIterator(): Iterable<Profile> {
     if (this.profiles) yield* this.profiles;
   }
 
@@ -591,11 +590,11 @@ export class Link<T extends Base = Group | Entry> extends Base {
     yield* this.target.extraConstraintsIterator();
     yield* super.extraConstraintsIterator();
   }
-  *rulesIterator(): Iterable<BSIRule> {
+  *rulesIterator(): Iterable<Rule> {
     yield* this.target.rulesIterator();
     yield* super.rulesIterator();
   }
-  *profilesIterator(): Iterable<BSIProfile> {
+  *profilesIterator(): Iterable<Profile> {
     yield* this.target.profilesIterator();
     yield* super.profilesIterator();
   }
@@ -619,19 +618,19 @@ export class Link<T extends Base = Group | Entry> extends Base {
     yield* this.target.categoryLinksIterator();
     yield* super.categoryLinksIterator();
   }
-  *infoLinksIterator(): Iterable<BSIInfoLink> {
+  *infoLinksIterator(): Iterable<InfoLink> {
     yield* this.target.infoLinksIterator();
     yield* super.infoLinksIterator();
   }
-  *infoGroupsIterator(): Iterable<BSIInfoGroup> {
+  *infoGroupsIterator(): Iterable<InfoGroup> {
     yield* this.target.infoGroupsIterator();
     yield* super.infoGroupsIterator();
   }
-  *infoRulesIterator(): Iterable<BSIRule> {
+  *infoRulesIterator(): Iterable<Rule> {
     yield* this.target.infoRulesIterator();
     yield* super.infoRulesIterator();
   }
-  *infoProfilesIterator(): Iterable<BSIProfile> {
+  *infoProfilesIterator(): Iterable<Profile> {
     yield* this.target.infoProfilesIterator();
     yield* super.infoProfilesIterator();
   }
@@ -713,13 +712,13 @@ export class Force extends Base {
     yield* this.categories;
     if (this.forces) yield* this.forces;
   }
-  *rulesIterator(): Iterable<BSIRule> {
+  *rulesIterator(): Iterable<Rule> {
     for (const group of getAllInfoGroups(this)) {
       if (group.rules) {
         yield* group.rules;
       }
       if (group.infoLinks) {
-        yield* group.infoLinks?.filter((o) => o.type === "rule").map((o) => o.target as BSIRule);
+        yield* group.infoLinks?.filter((o) => o.type === "rule").map((o) => o.target as Rule);
       }
     }
     if (this.main_catalogue) yield* this.main_catalogue.rulesIterator();
