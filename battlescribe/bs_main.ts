@@ -708,6 +708,9 @@ export class Force extends Base {
   isForce(): this is Force {
     return true;
   }
+  isEntry() {
+    return true;
+  }
   *selectionsIterator(): Iterable<Base> {
     yield* this.categories;
     if (this.forces) yield* this.forces;
