@@ -1,3 +1,5 @@
+import nodefetch from "node-fetch";
+
 type URL = string;
 export interface BattleScribeDataIndex {
   $schema: URL;
@@ -53,7 +55,7 @@ export function github_contents_api(user: string, repo: string, dir?: string) {
 
 // unused
 export async function github_download_blob(blob_url: string): Promise<Buffer> {
-  const fetched = await fetch(blob_url);
+  const fetched = await nodefetch(blob_url);
   const content = (await fetched.json()) as any;
   return Buffer.from(content.content, content.encoding);
 }
@@ -62,7 +64,7 @@ export async function fetch_bs_repos_data(): Promise<BattleScribeDataIndex> {
   const url =
     "https://github.com/BSData/gallery/releases/latest/download/bsdata.catpkg-gallery.json" ||
     `https://battlescribedata.appspot.com/repos`;
-  const response = await fetch(url);
+  const response = await nodefetch(url);
   if (!response.ok) {
     throw Error("Unable to fetch repos from appspot");
   }
@@ -81,9 +83,9 @@ export async function fetch_bs_repos_datas(bypass_cors = false): Promise<BattleS
   for (const url of urls) {
     try {
       const _url = bypass_cors ? `https://corsproxy.io/?${encodeURIComponent(url)}` : url;
-      console.log;
+      console.log(url);
 
-      const response = await fetch(_url);
+      const response = await nodefetch(_url);
 
       if (!response.ok) {
         console.log("Unable to fetch repos from appspot");
