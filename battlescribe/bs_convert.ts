@@ -3,7 +3,7 @@ import { X2jOptionsOptional, XMLParser, XMLBuilder, XmlBuilderOptionsOptional } 
 import { fix_xml_object, forEachValueRecursive, hashFnv32a, isObject, removePrefix, to_snake_case } from "./bs_helpers";
 import { rootToJson } from "./bs_main";
 import { getDataObject } from "./bs_system";
-import { BSICatalogue } from "./bs_types";
+import { BSICatalogue, BSIData } from "./bs_types";
 import { Catalogue } from "./bs_main_catalogue";
 
 export function xmlToJson(data: string) {
@@ -153,7 +153,7 @@ function putAttributesIn$(first: any) {
   return first;
 }
 
-export function convertToXml(data: BSICatalogue | Catalogue) {
+export function convertToXml(data: BSICatalogue | Catalogue | BSIData) {
   const json = JSON.parse(rootToJson(data));
   putAttributesIn$(getDataObject(json));
   const options: XmlBuilderOptionsOptional = {
