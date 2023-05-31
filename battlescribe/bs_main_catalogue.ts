@@ -34,6 +34,7 @@ export interface EditorBase extends Base {
 
   showInEditor?: boolean;
   showChildsInEditor?: boolean;
+  highlight?: boolean;
 }
 export class CatalogueLink extends Base {
   targetId!: string;
