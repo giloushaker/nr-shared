@@ -75,7 +75,7 @@ const good1 = [
   "rootRules",
 
   "publications",
-
+  "catalogueLinks",
   "constraints",
 
   "characteristics",
