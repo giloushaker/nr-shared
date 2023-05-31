@@ -121,16 +121,16 @@ export const categories: CategoryEntry[] = [
     icon: "infoGroup.png",
   },
   {
-    type: "selectionEntries",
-    links: "entryLinks",
-    name: "Root Selection Entries",
-    icon: "selectionEntry.png",
-  },
-  {
     type: "rules",
     links: "infoLinks",
     name: "Root Rules",
     icon: "rule.png",
+  },
+  {
+    type: "selectionEntries",
+    links: "entryLinks",
+    name: "Root Selection Entries",
+    icon: "selectionEntry.png",
   },
 ];
 
