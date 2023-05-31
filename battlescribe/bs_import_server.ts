@@ -7,54 +7,7 @@ import { GameSystemRow, BookRow } from "../../../assets/shared/types/db_types";
 import { saveFileAtDate, getFilePathByTimestamp } from "./bs_versioning_server";
 import { CatalogueExtraInfo } from "./bs_book";
 import { bs_to_json } from "./bs_xml";
-type URL = string;
-export interface BattleScribeDataIndex {
-  $schema: URL;
-  name: string;
-  description: string;
-  battleScribeVersion: string;
-  facebookUrl: URL;
-  repositorySourceUrl: URL;
-  twitterUrl: URL;
-  discordUrl: URL;
-  websiteUrl: URL;
-  feedUrl: URL;
-  githubUrl: URL;
-  repositories: BattleScribeRepoData[];
-}
-export interface BattleScribeRepoData {
-  name: string;
-  description: string;
-  battleScribeVersion: string;
-  version: string;
-  lastUpdated: string;
-  lastUpdateDescription: string;
-  indexUrl: URL;
-  repositoryUrl: URL;
-  repositoryGzipUrl: URL;
-  repositoryBsrUrl: URL;
-  githubUrl: URL;
-  feedUrl: URL;
-  bugTrackerUrl: URL;
-  reportBugUrl: URL;
-  archived: boolean;
-  repositoryFiles: BattleScribeFile[];
-}
-
-export interface BattleScribeFile {
-  id: string;
-  name: string;
-  type: "gamesystem" | "catalogue";
-  revision: number;
-  battleScribeVersion: string;
-  fileUrl: URL;
-  githubUrl: URL;
-  bugTrackerUrl: URL;
-  reportBugUrl: URL;
-  authorName: string;
-  authorContact: string;
-  authorUrl: URL;
-}
+import { BattleScribeFile, BattleScribeRepoData, fetch_bs_repos_data, github_contents_api } from "./bs_import_data";
 
 // -1: errors only
 //  0: number of repos/files found
@@ -66,34 +19,11 @@ const verbosity = -1;
 function log(_verbosity: number, ...args: any) {
   if (verbosity >= _verbosity) console.log(...args);
 }
-const BASE_URL = "https://api.github.com";
 // unused
-export function github_contents_api(user: string, repo: string, dir?: string) {
-  return `${BASE_URL}/repos/${user}/${repo}/contents` + (dir ? `/${dir}` : "");
-}
 
-// unused
-export async function github_download_blob(blob_url: string): Promise<Buffer> {
-  const fetched = await fetch(blob_url);
-  const content = await fetched.json();
-  return Buffer.from(content.content, content.encoding);
-}
-
-export async function fetch_bs_repos_data(): Promise<BattleScribeDataIndex> {
-  const url =
-    "https://github.com/BSData/gallery/releases/latest/download/bsdata.catpkg-gallery.json" ||
-    `https://battlescribedata.appspot.com/repos`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw Error("Unable to fetch repos from appspot");
-  }
-  const result = await response.json();
-
-  return result;
-}
 export async function fetch_bs_repo_data(url: string): Promise<BattleScribeRepoData> {
   const response = await fetch(url);
-  const result = await response.json();
+  const result = (await response.json()) as BattleScribeRepoData;
 
   return result;
 }
@@ -122,7 +52,7 @@ export function get_cached_systems(root: string): Record<string, GameSystemRow> 
   return JSON.parse(f) || {};
 }
 
-export async function fetch_github_repo(repo: string, user = "BSData"): Promise<string> {
+export async function fetch_github_repo(repo: string, user = "BSData") {
   const url = github_contents_api(user, repo);
   const res = await fetch(url);
   const result = await res.json();
