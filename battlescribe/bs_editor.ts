@@ -535,11 +535,13 @@ export function setAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[], ent
   arr.splice(lastNode.index, 0, entry);
   return current;
 }
-export function getAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[]): EditorBase {
+export function getAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[]): EditorBase | undefined {
   let current = catalogue as any;
   // resolve path up until the last node
   for (const node of path) {
-    current = current[node.key][node.index];
+    current = current[node.key];
+    if (!current) return undefined;
+    current = current[node.index];
   }
   return current;
 }

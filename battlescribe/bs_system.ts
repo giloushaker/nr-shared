@@ -105,7 +105,7 @@ export async function loadData(
   const isCatalogue = key === "catalogue";
   const obj = data[key]!;
   const asCatalogue = obj as unknown as Catalogue;
-  if (asCatalogue.loaded) return asCatalogue;
+  if (asCatalogue.loaded || asCatalogue.loaded_editor) return asCatalogue;
 
   // Prevent infinite loops by checking if prototype is already set
   setPrototypeRecursive(obj);
