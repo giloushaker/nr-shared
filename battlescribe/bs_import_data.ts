@@ -72,7 +72,7 @@ export async function fetch_bs_repos_data(): Promise<BattleScribeDataIndex> {
   return result;
 }
 
-export async function fetch_bs_repos_datas(bypass_cors = false): Promise<BattleScribeDataIndex> {
+export async function fetch_bs_repos_datas(): Promise<BattleScribeDataIndex> {
   const urls = [
     "https://github.com/BSData/gallery/releases/download/index-v1/bsdata.catpkg-gallery.json",
     `https://battlescribedata.appspot.com/repos`,
@@ -82,9 +82,7 @@ export async function fetch_bs_repos_datas(bypass_cors = false): Promise<BattleS
   let firstResponse = null as BattleScribeDataIndex | null;
   for (const url of urls) {
     try {
-      const _url = bypass_cors ? `https://corsproxy.io/?${encodeURIComponent(url)}` : url;
-      console.log(url);
-
+      const _url = url;
       const response = await nodefetch(_url);
 
       if (!response.ok) {
