@@ -14,7 +14,7 @@ import type {
   BSICatalogue,
   BSICharacteristic,
 } from "./bs_types";
-import type { Catalogue, EditorBase } from "./bs_main_catalogue";
+import { Catalogue, EditorBase } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
 import type { IModel } from "../systems/army_interfaces";
 import type { NRAssociation, AssociationConstraint } from "./bs_association";
@@ -917,11 +917,6 @@ export class Rule extends Base implements BSIRule {
   isRule() {
     return true;
   }
-  post_init() {
-    if (Array.isArray(this.description)) {
-      this.description = this.description[0];
-    }
-  }
 }
 
 export function getStaticFilters(source: Base): string[] {
@@ -967,6 +962,7 @@ export const goodJsonKeys = new Set([
   "sharedSelectionEntryGroups",
   "selectionEntryGroup",
   "sharedProfiles",
+  "sharedInfoGroups",
   "profile",
   "characteristics",
   "characteristic",
@@ -1019,6 +1015,7 @@ export const goodJsonKeys = new Set([
   "typeId",
   "collective",
   "import",
+  "importRootEntries",
   "$text",
   "page",
   "typeName",
@@ -1039,7 +1036,7 @@ export const goodJsonKeys = new Set([
   "publisherUrl",
   "shortName",
 ]);
-export function rootToJson(data: Catalogue | Record<string, any> | BSICatalogue): string {
+export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>): string {
   const root: any = {
     catalogue: undefined,
     gameSystem: undefined,

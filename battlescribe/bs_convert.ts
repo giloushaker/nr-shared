@@ -153,7 +153,7 @@ function putAttributesIn$(first: any) {
   return first;
 }
 
-export function convertToXml(data: BSICatalogue | Catalogue | BSIData) {
+export function convertToXml(data: BSICatalogue | Catalogue) {
   const json = JSON.parse(rootToJson(data));
   putAttributesIn$(getDataObject(json));
   const options: XmlBuilderOptionsOptional = {
