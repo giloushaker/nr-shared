@@ -79,8 +79,10 @@ export function constraintError(instance: Instance, constraint: BSIConstraint, v
 
   // There cannot be an 'ancestor' constraint so no arrays can be returned
   const scope = instance.state.find(constraint.scope, constraint.shared) as BSNodeState;
+  const index = instance.getCostIndex();
+  const split = constraint.field.split("::");
+  const constraintField = split.map((o) => index[o]?.name || o).join("::");
 
-  const constraintField = instance.getCostIndex()[constraint.field]?.name || constraint.field;
   const ofWhat = (constraint as BSIExtraConstraint).name || constraint.childId || instance.getName();
   const msg = buildErrorMessage(
     scope?.name,
@@ -106,7 +108,6 @@ export function constraintError(instance: Instance, constraint: BSIConstraint, v
 
 function getConstraintErrorSeverity(self: Instance, state: BSNodeState, constraintType: string): "error" | "warning" {
   if (!self.isGroup() && !self.isQuantifiable()) return "error";
-  // Is a min
   if (constraintType !== "min") return "error";
 
   // If a scope is within ParentEntry, this is an error
