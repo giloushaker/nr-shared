@@ -247,8 +247,11 @@ export class Catalogue extends Base {
       for (const imported of [this, ...this.imports]) {
         for (const val of Object.values(imported.index)) {
           if ((val as any).getName) {
-            if (val.isLink() && val.isCategory() && !(val as any as EditorBase).parent?.isForce()) {
-              continue;
+            if (val.isLink()) {
+              if (!val.target) continue;
+              if (val.isCategory() && !(val as unknown as EditorBase).parent?.isForce()) {
+                continue;
+              }
             }
             result.push(val);
           } else {

@@ -1,3 +1,4 @@
+import { remove } from "jszip";
 import { escapeXml } from "./bs_export_xml";
 import { Base, Link, goodJsonKeys } from "./bs_main";
 import { Catalogue, EditorBase } from "./bs_main_catalogue";
