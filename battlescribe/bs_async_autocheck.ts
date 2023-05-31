@@ -65,7 +65,8 @@ async function autoCheckCreationGroupAsync(option: Instance) {
 
   const options = option.getOptions();
   // Filter non defaultSelectionEntryId here to remove initial 'choices'
-  const sorted = sortByDescending(options, (o) => autoCheckPriority(o, option, option.source.defaultSelectionEntryId));
+  const defaultId = option.source.isGroup() ? option.source.defaultSelectionEntryId : undefined;
+  const sorted = sortByDescending(options, (o) => autoCheckPriority(o, option, defaultId));
   for (const nested_option of sorted) {
     const missing = min - option.getSelfAmountElseChilds();
     if (missing <= 0) break;
