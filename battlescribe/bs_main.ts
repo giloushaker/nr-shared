@@ -664,6 +664,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
 
 export class InfoLink<T extends Base = Rule | InfoGroup | Profile> extends Link {
   declare target: T;
+  declare type: "infoGroup" | "profile" | "rule";
 }
 export class CategoryLink extends Link {
   declare targetId: string;
