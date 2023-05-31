@@ -39,6 +39,10 @@ export class CatalogueLink extends Base {
   targetId!: string;
   declare target: Catalogue;
   importRootEntries?: boolean;
+  /** Most code that checks for links expects entryLinks or categoryLinks, catalogueLinks are specially handled */
+  isLink() {
+    return false;
+  }
 }
 export class Publication extends Base implements BSIPublication {
   shortName?: string;
@@ -88,7 +92,7 @@ export class Catalogue extends Base {
   costIndex!: Record<string, BSICostType>;
 
   fullFilePath?: string;
-  process(loadOptions?: any) {
+  process() {
     if (this.loaded) return;
     this.loaded = true;
     const units = this.generateUnits();
@@ -584,7 +588,7 @@ export class Catalogue extends Base {
       delete this.index[cur.id];
     }
   }
-  resolveAllLinks(imports: Catalogue[]) {
+  resolveAllLinks(imports: Catalogue[], deleteBadLinks = true) {
     const catalogue = this as Catalogue;
     const unresolvedLinks: Array<Link> = [];
     const unresolvedPublications: Array<BSIInfoLink | BSIRule | BSIProfile> = [];
@@ -613,7 +617,7 @@ export class Catalogue extends Base {
     for (const importedCatalogue of imports) {
       indexes.push(importedCatalogue.index);
     }
-    resolveLinks(unresolvedLinks, indexes, parents);
+    resolveLinks(unresolvedLinks, indexes, parents, deleteBadLinks);
     resolvePublications(unresolvedPublications, indexes);
     resolveChildIds(unresolvedChildIds, indexes);
   }
@@ -660,7 +664,12 @@ export class Catalogue extends Base {
  * @param unresolved The links to resolve
  * @param indexes Array of indexes which match an id to a node
  */
-export function resolveLinks(unresolved: Link[] = [], indexes: Record<string, Base>[], parents: Base[]) {
+export function resolveLinks(
+  unresolved: Link[] = [],
+  indexes: Record<string, Base>[],
+  parents: Base[],
+  deleteBadLinks = true
+) {
   const length = unresolved.length;
   const resolved = [];
 
@@ -701,7 +710,7 @@ export function resolveLinks(unresolved: Link[] = [], indexes: Record<string, Ba
   }
 
   // Delete unresolved links
-  if (unresolved.length) {
+  if (unresolved.length && deleteBadLinks) {
     console.warn(`${length - unresolved.length}/${length} links resolved in ${unresolved[0].catalogue.name}`);
     console.log(`unresolved links: ${unresolved.map((o) => `${o.id} -> ${o.targetId}`)}`);
     for (let i = 0; i < unresolved.length; i++) {

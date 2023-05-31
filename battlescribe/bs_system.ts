@@ -11,7 +11,6 @@ import { getBookDate, BooksDate } from "./bs_versioning";
 
 export class BSCatalogueManager {
   catalogues = {} as Record<string, Record<string, Catalogue>>;
-  loadOptions?: any;
   // Must implement
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData> {
@@ -38,7 +37,7 @@ export class BSCatalogueManager {
 
   async loadData(data: BSIData, booksDate?: BooksDate): Promise<Catalogue> {
     const loaded = await loadData(this, data, booksDate);
-    loaded.process(this.loadOptions);
+    loaded.process();
     return loaded;
   }
   async loadCatalogue(catalogueLink: BSICatalogueLink, booksDate?: BooksDate, forceLoad?: boolean): Promise<Catalogue> {
@@ -88,7 +87,15 @@ export function getDataDbId(data: BSIData | Catalogue): string {
   }
   throw Error("getDataId data argument is not a valid system or catalogue");
 }
-export async function loadData(system: BSCatalogueManager, data: BSIData, booksDate?: BooksDate): Promise<Catalogue> {
+export interface loadDataOptions {
+  deleteBadLinks: boolean;
+}
+export async function loadData(
+  system: BSCatalogueManager,
+  data: BSIData,
+  booksDate?: BooksDate,
+  options?: loadDataOptions
+): Promise<Catalogue> {
   if (!data.catalogue && !data.gameSystem) {
     throw Error(`invalid loadBsData argument: no .catalogue or .gameSystem in data`);
   }
@@ -118,7 +125,7 @@ export async function loadData(system: BSCatalogueManager, data: BSIData, booksD
         content.gameSystem = loadedGameSystem;
       } //
       else {
-        content.gameSystem = await loadData(system, data, booksDate);
+        content.gameSystem = await loadData(system, data, booksDate, options);
       }
     }
   }
@@ -142,7 +149,7 @@ export async function loadData(system: BSCatalogueManager, data: BSIData, booksD
         link.target = loadedCatalogue;
         return;
       }
-      return loadData(system, data, booksDate).then((data) => (link.target = data));
+      return loadData(system, data, booksDate, options).then((data) => (link.target = data));
     });
     promises.push(promise);
   }
@@ -151,7 +158,7 @@ export async function loadData(system: BSCatalogueManager, data: BSIData, booksD
   content.generateImports();
 
   // Resolve links
-  content.resolveAllLinks(content.imports);
+  content.resolveAllLinks(content.imports, options?.deleteBadLinks);
 
   // Add loaded catalogue to Manager
   if (isSystem) {
