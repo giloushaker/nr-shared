@@ -97,7 +97,6 @@ export class Base implements BSModifierBase {
   shared?: boolean;
   import?: boolean;
   collective?: boolean;
-  defaultSelectionEntryId?: string;
 
   // Maybe move this to catalogue
   profileTypes?: BSIProfileType[];
@@ -175,7 +174,7 @@ export class Base implements BSModifierBase {
     // Anything can go here really as long as it's not 'Object'
     return (globalThis as any).isEditor ? "Object" : "ObjectNoObserve";
   }
-  isGroup(): this is Group {
+  isGroup(): this is Group | Link<Group> {
     return false;
   }
   isForce(): this is Force {
@@ -521,6 +520,7 @@ export class Entry extends Base {
   }
 }
 export class Group extends Base {
+  declare defaultSelectionEntryId?: string;
   isGroup() {
     return true;
   }
@@ -581,7 +581,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore: TS2611
   get defaultSelectionEntryId(): string | undefined {
-    return this.target.defaultSelectionEntryId;
+    return (this.target as Group).defaultSelectionEntryId;
   }
   isCollective(): boolean | undefined {
     return super.isCollective() || this.target.isCollective();
@@ -664,6 +664,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
 
 export class InfoLink<T extends Base = Rule | InfoGroup | Profile> extends Link {
   declare target: T;
+  declare type: "infoGroup" | "profile" | "rule";
 }
 export class CategoryLink extends Link {
   declare targetId: string;

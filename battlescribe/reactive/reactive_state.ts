@@ -321,7 +321,7 @@ export class BSNodeState
       case "self":
         return this;
       case "parent":
-        return extra ? this : this.findParent((o) => o.source.isEntry() || o.source.isRoster());
+        return extra ? this : this.findParent((o) => o.source.isRoster() || o.source.isEntry());
       case "primary-category":
         return this.source.isCategory() ? this : this.findParent((o) => o.source.isCategory());
       case "force":

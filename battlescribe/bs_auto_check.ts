@@ -1,5 +1,5 @@
 import type { IArmyOption } from "../systems/army_interfaces";
-import type { Base, Link } from "./bs_main";
+import type { Base, Link, Group } from "./bs_main";
 import type { BSIConstraint } from "./bs_types";
 import { HeaderInstance, Instance } from "./bs_instance";
 import { getIn } from "./bs_condition";
@@ -147,7 +147,8 @@ function autoCheckCreationGroup(option: Instance) {
 
   const options = option.getOptions();
   // Filter non defaultSelectionEntryId here to remove initial 'choices'
-  const sorted = sortByDescending(options, (o) => autoCheckPriority(o, option, option.source.defaultSelectionEntryId));
+  const defaultId = option.source.isGroup() ? option.source.defaultSelectionEntryId : undefined;
+  const sorted = sortByDescending(options, (o) => autoCheckPriority(o, option, defaultId));
   for (const nested_option of sorted) {
     // if (nested_option.isHidden()) continue;
     const missing = min - option.getSelfAmountElseChilds();

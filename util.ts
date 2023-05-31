@@ -368,6 +368,7 @@ export function download(filename: string, mimeType: any, content: BlobPart) {
   a.click(); // Start downloading
 }
 
+// @ts-ignore
 export async function zip<T extends OutputType>(filename: string, content: string, type: T = "blob") {
   const zip = new JSZip();
   zip.file(filename, content);
