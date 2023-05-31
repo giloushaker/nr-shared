@@ -642,12 +642,12 @@ type ArrayPropertyType<O, KT extends keyof O> = NonNullable<O[KT]> extends unkno
   ? ArrayElement<NonNullable<O[KT]>>
   : never;
 export function addObj<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
-  const found = obj[key] as T[];
+  const found = obj[key] as unknown as T[];
   if (found) {
     found.push(val);
     return;
   }
-  (obj[key] as T[]) = [val];
+  (obj[key] as unknown as T[]) = [val];
 }
 
 export function add(obj: any, key: string, amount = 1) {

@@ -379,7 +379,6 @@ export function getNameExtra(obj: EditorBase): string {
     case "selectionEntryGroups":
     case "sharedSelectionEntryGroups":
     case "entryLinks":
-    case "sharedEntryLinks":
     case "forceEntries":
     case "categoryLinks":
     case "categoryEntries":

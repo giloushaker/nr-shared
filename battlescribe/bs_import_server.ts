@@ -7,13 +7,13 @@ import { GameSystemRow, BookRow } from "../../../assets/shared/types/db_types";
 import { saveFileAtDate, getFilePathByTimestamp } from "./bs_versioning_server";
 import { CatalogueExtraInfo } from "./bs_book";
 import { bs_to_json } from "./bs_xml";
-import { BattleScribeFile, BattleScribeRepoData, fetch_bs_repos_data, github_contents_api } from "./bs_import_data";
+import { BattleScribeFile, BattleScribeRepoData, fetch_bs_repos_datas, github_contents_api } from "./bs_import_data";
 
 // -1: errors only
 //  0: number of repos/files found
 //  1: downloading/updating file
 //  2: everything (spam)
-const verbosity = -1;
+const verbosity = 2;
 
 // wanted to put a carriage return but it doesnt work..
 function log(_verbosity: number, ...args: any) {
@@ -68,7 +68,7 @@ export async function update_bs_data(
   let result = 0;
   if (force) log(0, "Force updating BSData...");
   log(0, "Fetching bs repo data...");
-  const new_data = await fetch_bs_repos_data();
+  const new_data = await fetch_bs_repos_datas();
   log(1, `Fetching bs repo data done (${Boolean(new_data?.repositories?.length)})`);
 
   if (!new_data.repositories || new_data.repositories.length < 100) {
