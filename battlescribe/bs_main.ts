@@ -198,6 +198,9 @@ export class Base implements BSModifierBase {
   isEntry(): this is Entry {
     return false;
   }
+  isRule(): this is Rule | InfoLink<Rule> {
+    return false;
+  }
   isProfile(): this is Profile | InfoLink<Profile> {
     return false;
   }
@@ -543,6 +546,15 @@ export class Link<T extends Base = Group | Entry> extends Base {
   isEntry() {
     return this.target.isEntry();
   }
+  isProfile() {
+    return this.target.isProfile();
+  }
+  isRule(): boolean {
+    return this.target.isRule();
+  }
+  isInfoGroup() {
+    return this.target.isInfoGroup();
+  }
   isUnit(): boolean {
     if (this.target.isUnit()) return true;
     for (const categoryLink of this.categoryLinks || []) {
@@ -878,12 +890,18 @@ export class Profile extends Base implements BSIProfile {
   declare typeId: string;
   declare typeName: string;
   declare publication?: BSIPublication | undefined;
+  isProfile() {
+    return true;
+  }
 }
 export class InfoGroup extends Base {
   declare characteristics: BSICharacteristic[];
   declare typeId: string;
   declare typeName: string;
   declare publication?: BSIPublication | undefined;
+  isInfoGroup() {
+    return true;
+  }
 }
 export class Rule extends Base implements BSIRule {
   declare id: string;
@@ -895,6 +913,9 @@ export class Rule extends Base implements BSIRule {
   declare modifierGroups?: BSIModifierGroup[] | undefined;
   getDescription(): string {
     return Array.isArray(this.description) ? this.description.join("\n") : this.description;
+  }
+  isRule() {
+    return true;
   }
   post_init() {
     if (Array.isArray(this.description)) {
