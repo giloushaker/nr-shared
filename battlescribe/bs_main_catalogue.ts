@@ -248,8 +248,7 @@ export class Catalogue extends Base {
         for (const val of Object.values(imported.index) as EditorBase[]) {
           if ((val as any).getName) {
             if (val.isLink()) {
-              if (!val.target) continue;
-              if (val.isCategory() && !val.parent?.isForce()) {
+              if (val.target && val.isCategory() && !val.parent?.isForce()) {
                 continue;
               }
             }
@@ -268,7 +267,7 @@ export class Catalogue extends Base {
         const name = val.getName?.call(val);
         if (name && String(name).match(regx)) {
           if (val.isLink()) {
-            if (val.isCategory() && !val.parent?.isForce()) {
+            if (val.target && val.isCategory() && !val.parent?.isForce()) {
               continue;
             }
           }
