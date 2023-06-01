@@ -13,6 +13,9 @@ import type {
   BSIData,
   BSICatalogue,
   BSICharacteristic,
+  BSICondition,
+  BSIConditionGroup,
+  BSIRepeat,
 } from "./bs_types";
 import { Catalogue, EditorBase } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
@@ -133,6 +136,9 @@ export class Base implements BSModifierBase {
   modifiers?: BSIModifier[];
   modifierGroups?: BSIModifierGroup[];
   constraints?: BSIConstraint[];
+  repeats?: BSIRepeat[];
+  conditions?: BSICondition[];
+  conditionGroups?: BSIConditionGroup[];
 
   // Processed (Catalogue)
   catalogue!: Catalogue; // Parent Catalogue
@@ -1057,7 +1063,14 @@ export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>)
   return stringed;
 }
 export function entryToJson(data: Base | Record<string, any>, extraFields?: Set<string>): string {
-  const stringed = JSON.stringify(data, (k, v) => {
+  const stringed = JSON.stringify(data, function (k, v) {
+    if (goodJsonKeys.has(k) || isFinite(Number(k)) || extraFields?.has(k)) return v;
+    return undefined;
+  });
+  return stringed;
+}
+export function entriesToJson(data: Array<Base | Record<string, any>>, extraFields?: Set<string>): string {
+  const stringed = JSON.stringify(data, function (k, v) {
     if (goodJsonKeys.has(k) || isFinite(Number(k)) || extraFields?.has(k)) return v;
     return undefined;
   });

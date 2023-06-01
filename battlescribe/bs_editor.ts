@@ -370,27 +370,33 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
 
 export function getNameExtra(obj: EditorBase): string {
   const type = obj.parentKey;
+  const pieces = [];
   switch (type) {
     case "sharedProfiles":
     case "profiles":
-      return (obj as unknown as BSIProfile).typeName;
+      pieces.push((obj as unknown as BSIProfile).typeName);
 
     case "selectionEntries":
     case "sharedSelectionEntries":
+    case "entryLinks":
+      if (obj.isEntry()) {
+        pieces.push(obj.getType());
+      }
     case "selectionEntryGroups":
     case "sharedSelectionEntryGroups":
-    case "entryLinks":
     case "forceEntries":
     case "categoryLinks":
     case "categoryEntries":
     case "sharedInfoGroups":
     case "infoGroups":
-      if (!obj.links?.length) return "";
-      const s = obj.links.length === 1 ? "" : "s";
-      return `(${obj.links.length} ref${s})`;
     default:
-      return "";
+      break;
   }
+  if (obj.links?.length) {
+    const s = obj.links.length === 1 ? "" : "s";
+    pieces.push(`(${obj.links.length} ref${s})`);
+  }
+  return pieces.join(" ");
 }
 export function getName(obj: any): string {
   const type = obj.parentKey;
@@ -579,4 +585,59 @@ export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {
       entry.id = catalogue.generateNonConflictingId();
     }
   });
+}
+
+export function fixKey(parent: EditorBase | Catalogue, key: keyof Base, catalogueKey?: string): keyof Base | "" {
+  if (!parent.isCatalogue()) {
+    switch (key) {
+      case "sharedRules":
+        return "rules";
+      case "sharedProfiles":
+        return "profiles";
+      case "sharedInfoGroups":
+        return "infoGroups";
+      case "sharedSelectionEntries":
+        return "selectionEntries";
+      case "sharedSelectionEntryGroups":
+        return "selectionEntryGroups";
+      default:
+        return key;
+    }
+  } else if (catalogueKey) {
+    switch (key) {
+      case "sharedRules":
+      case "rules":
+        if (["sharedRules", "rules"].includes(catalogueKey)) {
+          return catalogueKey as keyof Base;
+        }
+        return "";
+      case "sharedProfiles":
+      case "profiles":
+        if (["sharedProfiles", "profiles"].includes(catalogueKey)) {
+          return catalogueKey as keyof Base;
+        }
+        return "";
+      case "sharedInfoGroups":
+      case "infoGroups":
+        if (["sharedInfoGroups", "infoGroups"].includes(catalogueKey)) {
+          return catalogueKey as keyof Base;
+        }
+        return "";
+      case "sharedSelectionEntries":
+      case "selectionEntries":
+        if (["sharedSelectionEntries", "selectionEntries"].includes(catalogueKey)) {
+          return catalogueKey as keyof Base;
+        }
+        return "";
+      case "sharedSelectionEntryGroups":
+      case "selectionEntryGroups":
+        if (["sharedSelectionEntryGroups", "selectionEntryGroups"].includes(catalogueKey)) {
+          return catalogueKey as keyof Base;
+        }
+        return "";
+      default:
+        return key === catalogueKey ? key : "";
+    }
+  }
+  return key;
 }
