@@ -1030,6 +1030,7 @@ export const goodJsonKeys = new Set([
   "gameSystemRevision",
   "xmlns",
   "readme",
+  "description",
   "comment",
   "publicationDate",
   "publisher",
