@@ -241,15 +241,15 @@ export class Catalogue extends Base {
     }
     return result;
   }
-  findOptionsByText(name?: string): Base[] {
-    if (!name || !name.trim()) {
+  findOptionsByText(text?: string): Base[] {
+    if (!text || !text.trim()) {
       const result = [];
       for (const imported of [this, ...this.imports]) {
-        for (const val of Object.values(imported.index)) {
+        for (const val of Object.values(imported.index) as EditorBase[]) {
           if ((val as any).getName) {
             if (val.isLink()) {
               if (!val.target) continue;
-              if (val.isCategory() && !(val as unknown as EditorBase).parent?.isForce()) {
+              if (val.isCategory() && !val.parent?.isForce()) {
                 continue;
               }
             }
@@ -262,13 +262,15 @@ export class Catalogue extends Base {
       return result;
     }
     const result = [];
-    const regx = textSearchRegex(name);
+    const regx = textSearchRegex(text);
     for (const imported of [this, ...this.imports]) {
-      for (const val of Object.values(imported.index)) {
+      for (const val of Object.values(imported.index) as EditorBase[]) {
         const name = val.getName?.call(val);
         if (name && String(name).match(regx)) {
-          if (val.isLink() && val.isCategory() && !(val as any as EditorBase).parent?.isForce()) {
-            continue;
+          if (val.isLink()) {
+            if (val.isCategory() && !val.parent?.isForce()) {
+              continue;
+            }
           }
           result.push(val);
         }
