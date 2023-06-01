@@ -34,6 +34,9 @@ export class BSCatalogueManager {
   addLoadedSystem(system: Catalogue, booksDate?: BooksDate) {
     return this.addLoadedCatalogue(system, booksDate);
   }
+  async unloadAll() {
+    this.catalogues = {};
+  }
 
   async loadData(data: BSIData, booksDate?: BooksDate): Promise<Catalogue> {
     const loaded = await loadData(this, data, booksDate);
