@@ -14,6 +14,7 @@ import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { BsBook } from "./bs_book";
 import type { GameSystem } from "../../ts/systems/game_system";
 import type { ItemTypeNames } from "./bs_editor";
+import { BSCatalogueManager } from "./bs_system";
 
 export interface WikiLink extends Link {
   parent: WikiBase;
@@ -166,6 +167,16 @@ export class Catalogue extends Base {
   }
   isGameSystem(): boolean {
     return this.gameSystemId === this.id || !this.gameSystemId;
+  }
+  getCatalogue() {
+    return this;
+  }
+  getGameSystem() {
+    if (this.isGameSystem()) return this;
+    return this.gameSystem;
+  }
+  getSystemId(): string {
+    return this.isGameSystem() ? this.id : this.gameSystemId!;
   }
   *iterateCategoryEntries(): Iterable<Category> {
     for (const catalogue of this.imports) {
@@ -577,6 +588,15 @@ export class Catalogue extends Base {
     }
 
     this.roster_constraints = Object.values(roster_constraints);
+  }
+  async reload(manager: BSCatalogueManager) {
+    const sys = manager;
+    delete this.catalogue.loaded;
+    delete this.catalogue.loaded_editor;
+    delete (this.catalogue as any).imports;
+    const key = this.isGameSystem() ? "gameSystem" : "catalogue";
+    const loaded = await sys.loadData({ [key]: this.catalogue } as any);
+    return loaded;
   }
   addToIndex(cur: Base) {
     if (cur instanceof Publication) {

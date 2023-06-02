@@ -1,7 +1,7 @@
 import { remove } from "jszip";
 import { escapeXml } from "./bs_export_xml";
 import { Base, Link, goodJsonKeys } from "./bs_main";
-import { Catalogue, EditorBase } from "./bs_main_catalogue";
+import { Catalogue, CatalogueLink, EditorBase } from "./bs_main_catalogue";
 import { conditionToString, fieldToText, modifierToString } from "./bs_modifiers";
 import {
   BSICondition,
@@ -12,6 +12,7 @@ import {
   BSIProfile,
   BSIRepeat,
 } from "./bs_types";
+import { BSCatalogueManager } from "./bs_system";
 export interface hasParent<T> {
   parent?: T | undefined;
 }
@@ -480,7 +481,7 @@ export function forEachEntryRecursive(
  * Removes an entry and fixes up the index
  * Returns all the removed data for undoing
  */
-export function onRemoveEntry(removed: EditorBase) {
+export function onRemoveEntry(removed: EditorBase, manager: BSCatalogueManager) {
   const catalogue = removed.catalogue;
   forEachEntryRecursive(removed, (entry, key, parent) => {
     catalogue.removeFromIndex(entry);
@@ -491,11 +492,20 @@ export function onRemoveEntry(removed: EditorBase) {
     delete (entry as any).parent;
     delete (entry as any).catalogue;
   });
+  if (removed instanceof CatalogueLink) {
+    removed.catalogue.reload(manager);
+  }
 }
 
-export function onAddEntry(entries: EditorBase[] | EditorBase, catalogue: Catalogue, parent?: EditorBase | Catalogue) {
-  for (const removedEntry of Array.isArray(entries) ? entries : [entries]) {
-    forEachEntryRecursive(removedEntry, (entry, key, _parent) => {
+export function onAddEntry(
+  entries: EditorBase[] | EditorBase,
+  catalogue: Catalogue,
+  parent: EditorBase | Catalogue,
+  manager: BSCatalogueManager
+) {
+  let reload = false;
+  for (const entry of Array.isArray(entries) ? entries : [entries]) {
+    forEachEntryRecursive(entry, (entry, key, _parent) => {
       entry.parent = _parent || (parent as any);
 
       entry.catalogue = catalogue;
@@ -504,6 +514,13 @@ export function onAddEntry(entries: EditorBase[] | EditorBase, catalogue: Catalo
         catalogue.updateLink(entry);
       }
     });
+    if (entry instanceof CatalogueLink) {
+      reload = true;
+    }
+  }
+  if (reload && parent) {
+    const catalogue = parent.catalogue || parent;
+    catalogue.reload(manager);
   }
 }
 export interface EntryPathEntry {

@@ -184,10 +184,9 @@ export interface BSIGameSystem {
   authorName?: string;
   authorContact?: string;
   authorUrl?: string;
-  library: boolean;
-  xmlns: string;
-  gameSystemId: undefined;
-  catalogueLinks: undefined;
+  library?: boolean;
+  gameSystemId?: undefined;
+  catalogueLinks?: undefined;
 
   fullFilePath?: string;
 }

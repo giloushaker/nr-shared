@@ -175,6 +175,12 @@ export class Base implements BSModifierBase {
   toJson() {
     return entryToJson(this);
   }
+  getCatalogue() {
+    return this.catalogue;
+  }
+  getGameSystem() {
+    return this.catalogue.getGameSystem();
+  }
   // Prevent Vue Observers
   get [Symbol.toStringTag](): string {
     // Anything can go here really as long as it's not 'Object'
