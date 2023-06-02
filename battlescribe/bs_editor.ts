@@ -424,22 +424,29 @@ export function getName(obj: any): string {
     case "profiles":
       return obj.getName();
     case "modifiers":
-      return modifierToString(findSelfOrParentWhere(obj, (o) => o.id)!, obj);
-    case "repeats":
+      return modifierToString(
+        findSelfOrParentWhere(obj, (o) => o.isEntry() || o.isGroup()),
+        obj
+      );
+    case "repeats": {
       const repeat = obj as BSIRepeat;
-      const parent = findSelfOrParentWhere(obj, (o) => o.id)!;
+      const parent = findSelfOrParentWhere(obj, (o) => o.isEntry() || o.isGroup());
+      if (!parent) {
+        console.error("no parent for repeat", obj);
+      }
       return `Repeat ${repeat.repeats} times for every ${repeat.value} ${fieldToText(
         parent,
         repeat.field
       )} in ${fieldToText(parent, repeat.scope)} of ${repeat.childId ? fieldToText(parent, repeat.childId) : " any"}`;
+    }
     case "conditions":
       return conditionToString(
-        findSelfOrParentWhere(obj, (o) => o.id),
+        findSelfOrParentWhere(obj, (o) => o.isEntry() || o.isGroup()),
         obj
       );
     case "constraints":
       return conditionToString(
-        findSelfOrParentWhere(obj, (o) => o.id),
+        findSelfOrParentWhere(obj, (o) => o.isEntry() || o.isGroup()),
         obj
       );
 
