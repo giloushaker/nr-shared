@@ -311,7 +311,6 @@ export class Catalogue extends Base {
     return result;
   }
   generateImports() {
-    if (this.imports) return this.imports;
     const importRootEntries: Record<string, Catalogue> = {};
     const imports: Record<string, Catalogue> = {};
     if (this.gameSystem) {
@@ -322,7 +321,8 @@ export class Catalogue extends Base {
 
     for (const link of this.catalogueLinks || []) {
       const catalogue = link.target;
-      catalogue.generateImports();
+      if (!catalogue) continue;
+      // catalogue.generateImports();
 
       for (const imported of catalogue.imports) {
         imports[imported.id] = imported;
@@ -591,11 +591,10 @@ export class Catalogue extends Base {
   }
   async reload(manager: BSCatalogueManager) {
     const sys = manager;
-    delete this.catalogue.loaded;
-    delete this.catalogue.loaded_editor;
-    delete (this.catalogue as any).imports;
+    delete this.loaded;
+    delete this.loaded_editor;
     const key = this.isGameSystem() ? "gameSystem" : "catalogue";
-    const loaded = await sys.loadData({ [key]: this.catalogue } as any);
+    const loaded = await sys.loadData({ [key]: this } as any);
     return loaded;
   }
   addToIndex(cur: Base) {
