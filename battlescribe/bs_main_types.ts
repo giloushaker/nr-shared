@@ -1,4 +1,19 @@
-import { Category, Force, Link, Base, Group, CategoryLink, Rule, Entry, Profile, InfoLink, InfoGroup } from "./bs_main";
+import {
+  Category,
+  Force,
+  Link,
+  Base,
+  Group,
+  CategoryLink,
+  Rule,
+  Entry,
+  Profile,
+  InfoLink,
+  InfoGroup,
+  Condition,
+  Modifier,
+  ModifierGroup,
+} from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
 import { getTypeName } from "./bs_editor";
@@ -79,6 +94,12 @@ export const protoMap = {
 
   publications: Publication.prototype,
   publication: Publication.prototype,
+
+  repeats: Condition.prototype,
+  conditions: Condition.prototype,
+  constraints: Condition.prototype,
+  modifiers: Modifier.prototype,
+  modifierGroups: ModifierGroup.prototype,
 };
 export const protoMapValues = Object.values(protoMap);
 export type ProtoMap = typeof protoMap;

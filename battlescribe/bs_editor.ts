@@ -1,4 +1,4 @@
-import { Base, Link, goodJsonKeys } from "./bs_main";
+import { Base, Condition, Link, Modifier, ModifierGroup, goodJsonKeys } from "./bs_main";
 import { Catalogue, CatalogueLink, EditorBase } from "./bs_main_catalogue";
 import { conditionToString, fieldToText, modifierToString } from "./bs_modifiers";
 import {
@@ -399,6 +399,18 @@ export function getNameExtra(obj: EditorBase): string {
   }
   return pieces.join(" ");
 }
+function getModifierOrConditionParent(obj: EditorBase) {
+  const parent = findSelfOrParentWhere(obj, (o) => {
+    if (o instanceof Modifier) return false;
+    if (o instanceof Condition) return false;
+    if (o instanceof ModifierGroup) return false;
+    return true;
+  });
+  if (!parent) {
+    throw new Error("no parent found");
+  }
+  return parent;
+}
 export function getName(obj: any): string {
   const type = obj.parentKey;
   switch (type) {
@@ -424,13 +436,10 @@ export function getName(obj: any): string {
     case "profiles":
       return obj.getName();
     case "modifiers":
-      return modifierToString(
-        findSelfOrParentWhere(obj, (o) => o.isEntry() || o.isGroup()),
-        obj
-      );
+      return modifierToString(getModifierOrConditionParent(obj), obj);
     case "repeats": {
       const repeat = obj as BSIRepeat;
-      const parent = findSelfOrParentWhere(obj, (o) => o.isEntry() || o.isGroup());
+      const parent = getModifierOrConditionParent(obj);
       if (!parent) {
         console.error("no parent for repeat", obj);
       }
@@ -440,15 +449,9 @@ export function getName(obj: any): string {
       )} in ${fieldToText(parent, repeat.scope)} of ${repeat.childId ? fieldToText(parent, repeat.childId) : " any"}`;
     }
     case "conditions":
-      return conditionToString(
-        findSelfOrParentWhere(obj, (o) => o.isEntry() || o.isGroup()),
-        obj
-      );
+      return conditionToString(getModifierOrConditionParent(obj), obj);
     case "constraints":
-      return conditionToString(
-        findSelfOrParentWhere(obj, (o) => o.isEntry() || o.isGroup()),
-        obj
-      );
+      return conditionToString(getModifierOrConditionParent(obj), obj);
 
     case "modifierGroups":
       return `Modifier Group (${obj.modifiers?.length || 0 + obj.modifierGroup?.length || 0})`;

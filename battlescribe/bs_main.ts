@@ -912,6 +912,10 @@ export class InfoGroup extends Base {
     return true;
   }
 }
+export class Condition extends Base {}
+export class Modifier extends Base {}
+export class ModifierGroup extends Base {}
+
 export class Rule extends Base implements BSIRule {
   declare id: string;
   declare name: string;
