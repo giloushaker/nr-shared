@@ -956,7 +956,6 @@ export function* iterateModifierGroupsRecursive(
 
 export const goodJsonKeys = new Set([
   "publications",
-  "publication",
   "costTypes",
   "costType",
   "profileTypes",
