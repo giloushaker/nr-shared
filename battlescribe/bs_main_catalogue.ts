@@ -78,7 +78,7 @@ export class Catalogue extends Base {
   loaded_editor?: boolean;
 
   imports!: Catalogue[];
-  importRootEntries!: Catalogue[];
+  importsWithEntries!: Catalogue[];
   index!: Record<string, Base>;
 
   forces!: Force[];
@@ -203,7 +203,7 @@ export class Catalogue extends Base {
     }
   }
   *iterateSelectionEntries(): Iterable<Base> {
-    for (const catalogue of this.importRootEntries) {
+    for (const catalogue of this.importsWithEntries) {
       const system = catalogue.isGameSystem();
       for (const entry of catalogue.selectionEntries || []) {
         if (system || entry.import !== false) yield entry;
@@ -311,10 +311,10 @@ export class Catalogue extends Base {
     return result;
   }
   generateImports() {
-    const importRootEntries: Record<string, Catalogue> = {};
+    const importsWithEntries: Record<string, Catalogue> = {};
     const imports: Record<string, Catalogue> = {};
     if (this.gameSystem) {
-      importRootEntries[this.gameSystem.id] = this.gameSystem;
+      importsWithEntries[this.gameSystem.id] = this.gameSystem;
       imports[this.gameSystem.id] = this.gameSystem;
       if (!this.gameSystem.import) this.gameSystem.imports = [];
     }
@@ -327,16 +327,16 @@ export class Catalogue extends Base {
       for (const imported of catalogue.imports) {
         imports[imported.id] = imported;
       }
-      for (const imported of catalogue.importRootEntries) {
-        importRootEntries[imported.id] = imported;
+      for (const imported of catalogue.importsWithEntries) {
+        importsWithEntries[imported.id] = imported;
       }
 
-      if (link.importRootEntries) importRootEntries[catalogue.id] = catalogue;
+      if (link.importRootEntries) importsWithEntries[catalogue.id] = catalogue;
       imports[catalogue.id] = catalogue;
     }
 
     this.imports = Object.values(imports);
-    this.importRootEntries = Object.values(importRootEntries);
+    this.importsWithEntries = Object.values(importsWithEntries);
     return this.imports;
   }
   generateForces(categories: Record<string, Category>): Force[] {
@@ -420,7 +420,7 @@ export class Catalogue extends Base {
   }
   generateUnits(): Record<string, Base[]> {
     const units = [];
-    for (const imported of this.importRootEntries) {
+    for (const imported of this.importsWithEntries) {
       const system = imported.isGameSystem();
       for (const unit of imported.selectionEntries || []) {
         if (system || unit.import !== false) units.push(unit);

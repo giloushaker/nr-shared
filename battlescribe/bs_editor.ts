@@ -1,5 +1,3 @@
-import { remove } from "jszip";
-import { escapeXml } from "./bs_export_xml";
 import { Base, Link, goodJsonKeys } from "./bs_main";
 import { Catalogue, CatalogueLink, EditorBase } from "./bs_main_catalogue";
 import { conditionToString, fieldToText, modifierToString } from "./bs_modifiers";
