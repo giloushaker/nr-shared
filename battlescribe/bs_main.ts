@@ -43,7 +43,7 @@ export interface BSModifierBase {
   modifierGroups?: BSIModifierGroup[];
 }
 
-const good1 = [
+const arrayKeys = [
   "profile",
   "rule",
   "infoLink",
@@ -85,9 +85,9 @@ const good1 = [
   "costs",
 ];
 
-const good2 = ["conditions", "conditionGroups", "modifiers", "modifierGroups", "repeats"];
-export const goodKeys = new Set([...good1, ...good2]);
-export const goodKeysWiki = new Set(good1);
+const arrayKeysWithoutId = ["conditions", "conditionGroups", "modifiers", "modifierGroups", "repeats"];
+export const goodKeys = new Set([...arrayKeys, ...arrayKeysWithoutId]);
+export const goodKeysWiki = new Set(arrayKeys);
 
 /**
  * This is a base class with generic functions for all nodes in the BSData xml/json

@@ -598,10 +598,6 @@ export class Catalogue extends Base {
     return loaded;
   }
   addToIndex(cur: Base) {
-    if (cur instanceof Publication) {
-      this.index[cur.id] = cur;
-      return;
-    }
     if (cur.id) {
       cur.catalogue = this;
       this.index[cur.id] = cur;

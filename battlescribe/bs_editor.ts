@@ -66,12 +66,7 @@ export const possibleChildren: ItemKeys[] = [
   "repeats",
   "conditionGroups",
 ];
-export const categories: CategoryEntry[] = [
-  {
-    type: "catalogueLinks",
-    name: "Catalogue Links",
-    icon: "catalogueLink.png",
-  },
+export const systemCategories: CategoryEntry[] = [
   {
     type: "publications",
     name: "Publications",
@@ -135,7 +130,14 @@ export const categories: CategoryEntry[] = [
     icon: "selectionEntry.png",
   },
 ];
-
+export const catalogueCategories: CategoryEntry[] = [
+  {
+    type: "catalogueLinks",
+    name: "Catalogue Links",
+    icon: "catalogueLink.png",
+  },
+  ...systemCategories,
+];
 export type ItemTypeNames =
   | "catalogue"
   | "gameSystem"
