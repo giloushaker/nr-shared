@@ -143,9 +143,8 @@ export class Catalogue extends Base {
       if (cur.target) {
         addObj(cur.target as EditorBase, "links", cur);
       }
-      const typeId = (cur as any as BSIProfile).typeId;
-      if (typeId) {
-        const target = this.findOptionById(typeId) as EditorBase;
+      if (cur.isProfile() && !cur.isLink()) {
+        const target = this.findOptionById(cur.typeId) as EditorBase;
         if (target) {
           addObj(target, "links", cur);
         }
