@@ -13,6 +13,7 @@ import {
   Condition,
   Modifier,
   ModifierGroup,
+  ProfileType,
 } from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
@@ -84,6 +85,7 @@ export const protoMap = {
   rules: Rule.prototype,
   rule: Rule.prototype,
 
+  profileTypes: ProfileType.prototype,
   sharedProfiles: Profile.prototype,
   profiles: Profile.prototype,
   profile: Profile.prototype,

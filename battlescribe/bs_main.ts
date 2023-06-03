@@ -13,6 +13,7 @@ import type {
   BSICondition,
   BSIConditionGroup,
   BSIRepeat,
+  BSICharacteristicType,
 } from "./bs_types";
 import { Catalogue, EditorBase } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
@@ -893,6 +894,9 @@ export interface BSIExtraConstraint extends BSIConstraint, BSINamed {
   modifierGroups: BSIModifierGroup[];
 }
 
+export class ProfileType extends Base implements BSIProfileType {
+  declare characteristicTypes: BSICharacteristicType[];
+}
 // const debugKeys = new Set();
 export class Profile extends Base implements BSIProfile {
   declare characteristics: BSICharacteristic[];
