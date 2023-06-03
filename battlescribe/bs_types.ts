@@ -305,7 +305,6 @@ export interface BSIInfoGroup {
   modifierGroups?: BSIModifierGroup[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BSIPublication {
   id: string;
   name?: string;
