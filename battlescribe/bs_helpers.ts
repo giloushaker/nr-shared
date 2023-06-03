@@ -85,7 +85,7 @@ export function pushAfterLastOfAssumingSorted<T>(array: T[], value: T, _function
   else array.splice(index + 1, 0, value);
 }
 export function escapeRegex(str: string) {
-  return str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+  return str.replace(/([.?*+^$[\]\\(){}|-])/g, `\\$1`);
 }
 
 export function groupBy<V>(
@@ -677,7 +677,7 @@ export function arraysEqual(a: any[], b: any[]) {
 
 export function textSearchRegex(query: string) {
   const words = escapeRegex(query).split(" ");
-  const regexStr = `^(?=.*\\b${words.join(".*)(?=.*\\b")}).*$`;
+  const regexStr = `^(?=.*${words.map((word) => `(?=.*${word})`).join("")}).*$`;
   const regx = new RegExp(regexStr, "i");
   return regx;
 }
