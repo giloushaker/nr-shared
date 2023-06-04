@@ -66,7 +66,7 @@ export class Catalogue extends Base {
   authorName?: string;
   authorUrl?: string;
 
-  battleScribeVersion?: number;
+  battleScribeVersion?: string;
 
   costTypes?: BSICostType[];
   catalogueLinks?: CatalogueLink[];
