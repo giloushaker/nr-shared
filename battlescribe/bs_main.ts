@@ -4,18 +4,16 @@ import type {
   BSIConstraint,
   BSIProfile,
   BSIRule,
-  BSIInfoLink,
-  BSIInfoGroup,
   BSICost,
   BSIPublication,
   BSINamed,
   BSIProfileType,
-  BSIData,
   BSICatalogue,
   BSICharacteristic,
   BSICondition,
   BSIConditionGroup,
   BSIRepeat,
+  BSICharacteristicType,
 } from "./bs_types";
 import { Catalogue, EditorBase } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
@@ -43,7 +41,7 @@ export interface BSModifierBase {
   modifierGroups?: BSIModifierGroup[];
 }
 
-const good1 = [
+const arrayKeys = [
   "profile",
   "rule",
   "infoLink",
@@ -85,9 +83,9 @@ const good1 = [
   "costs",
 ];
 
-const good2 = ["conditions", "conditionGroups", "modifiers", "modifierGroups", "repeats"];
-export const goodKeys = new Set([...good1, ...good2]);
-export const goodKeysWiki = new Set(good1);
+const arrayKeysWithoutId = ["conditions", "conditionGroups", "modifiers", "modifierGroups", "repeats"];
+export const goodKeys = new Set([...arrayKeys, ...arrayKeysWithoutId]);
+export const goodKeysWiki = new Set(arrayKeys);
 
 /**
  * This is a base class with generic functions for all nodes in the BSData xml/json
@@ -100,6 +98,7 @@ export class Base implements BSModifierBase {
   shared?: boolean;
   import?: boolean;
   collective?: boolean;
+  comment?: string;
 
   // Maybe move this to catalogue
   profileTypes?: BSIProfileType[];
@@ -174,6 +173,12 @@ export class Base implements BSModifierBase {
   }
   toJson() {
     return entryToJson(this);
+  }
+  getCatalogue() {
+    return this.catalogue;
+  }
+  getGameSystem() {
+    return this.catalogue.getGameSystem();
   }
   // Prevent Vue Observers
   get [Symbol.toStringTag](): string {
@@ -553,13 +558,13 @@ export class Link<T extends Base = Group | Entry> extends Base {
     return this.target.isEntry();
   }
   isProfile() {
-    return this.target.isProfile();
+    return this.target?.isProfile();
   }
   isRule(): boolean {
-    return this.target.isRule();
+    return this.target?.isRule();
   }
   isInfoGroup() {
-    return this.target.isInfoGroup();
+    return this.target?.isInfoGroup();
   }
   isUnit(): boolean {
     if (this.target.isUnit()) return true;
@@ -890,6 +895,9 @@ export interface BSIExtraConstraint extends BSIConstraint, BSINamed {
   modifierGroups: BSIModifierGroup[];
 }
 
+export class ProfileType extends Base implements BSIProfileType {
+  declare characteristicTypes: BSICharacteristicType[];
+}
 // const debugKeys = new Set();
 export class Profile extends Base implements BSIProfile {
   declare characteristics: BSICharacteristic[];
@@ -909,6 +917,10 @@ export class InfoGroup extends Base {
     return true;
   }
 }
+export class Condition extends Base {}
+export class Modifier extends Base {}
+export class ModifierGroup extends Base {}
+
 export class Rule extends Base implements BSIRule {
   declare id: string;
   declare name: string;
@@ -950,61 +962,37 @@ export function* iterateModifierGroupsRecursive(
 
 export const goodJsonKeys = new Set([
   "publications",
-  "publication",
   "costTypes",
-  "costType",
   "profileTypes",
-  "profileType",
+  "profiles",
   "categoryEntries",
-  "categoryEntry",
   "forceEntries",
-  "forceEntry",
   "selectionEntries",
-  "selectionEntry",
   "entryLinks",
-  "entryLink",
   "sharedSelectionEntries",
-  "selectionEntry",
   "sharedSelectionEntryGroups",
-  "selectionEntryGroup",
   "sharedProfiles",
   "sharedInfoGroups",
-  "profile",
   "characteristics",
-  "characteristic",
   "modifiers",
-  "modifier",
   "constraints",
-  "constraint",
-  "profiles",
-  "profile",
   "categoryLinks",
-  "categoryLink",
   "costs",
-  "cost",
   "conditionGroups",
-  "conditionGroup",
   "conditions",
-  "condition",
   "repeats",
-  "repeat",
   "selectionEntryGroups",
-  "selectionEntryGroup",
   "infoLinks",
-  "infoLink",
   "characteristicTypes",
-  "characteristicType",
   "catalogueLinks",
-  "catalogueLink",
   "modifierGroups",
-  "modifierGroup",
-  "rules",
-  "rule",
   "sharedRules",
-  "rule",
+  "rules",
   "infoGroups",
-  "infoGroup",
+
   "id",
+  "import",
+  "importRootEntries",
   "name",
   "hidden",
   "field",
@@ -1020,8 +1008,6 @@ export const goodJsonKeys = new Set([
   "primary",
   "typeId",
   "collective",
-  "import",
-  "importRootEntries",
   "$text",
   "page",
   "typeName",

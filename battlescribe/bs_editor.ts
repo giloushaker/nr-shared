@@ -1,7 +1,5 @@
-import { remove } from "jszip";
-import { escapeXml } from "./bs_export_xml";
-import { Base, Link, goodJsonKeys } from "./bs_main";
-import { Catalogue, EditorBase } from "./bs_main_catalogue";
+import { Base, Condition, Link, Modifier, ModifierGroup, goodJsonKeys } from "./bs_main";
+import { Catalogue, CatalogueLink, EditorBase } from "./bs_main_catalogue";
 import { conditionToString, fieldToText, modifierToString } from "./bs_modifiers";
 import {
   BSICondition,
@@ -12,6 +10,7 @@ import {
   BSIProfile,
   BSIRepeat,
 } from "./bs_types";
+import { BSCatalogueManager } from "./bs_system";
 export interface hasParent<T> {
   parent?: T | undefined;
 }
@@ -65,12 +64,7 @@ export const possibleChildren: ItemKeys[] = [
   "repeats",
   "conditionGroups",
 ];
-export const categories: CategoryEntry[] = [
-  {
-    type: "catalogueLinks",
-    name: "Catalogue Links",
-    icon: "catalogueLink.png",
-  },
+export const systemCategories: CategoryEntry[] = [
   {
     type: "publications",
     name: "Publications",
@@ -134,7 +128,14 @@ export const categories: CategoryEntry[] = [
     icon: "selectionEntry.png",
   },
 ];
-
+export const catalogueCategories: CategoryEntry[] = [
+  {
+    type: "catalogueLinks",
+    name: "Catalogue Links",
+    icon: "catalogueLink.png",
+  },
+  ...systemCategories,
+];
 export type ItemTypeNames =
   | "catalogue"
   | "gameSystem"
@@ -375,13 +376,21 @@ export function getNameExtra(obj: EditorBase): string {
     case "sharedProfiles":
     case "profiles":
       pieces.push((obj as unknown as BSIProfile).typeName);
-
+      break;
     case "selectionEntries":
     case "sharedSelectionEntries":
     case "entryLinks":
       if (obj.isEntry()) {
         pieces.push(obj.getType());
       }
+      break;
+    case "modifierGroups":
+      pieces.push(`(${(obj.modifiers?.length || 0) + (obj.modifierGroups?.length || 0)})`);
+      break;
+    case "conditionGroups":
+    case "modifiers":
+    case "repeats":
+    case "conditions":
     case "selectionEntryGroups":
     case "sharedSelectionEntryGroups":
     case "forceEntries":
@@ -396,7 +405,23 @@ export function getNameExtra(obj: EditorBase): string {
     const s = obj.links.length === 1 ? "" : "s";
     pieces.push(`(${obj.links.length} ref${s})`);
   }
+  if (obj.comment && obj.comment[0]) {
+    pieces.push("# " + obj.comment);
+  }
+
   return pieces.join(" ");
+}
+export function getModifierOrConditionParent(obj: EditorBase) {
+  const parent = findSelfOrParentWhere(obj, (o) => {
+    if (o instanceof Modifier) return false;
+    if (o instanceof Condition) return false;
+    if (o instanceof ModifierGroup) return false;
+    return true;
+  });
+  if (!parent) {
+    throw new Error("no parent found");
+  }
+  return parent;
 }
 export function getName(obj: any): string {
   const type = obj.parentKey;
@@ -423,29 +448,27 @@ export function getName(obj: any): string {
     case "profiles":
       return obj.getName();
     case "modifiers":
-      return modifierToString(findSelfOrParentWhere(obj, (o) => o.id)!, obj);
-    case "repeats":
+      return modifierToString(getModifierOrConditionParent(obj), obj);
+    case "repeats": {
       const repeat = obj as BSIRepeat;
-      const parent = findSelfOrParentWhere(obj, (o) => o.id)!;
+      const parent = getModifierOrConditionParent(obj);
+      if (!parent) {
+        console.error("no parent for repeat", obj);
+      }
       return `Repeat ${repeat.repeats} times for every ${repeat.value} ${fieldToText(
         parent,
         repeat.field
       )} in ${fieldToText(parent, repeat.scope)} of ${repeat.childId ? fieldToText(parent, repeat.childId) : " any"}`;
+    }
     case "conditions":
-      return conditionToString(
-        findSelfOrParentWhere(obj, (o) => o.id),
-        obj
-      );
+      return conditionToString(getModifierOrConditionParent(obj), obj);
     case "constraints":
-      return conditionToString(
-        findSelfOrParentWhere(obj, (o) => o.id),
-        obj
-      );
+      return conditionToString(getModifierOrConditionParent(obj), obj);
 
     case "modifierGroups":
-      return `Modifier Group (${obj.modifiers?.length || 0 + obj.modifierGroup?.length || 0})`;
+      return `Modify...`;
     case "conditionGroups":
-      return `(${obj.type})`;
+      return `${obj.type.toUpperCase()}`;
 
     case "infoLinks":
       return obj.target ? getName(obj.target) : obj.getName();
@@ -480,7 +503,7 @@ export function forEachEntryRecursive(
  * Removes an entry and fixes up the index
  * Returns all the removed data for undoing
  */
-export function onRemoveEntry(removed: EditorBase) {
+export async function onRemoveEntry(removed: EditorBase, manager: BSCatalogueManager) {
   const catalogue = removed.catalogue;
   forEachEntryRecursive(removed, (entry, key, parent) => {
     catalogue.removeFromIndex(entry);
@@ -491,11 +514,20 @@ export function onRemoveEntry(removed: EditorBase) {
     delete (entry as any).parent;
     delete (entry as any).catalogue;
   });
+  if (removed instanceof CatalogueLink) {
+    await catalogue.reload(manager);
+  }
 }
 
-export function onAddEntry(entries: EditorBase[] | EditorBase, catalogue: Catalogue, parent?: EditorBase | Catalogue) {
-  for (const removedEntry of Array.isArray(entries) ? entries : [entries]) {
-    forEachEntryRecursive(removedEntry, (entry, key, _parent) => {
+export async function onAddEntry(
+  entries: EditorBase[] | EditorBase,
+  catalogue: Catalogue,
+  parent: EditorBase | Catalogue,
+  manager: BSCatalogueManager
+) {
+  let reload = false;
+  for (const entry of Array.isArray(entries) ? entries : [entries]) {
+    forEachEntryRecursive(entry, (entry, key, _parent) => {
       entry.parent = _parent || (parent as any);
 
       entry.catalogue = catalogue;
@@ -504,6 +536,13 @@ export function onAddEntry(entries: EditorBase[] | EditorBase, catalogue: Catalo
         catalogue.updateLink(entry);
       }
     });
+    if (entry instanceof CatalogueLink && entry.targetId) {
+      reload = true;
+    }
+  }
+  if (reload && parent) {
+    const catalogue = parent.catalogue || parent;
+    await catalogue.reload(manager);
   }
 }
 export interface EntryPathEntry {

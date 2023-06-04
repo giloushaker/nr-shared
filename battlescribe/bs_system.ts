@@ -157,6 +157,7 @@ export async function loadData(
     promises.push(promise);
   }
   await Promise.all(promises);
+
   // Resolve Imports
   content.generateImports();
 

@@ -14,6 +14,7 @@ import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { BsBook } from "./bs_book";
 import type { GameSystem } from "../../ts/systems/game_system";
 import type { ItemTypeNames } from "./bs_editor";
+import { BSCatalogueManager } from "./bs_system";
 
 export interface WikiLink extends Link {
   parent: WikiBase;
@@ -77,7 +78,7 @@ export class Catalogue extends Base {
   loaded_editor?: boolean;
 
   imports!: Catalogue[];
-  importRootEntries!: Catalogue[];
+  importsWithEntries!: Catalogue[];
   index!: Record<string, Base>;
 
   forces!: Force[];
@@ -133,14 +134,17 @@ export class Catalogue extends Base {
     this.loaded_editor = true;
     this.generateCostIndex();
 
-    this.imports.forEach((imported) => {
-      addObj(imported as any, "links", this);
-    });
     this.forEachObjectWhitelist<EditorBase>((cur, parent) => {
       cur.parent = parent;
       cur.catalogue = this;
       if (cur.target) {
         addObj(cur.target as EditorBase, "links", cur);
+      }
+      if (cur.isProfile() && !cur.isLink()) {
+        const target = this.findOptionById(cur.typeId) as EditorBase;
+        if (target) {
+          addObj(target, "links", cur);
+        }
       }
       const childId = (cur as any).childId;
       if (childId) {
@@ -166,6 +170,16 @@ export class Catalogue extends Base {
   }
   isGameSystem(): boolean {
     return this.gameSystemId === this.id || !this.gameSystemId;
+  }
+  getCatalogue() {
+    return this;
+  }
+  getGameSystem() {
+    if (this.isGameSystem()) return this;
+    return this.gameSystem;
+  }
+  getSystemId(): string {
+    return this.isGameSystem() ? this.id : this.gameSystemId!;
   }
   *iterateCategoryEntries(): Iterable<Category> {
     for (const catalogue of this.imports) {
@@ -201,7 +215,7 @@ export class Catalogue extends Base {
     }
   }
   *iterateSelectionEntries(): Iterable<Base> {
-    for (const catalogue of this.importRootEntries) {
+    for (const catalogue of this.importsWithEntries) {
       const system = catalogue.isGameSystem();
       for (const entry of catalogue.selectionEntries || []) {
         if (system || entry.import !== false) yield entry;
@@ -309,32 +323,32 @@ export class Catalogue extends Base {
     return result;
   }
   generateImports() {
-    if (this.imports) return this.imports;
-    const importRootEntries: Record<string, Catalogue> = {};
+    const importsWithEntries: Record<string, Catalogue> = {};
     const imports: Record<string, Catalogue> = {};
     if (this.gameSystem) {
-      importRootEntries[this.gameSystem.id] = this.gameSystem;
+      importsWithEntries[this.gameSystem.id] = this.gameSystem;
       imports[this.gameSystem.id] = this.gameSystem;
       if (!this.gameSystem.import) this.gameSystem.imports = [];
     }
 
     for (const link of this.catalogueLinks || []) {
       const catalogue = link.target;
-      catalogue.generateImports();
+      if (!catalogue) continue;
+      // catalogue.generateImports();
 
       for (const imported of catalogue.imports) {
         imports[imported.id] = imported;
       }
-      for (const imported of catalogue.importRootEntries) {
-        importRootEntries[imported.id] = imported;
+      for (const imported of catalogue.importsWithEntries) {
+        importsWithEntries[imported.id] = imported;
       }
 
-      if (link.importRootEntries) importRootEntries[catalogue.id] = catalogue;
+      if (link.importRootEntries) importsWithEntries[catalogue.id] = catalogue;
       imports[catalogue.id] = catalogue;
     }
 
     this.imports = Object.values(imports);
-    this.importRootEntries = Object.values(importRootEntries);
+    this.importsWithEntries = Object.values(importsWithEntries);
     return this.imports;
   }
   generateForces(categories: Record<string, Category>): Force[] {
@@ -418,7 +432,7 @@ export class Catalogue extends Base {
   }
   generateUnits(): Record<string, Base[]> {
     const units = [];
-    for (const imported of this.importRootEntries) {
+    for (const imported of this.importsWithEntries) {
       const system = imported.isGameSystem();
       for (const unit of imported.selectionEntries || []) {
         if (system || unit.import !== false) units.push(unit);
@@ -587,11 +601,15 @@ export class Catalogue extends Base {
 
     this.roster_constraints = Object.values(roster_constraints);
   }
+  async reload(manager: BSCatalogueManager) {
+    const sys = manager;
+    delete this.loaded;
+    delete this.loaded_editor;
+    const key = this.isGameSystem() ? "gameSystem" : "catalogue";
+    const loaded = await sys.loadData({ [key]: this } as any);
+    return loaded;
+  }
   addToIndex(cur: Base) {
-    if (cur instanceof Publication) {
-      this.index[cur.id] = cur;
-      return;
-    }
     if (cur.id) {
       cur.catalogue = this;
       this.index[cur.id] = cur;

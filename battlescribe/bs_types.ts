@@ -6,7 +6,7 @@ export interface BSINamed {
 }
 export interface BSIOption {
   id: string;
-  comment?: string;
+  comment?: string[];
 }
 export interface BSIHidden {
   hidden: boolean;
@@ -184,10 +184,9 @@ export interface BSIGameSystem {
   authorName?: string;
   authorContact?: string;
   authorUrl?: string;
-  library: boolean;
-  xmlns: string;
-  gameSystemId: undefined;
-  catalogueLinks: undefined;
+  library?: boolean;
+  gameSystemId?: undefined;
+  catalogueLinks?: undefined;
 
   fullFilePath?: string;
 }
@@ -306,7 +305,6 @@ export interface BSIInfoGroup {
   modifierGroups?: BSIModifierGroup[];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BSIPublication {
   id: string;
   name?: string;

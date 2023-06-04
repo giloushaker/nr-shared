@@ -3,7 +3,7 @@ import { X2jOptionsOptional, XMLParser, XMLBuilder, XmlBuilderOptionsOptional } 
 import { fix_xml_object, forEachValueRecursive, hashFnv32a, isObject, removePrefix, to_snake_case } from "./bs_helpers";
 import { rootToJson } from "./bs_main";
 import { getDataObject } from "./bs_system";
-import { BSICatalogue, BSIData } from "./bs_types";
+import { BSICatalogue, BSIData, BSIGameSystem } from "./bs_types";
 import { Catalogue } from "./bs_main_catalogue";
 
 export function xmlToJson(data: string) {
@@ -123,10 +123,13 @@ function toSingle(key: string) {
     throw Error(`Couldn't convert "${key}" to non-plural (modify toSingle)`);
   }
 }
-const skipKeys = new Set(["?xml", "readme", "comment", "$text", "description", "_"]);
+const stringArrayKeys = new Set(["readme", "comment", "description"]);
+const skipKeys = new Set(["?xml", "$text", "_"]);
 function renestChilds(obj: any) {
   for (const [key, value] of Object.entries(obj)) {
-    if (Array.isArray(value) && !skipKeys.has(key)) {
+    if (stringArrayKeys.has(key)) {
+      obj[key] = Array.isArray(value) ? value : [value];
+    } else if (Array.isArray(value) && !skipKeys.has(key)) {
       obj[key] = [{ [toSingle(key)]: value }];
     } else if (key in typeMap) {
       obj[key] = [value];
@@ -143,7 +146,7 @@ function putAttributesIn$(first: any) {
     if (typeof current === "object") {
       for (const [key, value] of Object.entries(current)) {
         if (Array.isArray(value)) continue;
-        if (skipKeys.has(key)) continue;
+        if (skipKeys.has(key) || stringArrayKeys.has(key)) continue;
         if (isObject(value)) continue;
         current[`_${key}`] = value;
         delete current[key];
@@ -153,7 +156,7 @@ function putAttributesIn$(first: any) {
   return first;
 }
 
-export function convertToXml(data: BSICatalogue | Catalogue) {
+export function convertToXml(data: BSICatalogue | Catalogue | BSIGameSystem) {
   const json = JSON.parse(rootToJson(data));
   putAttributesIn$(getDataObject(json));
   const options: XmlBuilderOptionsOptional = {

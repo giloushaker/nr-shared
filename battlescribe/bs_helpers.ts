@@ -85,7 +85,7 @@ export function pushAfterLastOfAssumingSorted<T>(array: T[], value: T, _function
   else array.splice(index + 1, 0, value);
 }
 export function escapeRegex(str: string) {
-  return str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+  return str.replace(/([.?*+^$[\]\\(){}|-])/g, `\\$1`);
 }
 
 export function groupBy<V>(
@@ -438,88 +438,6 @@ export function diffSet<T>(_setA: Set<T>, _setB: Set<T>): T[] {
   }
   return result;
 }
-class NoObserveCache {
-  lock = 0;
-  max = 1;
-  get [Symbol.toStringTag](): string {
-    return "ObjectNoObserve";
-  }
-}
-
-export class CacheEvent<T> {
-  id: string;
-  cache!: T;
-  no_vue = new NoObserveCache();
-  cache_valid = false;
-  constructor(cache: T, max = 1, private fn: (...args: any[]) => unknown, private thisArg: any) {
-    this.cache = cache;
-    this.no_vue.max = max;
-    this.id = fn.name;
-  }
-  invalidate(...args: any[]): void {
-    this.cache_valid = false;
-    if (this.no_vue.lock === 0) this.fn.call(this.thisArg, ...args);
-  }
-  can_proceed(): boolean {
-    if (this.no_vue.lock >= this.no_vue.max) {
-      // console.warn("prevented loop");
-      return false;
-    }
-    if (this.cache_valid) {
-      return false;
-    }
-    this.no_vue.lock += 1;
-    return true;
-  }
-  set_cache(obj: T) {
-    this.cache = obj;
-    this.cache_valid = true;
-  }
-  end(obj: T): T {
-    this.cache = obj;
-    this.no_vue.lock -= 1;
-    this.cache_valid = true;
-    return obj;
-  }
-  result(): T {
-    return this.cache;
-  }
-}
-
-export class Cache<T> {
-  cache!: T;
-  no_vue = new NoObserveCache();
-  cache_valid = false;
-  constructor(cache: T, max = 1, public id: string) {
-    this.cache = cache;
-    this.no_vue.max = max;
-  }
-  invalidate(): void {
-    this.cache_valid = false;
-  }
-  can_proceed(): boolean {
-    if (this.no_vue.lock >= this.no_vue.max) {
-      return false;
-    }
-    if (this.cache_valid) return false;
-
-    this.no_vue.lock += 1;
-    return true;
-  }
-  set_cache(obj: T) {
-    this.cache = obj;
-    this.cache_valid = true;
-  }
-  end(obj: T): T {
-    this.cache = obj;
-    this.no_vue.lock -= 1;
-    this.cache_valid = true;
-    return obj;
-  }
-  result(): T {
-    return this.cache;
-  }
-}
 
 export function suffixIf(value: any, suffix: string): string {
   if (value) return value.toString() + suffix;
@@ -759,7 +677,7 @@ export function arraysEqual(a: any[], b: any[]) {
 
 export function textSearchRegex(query: string) {
   const words = escapeRegex(query).split(" ");
-  const regexStr = `^(?=.*\\b${words.join(".*)(?=.*\\b")}).*$`;
+  const regexStr = `^(?=.*${words.map((word) => `(?=.*${word})`).join("")}).*$`;
   const regx = new RegExp(regexStr, "i");
   return regx;
 }
