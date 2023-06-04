@@ -134,15 +134,9 @@ export class Catalogue extends Base {
     this.loaded_editor = true;
     this.generateCostIndex();
 
-    this.imports.forEach((imported) => {
-      addObj(imported as any, "links", this);
-    });
     this.forEachObjectWhitelist<EditorBase>((cur, parent) => {
       cur.parent = parent;
       cur.catalogue = this;
-      if (cur?.comment?.length) {
-        console.log(cur.name, cur.comment);
-      }
       if (cur.target) {
         addObj(cur.target as EditorBase, "links", cur);
       }
