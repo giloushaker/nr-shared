@@ -189,6 +189,15 @@ export class Catalogue extends Base {
     }
     if (this.categoryEntries) yield* this.categoryEntries;
   }
+  *iterateCostTypes(): Iterable<BSICostType> {
+    for (const catalogue of this.imports) {
+      for (const costType of catalogue.costTypes || []) {
+        yield costType;
+      }
+    }
+    if (this.costTypes) yield* this.costTypes;
+  }
+
   *forcesIterator(): Iterable<Force> {
     for (const catalogue of this.imports) {
       for (const force of catalogue.forceEntries || []) {
