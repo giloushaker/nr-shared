@@ -376,13 +376,21 @@ export function getNameExtra(obj: EditorBase): string {
     case "sharedProfiles":
     case "profiles":
       pieces.push((obj as unknown as BSIProfile).typeName);
-
+      break;
     case "selectionEntries":
     case "sharedSelectionEntries":
     case "entryLinks":
       if (obj.isEntry()) {
         pieces.push(obj.getType());
       }
+      break;
+    case "modifierGroups":
+      pieces.push(`(${(obj.modifiers?.length || 0) + (obj.modifierGroups?.length || 0)})`);
+      break;
+    case "conditionGroups":
+    case "modifiers":
+    case "repeats":
+    case "conditions":
     case "selectionEntryGroups":
     case "sharedSelectionEntryGroups":
     case "forceEntries":
@@ -397,9 +405,13 @@ export function getNameExtra(obj: EditorBase): string {
     const s = obj.links.length === 1 ? "" : "s";
     pieces.push(`(${obj.links.length} ref${s})`);
   }
+  if (obj.comment && obj.comment[0]) {
+    pieces.push("# " + obj.comment);
+  }
+
   return pieces.join(" ");
 }
-function getModifierOrConditionParent(obj: EditorBase) {
+export function getModifierOrConditionParent(obj: EditorBase) {
   const parent = findSelfOrParentWhere(obj, (o) => {
     if (o instanceof Modifier) return false;
     if (o instanceof Condition) return false;
@@ -454,9 +466,9 @@ export function getName(obj: any): string {
       return conditionToString(getModifierOrConditionParent(obj), obj);
 
     case "modifierGroups":
-      return `Modifier Group (${obj.modifiers?.length || 0 + obj.modifierGroup?.length || 0})`;
+      return `Modify...`;
     case "conditionGroups":
-      return `(${obj.type})`;
+      return `${obj.type.toUpperCase()}`;
 
     case "infoLinks":
       return obj.target ? getName(obj.target) : obj.getName();

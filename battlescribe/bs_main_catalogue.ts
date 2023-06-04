@@ -140,6 +140,9 @@ export class Catalogue extends Base {
     this.forEachObjectWhitelist<EditorBase>((cur, parent) => {
       cur.parent = parent;
       cur.catalogue = this;
+      if (cur?.comment?.length) {
+        console.log(cur.name, cur.comment);
+      }
       if (cur.target) {
         addObj(cur.target as EditorBase, "links", cur);
       }

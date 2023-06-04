@@ -123,10 +123,13 @@ function toSingle(key: string) {
     throw Error(`Couldn't convert "${key}" to non-plural (modify toSingle)`);
   }
 }
-const skipKeys = new Set(["?xml", "readme", "comment", "$text", "description", "_"]);
+const stringArrayKeys = new Set(["readme", "comment", "description"]);
+const skipKeys = new Set(["?xml", "$text", "_"]);
 function renestChilds(obj: any) {
   for (const [key, value] of Object.entries(obj)) {
-    if (Array.isArray(value) && !skipKeys.has(key)) {
+    if (stringArrayKeys.has(key)) {
+      obj[key] = Array.isArray(value) ? value : [value];
+    } else if (Array.isArray(value) && !skipKeys.has(key)) {
       obj[key] = [{ [toSingle(key)]: value }];
     } else if (key in typeMap) {
       obj[key] = [value];
@@ -143,7 +146,7 @@ function putAttributesIn$(first: any) {
     if (typeof current === "object") {
       for (const [key, value] of Object.entries(current)) {
         if (Array.isArray(value)) continue;
-        if (skipKeys.has(key)) continue;
+        if (skipKeys.has(key) || stringArrayKeys.has(key)) continue;
         if (isObject(value)) continue;
         current[`_${key}`] = value;
         delete current[key];
