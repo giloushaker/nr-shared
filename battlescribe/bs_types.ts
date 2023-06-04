@@ -180,7 +180,7 @@ export interface BSIGameSystem {
   id: string;
   name: string;
   revision: number;
-  battleScribeVersion: number;
+  battleScribeVersion: string;
   authorName?: string;
   authorContact?: string;
   authorUrl?: string;
