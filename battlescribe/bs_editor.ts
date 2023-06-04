@@ -380,7 +380,7 @@ export function getNameExtra(obj: EditorBase): string {
     case "selectionEntries":
     case "sharedSelectionEntries":
     case "entryLinks":
-      if (obj.isEntry()) {
+      if (obj.isEntry() && obj.getType() !== "upgrade") {
         pieces.push(obj.getType());
       }
       break;
