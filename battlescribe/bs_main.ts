@@ -98,7 +98,7 @@ export class Base implements BSModifierBase {
   shared?: boolean;
   import?: boolean;
   collective?: boolean;
-  comment?: string;
+  comment?: string[];
 
   // Maybe move this to catalogue
   profileTypes?: BSIProfileType[];
@@ -560,7 +560,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
   isProfile() {
     return this.target?.isProfile();
   }
-  isRule(): boolean {
+  isRule() {
     return this.target?.isRule();
   }
   isInfoGroup() {
