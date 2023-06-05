@@ -1,5 +1,16 @@
 import { groupBy, sortBy, clone, addObj, textSearchRegex, generateBattlescribeId } from "./bs_helpers";
-import { Base, UNCATEGORIZED_ID, ILLEGAL_ID, Category, Link, goodKeys, Rule, goodKeysWiki } from "./bs_main";
+import {
+  Base,
+  UNCATEGORIZED_ID,
+  ILLEGAL_ID,
+  Category,
+  Link,
+  goodKeys,
+  Rule,
+  goodKeysWiki,
+  goodJsonKeys,
+  goodJsonArrayKeys,
+} from "./bs_main";
 import type {
   BSICostType,
   BSICondition,
@@ -160,7 +171,7 @@ export class Catalogue extends Base {
           addObj(target, "other_links", cur);
         }
       }
-    }, goodKeys);
+    }, goodJsonArrayKeys);
   }
   get url(): string {
     return "%{book}";

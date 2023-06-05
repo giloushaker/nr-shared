@@ -123,7 +123,7 @@ function toSingle(key: string) {
     throw Error(`Couldn't convert "${key}" to non-plural (modify toSingle)`);
   }
 }
-const stringArrayKeys = new Set(["readme", "comment", "description"]);
+export const stringArrayKeys = new Set(["readme", "comment", "description"]);
 const skipKeys = new Set(["?xml", "$text", "_"]);
 function renestChilds(obj: any) {
   for (const [key, value] of Object.entries(obj)) {
@@ -165,6 +165,7 @@ export function convertToXml(data: BSICatalogue | Catalogue | BSIGameSystem) {
     attributeNamePrefix: "_",
     ignoreAttributes: false,
     suppressBooleanAttributes: false,
+    suppressEmptyNode: true,
   };
   const builder = new XMLBuilder(options);
   const xml = builder.build(json);

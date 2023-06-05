@@ -1,4 +1,5 @@
 import { getRandomInt } from "../util";
+import { goodJsonArrayKeys } from "./bs_main";
 import type { BSIProfile, BSICharacteristic } from "./bs_types";
 
 export type Modify<T, R> = Omit<T, keyof R> & R;
@@ -10,7 +11,8 @@ export function fix_xml_object(obj: any): void {
   while (O.length) {
     const cur: any = O.pop();
     // processing
-    for (const [key, value] of Object.entries(cur)) {
+    for (const key in cur) {
+      const value = cur[key];
       if (Array.isArray(value) && value.length === 1) {
         const container_object = value[0];
         const values = Object.values(container_object);
