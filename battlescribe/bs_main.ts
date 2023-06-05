@@ -960,7 +960,7 @@ export function* iterateModifierGroupsRecursive(
   }
 }
 
-export const goodJsonKeys = new Set([
+export const goodJsonArrayKeys = new Set([
   "publications",
   "costTypes",
   "profileTypes",
@@ -989,6 +989,9 @@ export const goodJsonKeys = new Set([
   "sharedRules",
   "rules",
   "infoGroups",
+]);
+export const goodJsonKeys = new Set([
+  ...goodJsonArrayKeys,
 
   "id",
   "import",
@@ -1043,6 +1046,7 @@ export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>)
     delete root.gameSystem;
   }
   const stringed = JSON.stringify(root, (k, v) => {
+    if (Array.isArray(v) && v.length === 0) return undefined;
     if (v === copy || goodJsonKeys.has(k) || isFinite(Number(k))) return v;
     return undefined;
   });
@@ -1055,10 +1059,18 @@ export function entryToJson(data: Base | Record<string, any>, extraFields?: Set<
   });
   return stringed;
 }
-export function entriesToJson(data: Array<Base | Record<string, any>>, extraFields?: Set<string>): string {
-  const stringed = JSON.stringify(data, function (k, v) {
-    if (goodJsonKeys.has(k) || isFinite(Number(k)) || extraFields?.has(k)) return v;
-    return undefined;
-  });
+export function entriesToJson(
+  data: Array<Base | Record<string, any>>,
+  extraFields?: Set<string>,
+  formatted = false
+): string {
+  const stringed = JSON.stringify(
+    data,
+    function (k, v) {
+      if (goodJsonKeys.has(k) || isFinite(Number(k)) || extraFields?.has(k)) return v;
+      return undefined;
+    },
+    formatted ? 2 : undefined
+  );
   return stringed;
 }

@@ -11,6 +11,8 @@ import {
   BSIRepeat,
 } from "./bs_types";
 import { BSCatalogueManager } from "./bs_system";
+import { isObject } from "./bs_helpers";
+import { stringArrayKeys } from "./bs_convert";
 export interface hasParent<T> {
   parent?: T | undefined;
 }
@@ -379,8 +381,12 @@ export function getNameExtra(obj: EditorBase): string {
       break;
     case "selectionEntries":
     case "sharedSelectionEntries":
-    case "entryLinks":
       if (obj.isEntry() && obj.getType() !== "upgrade") {
+        pieces.push(obj.getType());
+      }
+      break;
+    case "entryLinks":
+      if (obj.target && obj.isEntry() && obj.getType() !== "upgrade") {
         pieces.push(obj.getType());
       }
       break;
@@ -401,9 +407,9 @@ export function getNameExtra(obj: EditorBase): string {
     default:
       break;
   }
-  if (obj.links?.length) {
-    const s = obj.links.length === 1 ? "" : "s";
-    pieces.push(`(${obj.links.length} ref${s})`);
+  if (obj.links?.length || obj.other_links?.length) {
+    const s = obj.links?.length === 1 ? "" : "s";
+    pieces.push(`(${obj.links?.length || 0} ref${s})`);
   }
   if (obj.comment && obj.comment[0]) {
     pieces.push("# " + obj.comment);
@@ -487,7 +493,7 @@ export function forEachEntryRecursive(
   while (stack.length) {
     const cur = stack.pop()!;
     for (const key of Object.keys(cur)) {
-      if (!goodJsonKeys.has(key)) continue;
+      if (!goodJsonKeys.has(key) || stringArrayKeys.has(key)) continue;
       const val = (cur as any)[key] as EditorBase[] | undefined;
       if (val && Array.isArray(val)) {
         for (const e of val) {
@@ -528,6 +534,8 @@ export async function onAddEntry(
   let reload = false;
   for (const entry of Array.isArray(entries) ? entries : [entries]) {
     forEachEntryRecursive(entry, (entry, key, _parent) => {
+      if (isObject(entry)) {
+      }
       entry.parent = _parent || (parent as any);
 
       entry.catalogue = catalogue;
@@ -552,12 +560,15 @@ export interface EntryPathEntry {
 }
 
 export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
+  if (!entry.parent && !entry.isCatalogue()) {
+    return [{ id: entry.id, key: entry.parentKey, index: 0 }];
+  }
   const result = [];
   while (entry.parent) {
-    const parent = entry.parent as any;
+    const parent = (entry.parent || entry.catalogue) as any;
     result.push({
       key: entry.parentKey,
-      index: parent[(entry as any).parentKey].findIndex((o: EditorBase) => o === entry),
+      index: parent[(entry as any).parentKey].indexOf(entry),
       id: entry.id,
     });
     entry = entry.parent;
@@ -621,6 +632,7 @@ export function replaceAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[],
 export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {
   forEachEntryRecursive(entry, (entry, key, _parent) => {
     if (entry.id) {
+      if (entry instanceof Condition) return;
       entry.id = catalogue.generateNonConflictingId();
     }
   });

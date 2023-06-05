@@ -399,7 +399,6 @@ export class ReactiveExtraConstraint extends ReactiveConstraint implements HasMo
     }
   }
 }
-// export type ReactiveExtraConstraint = ReactiveConstraint<BSIExtraConstraint>;
 
 export class ReactiveTotalQuery {
   source: BSIQuery;
