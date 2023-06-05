@@ -1054,23 +1054,31 @@ export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>)
 }
 export function entryToJson(data: Base | Record<string, any>, extraFields?: Set<string>): string {
   const stringed = JSON.stringify(data, function (k, v) {
+    if (Array.isArray(v) && v.length === 0) return undefined;
     if (goodJsonKeys.has(k) || isFinite(Number(k)) || extraFields?.has(k)) return v;
     return undefined;
   });
   return stringed;
 }
+
+interface EntriesToJsonOptions {
+  formatted?: boolean;
+  forceArray?: boolean; // default is true
+}
 export function entriesToJson(
-  data: Array<Base | Record<string, any>>,
+  data: Array<Base | Record<string, any>> | Base | Record<string, any>,
   extraFields?: Set<string>,
-  formatted = false
+  options?: EntriesToJsonOptions
 ): string {
+  const takeOutOfArray = options?.forceArray === false;
+  data = Array.isArray(data) && data?.length === 1 && takeOutOfArray ? data[0] : data;
   const stringed = JSON.stringify(
     data,
     function (k, v) {
       if (goodJsonKeys.has(k) || isFinite(Number(k)) || extraFields?.has(k)) return v;
       return undefined;
     },
-    formatted ? 2 : undefined
+    options?.formatted === true ? 2 : undefined
   );
   return stringed;
 }
