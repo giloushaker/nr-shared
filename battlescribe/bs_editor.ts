@@ -163,7 +163,10 @@ export type ItemTypeNames =
   | "conditionGroup"
   | "cost"
   | "costType"
-  | "link";
+  | "link"
+  | "profileLink"
+  | "ruleLink"
+  | "infoGroupLink";
 
 export type ItemKeys =
   // Entries
@@ -304,9 +307,9 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
       return "selectionEntryGroup";
 
     case "sharedSelectionEntries":
-      return obj?.targetId ? "entryLink" : "selectionEntry";
+      return obj?.targetId ? "selectionEntryLink" : "selectionEntry";
     case "sharedSelectionEntryGroups":
-      return obj?.targetId ? "entryLink" : "selectionEntryGroup";
+      return obj?.targetId ? "selectionEntryLink" : "selectionEntryGroup";
 
     case "entryLinks":
       return obj?.target ? ((obj.target.editorTypeName + "Link") as any) : "link";
