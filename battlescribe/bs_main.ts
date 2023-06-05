@@ -313,6 +313,13 @@ export class Base implements BSModifierBase {
     if (this.entryLinks) yield* this.entryLinks;
     if (this.childs) yield* this.childs;
   }
+
+  *iterateSelectionEntries(): Iterable<Base> {
+    if (this.selectionEntries) yield* this.selectionEntries;
+    if (this.entryLinks) yield* this.entryLinks;
+    if (this.selectionEntryGroups) yield* this.selectionEntryGroups;
+  }
+
   *categoryLinksIterator(): Iterable<CategoryLink> {
     if (this.categoryLinks) yield* this.categoryLinks;
   }

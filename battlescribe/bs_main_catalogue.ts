@@ -225,20 +225,31 @@ export class Catalogue extends Base {
       }
     }
   }
+
   *iterateSelectionEntries(): Iterable<Base> {
     for (const catalogue of this.importsWithEntries) {
       const system = catalogue.isGameSystem();
       for (const entry of catalogue.selectionEntries || []) {
         if (system || entry.import !== false) yield entry;
       }
-
-      for (const entry of catalogue.sharedSelectionEntries || []) {
+      for (const entry of catalogue.entryLinks || []) {
         if (system || entry.import !== false) yield entry;
       }
+
+      for (const entry of catalogue.sharedSelectionEntries || []) {
+        yield entry;
+      }
+      for (const entry of catalogue.sharedSelectionEntryGroups || []) {
+        yield entry;
+      }
     }
+
     if (this.selectionEntries) yield* this.selectionEntries;
+    if (this.entryLinks) yield* this.entryLinks;
     if (this.sharedSelectionEntries) yield* this.sharedSelectionEntries;
+    if (this.sharedSelectionEntryGroups) yield* this.sharedSelectionEntryGroups;
   }
+
   *entriesIterator(): Iterable<Base | Link> {
     if (this.sharedSelectionEntries) yield* this.sharedSelectionEntries;
     if (this.selectionEntries) yield* this.selectionEntries;
@@ -246,6 +257,7 @@ export class Catalogue extends Base {
     if (this.selectionEntryGroups) yield* this.selectionEntryGroups;
     if (this.entryLinks) yield* this.entryLinks;
   }
+
   forEachNode(callbackfn: (value: Base | Link) => unknown): void {
     callbackfn(this);
     if (this.childs) for (const e of this.childs) e.forEachNode(callbackfn);
