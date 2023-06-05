@@ -159,11 +159,6 @@ export class Base implements BSModifierBase {
   get url(): string {
     return "%{main_catalogue|catalogue}/%{id}/%{getName}";
   }
-  post_init() {
-    if (!this.isLink() && (this as any as Link).targetId) {
-      Object.setPrototypeOf(this, Link.prototype);
-    }
-  }
 
   process() {
     if (this.loaded) return;

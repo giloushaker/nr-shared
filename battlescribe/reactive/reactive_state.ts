@@ -279,6 +279,7 @@ export class BSNodeState
   setParent(newParent: BSNodeState) {
     if (this.parent !== newParent) {
       this.disable();
+      const previousAmount = this.scope.propagateAmount;
       if (this.scope) {
         this.scope.updateMultipliers(this.scope.amount, 0);
       }
@@ -289,7 +290,7 @@ export class BSNodeState
       if (this.scope) {
         this.scope.updateFilters(this.getFilters());
         this.scope.updateCostFilters(this.getCostFilters());
-        this.scope.updateMultipliers(this.scope.amount, this.scope.propagateAmount);
+        this.scope.updateMultipliers(this.scope.amount, previousAmount);
       }
     }
   }
