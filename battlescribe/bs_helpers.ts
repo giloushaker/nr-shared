@@ -1,5 +1,5 @@
 import { getRandomInt } from "../util";
-import { goodJsonArrayKeys } from "./bs_main";
+import { entryToJson } from "./bs_main";
 import type { BSIProfile, BSICharacteristic } from "./bs_types";
 
 export type Modify<T, R> = Omit<T, keyof R> & R;
@@ -314,9 +314,7 @@ export function isProfileModified(profile: BSIProfile) {
   return false;
 }
 export function hashProfile(profile: BSIProfile): string {
-  const copy = JSON.parse(JSON.stringify(profile));
-  delete copy.id;
-  return JSON.stringify(copy);
+  return entryToJson({ ...profile, id: undefined });
 }
 export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[]): Record<string, T> {
   const hashed: { [hash: string]: T } = {};
