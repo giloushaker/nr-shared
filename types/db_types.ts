@@ -1,11 +1,6 @@
 import type { ObjectId } from "bson";
 
-import type {
-  SetupCategory,
-  IArmyBook,
-  IArmyRoster,
-  ReportRoster,
-} from "../systems/army_interfaces";
+import type { SetupCategory, IArmyBook, IArmyRoster, ReportRoster } from "../systems/army_interfaces";
 
 import type { PatchIndex } from "../battlescribe/bs_helpers";
 import type { BSICost } from "../battlescribe/bs_types";
@@ -41,10 +36,8 @@ export interface GameSystemRow {
     defaultMaxCosts?: Record<string, number>;
     patch?: PatchIndex;
     profileFilter?: string;
-    sizes?: Record<
-      string,
-      { type: string; size: { w: number; h: number; r: boolean } }
-    >;
+    profileOrder?: string[];
+    sizes?: Record<string, { type: string; size: { w: number; h: number; r: boolean } }>;
     major?: Record<string, Array<{ name: string; date: string }>>;
     score?: ScoringSystem[];
     setup_categories?: Record<string, SetupCategory>;
