@@ -228,12 +228,11 @@ export class Catalogue extends Base {
 
   *iterateSelectionEntries(): Iterable<Base> {
     for (const catalogue of this.importsWithEntries) {
-      const system = catalogue.isGameSystem();
       for (const entry of catalogue.selectionEntries || []) {
-        if (system || entry.import !== false) yield entry;
+        if (entry.import !== false) yield entry;
       }
       for (const entry of catalogue.entryLinks || []) {
-        if (system || entry.import !== false) yield entry;
+        if (entry.import !== false) yield entry;
       }
 
       for (const entry of catalogue.sharedSelectionEntries || []) {
@@ -244,8 +243,8 @@ export class Catalogue extends Base {
       }
     }
 
-    if (this.selectionEntries) yield* this.selectionEntries;
-    if (this.entryLinks) yield* this.entryLinks;
+    //if (this.selectionEntries) yield* this.selectionEntries;
+    //if (this.entryLinks) yield* this.entryLinks;
     if (this.sharedSelectionEntries) yield* this.sharedSelectionEntries;
     if (this.sharedSelectionEntryGroups) yield* this.sharedSelectionEntryGroups;
   }
