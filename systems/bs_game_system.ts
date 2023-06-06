@@ -2,19 +2,10 @@ import { arrayToIndex, systemToString } from "../util";
 import { BSCatalogueManager } from "../../shared/battlescribe/bs_system";
 import type { PatchIndex } from "../../shared/battlescribe/bs_helpers";
 import type { IArmyBook, SetupCategory } from "./army_interfaces";
-import type {
-  BookRow,
-  GameSystemRow,
-  Icons,
-  IndexAndArray,
-  ListRow,
-} from "../../../assets/shared/types/db_types";
+import type { BookRow, GameSystemRow, Icons, IndexAndArray, ListRow } from "../../../assets/shared/types/db_types";
 import { BsBook } from "../../shared/battlescribe/bs_book";
 
-import {
-  BooksDate,
-  getBookDate,
-} from "../../shared/battlescribe/bs_versioning";
+import { BooksDate, getBookDate } from "../../shared/battlescribe/bs_versioning";
 import { defaultScore } from "./system_scores";
 export type FetchedBook = any;
 
@@ -100,6 +91,7 @@ export class BsGameSystem {
     score?: ScoringSystem[];
     setup_categories?: Record<string, SetupCategory>;
     profileFilter?: string;
+    profilesOrder?: string[];
     exportFormats?: string[];
     extractModelCountFromName?: boolean;
     characteristicDefinesModel?: string;
@@ -115,12 +107,7 @@ export class BsGameSystem {
   private fetchStrategy: BookFetchFunction;
   public language = "EN";
 
-  constructor(
-    systemRow: GameSystemRow,
-    lang: string,
-    fetchStrategy: BookFetchFunction,
-    manager?: BSCatalogueManager
-  ) {
+  constructor(systemRow: GameSystemRow, lang: string, fetchStrategy: BookFetchFunction, manager?: BSCatalogueManager) {
     this.fetchStrategy = fetchStrategy;
     this.language = lang;
     this.manager = manager;
@@ -151,17 +138,15 @@ export class BsGameSystem {
     this.settings.patch = systemRow.settings?.patch;
     this.settings.defaultMaxCosts = systemRow.settings?.defaultMaxCosts;
     this.settings.profileFilter = systemRow.settings?.profileFilter;
+    this.settings.profilesOrder = systemRow.settings?.profilesOrder;
     this.settings.exportFormats = systemRow.settings?.exportFormats;
-    this.settings.extractModelCountFromName =
-      systemRow.settings?.extractModelCountFromName;
-    this.settings.characteristicDefinesModel =
-      systemRow.settings?.characteristicDefinesModel;
+    this.settings.extractModelCountFromName = systemRow.settings?.extractModelCountFromName;
+    this.settings.characteristicDefinesModel = systemRow.settings?.characteristicDefinesModel;
 
     this.settings.sizes = {};
     if (systemRow.settings?.sizes) {
       for (const elt in systemRow.settings.sizes) {
-        this.settings.sizes[elt.toLocaleLowerCase()] =
-          systemRow.settings.sizes[elt];
+        this.settings.sizes[elt.toLocaleLowerCase()] = systemRow.settings.sizes[elt];
       }
     }
 
@@ -196,11 +181,7 @@ export class BsGameSystem {
   }
 
   isGameSystem(book: BookRow): boolean {
-    return (
-      this.bsid !== undefined &&
-      book.bsid !== undefined &&
-      book.bsid === this.bsid
-    );
+    return this.bsid !== undefined && book.bsid !== undefined && book.bsid === this.bsid;
   }
 
   /**  Unloads all books */
@@ -241,15 +222,8 @@ export class BsGameSystem {
    * @param date The date to load the current book at
    * @param booksDate BooksDate to pass to dependencies
    */
-  private async loadBook(
-    book: LoadedBookRow,
-    date?: string | null,
-    booksDate?: BooksDate
-  ): Promise<string | null> {
-    if (
-      (this.engine == "t9a" && book.id < 100) ||
-      (this.engine == "bs" && book.id > 200)
-    ) {
+  private async loadBook(book: LoadedBookRow, date?: string | null, booksDate?: BooksDate): Promise<string | null> {
+    if ((this.engine == "t9a" && book.id < 100) || (this.engine == "bs" && book.id > 200)) {
       let date: string | undefined = undefined;
       if (booksDate) {
         date = booksDate[book.id] || undefined;
@@ -269,11 +243,7 @@ export class BsGameSystem {
       if (this.language) {
         book.rawTranslation = res.translation;
       }
-      const loaded = await this.loadBookFromJson(
-        res.book,
-        res.translation,
-        booksDate
-      );
+      const loaded = await this.loadBookFromJson(res.book, res.translation, booksDate);
       if (loaded) book.data[dateIndex] = loaded;
 
       return dateIndex;
@@ -292,13 +262,8 @@ export class BsGameSystem {
     return await BsBook.loadFromJson(this as any, jsonData, booksDate);
   }
 
-  public async findBookByName(
-    name: string,
-    date?: string
-  ): Promise<IArmyBook | null> {
-    const book = this.books.array.find(
-      (book) => book.name.toLowerCase() == name.toLowerCase()
-    );
+  public async findBookByName(name: string, date?: string): Promise<IArmyBook | null> {
+    const book = this.books.array.find((book) => book.name.toLowerCase() == name.toLowerCase());
     if (book) {
       const loaded = await this.loadBook(book, date);
       if (loaded) return book.data[loaded]; // Latest version should be in id = 0
@@ -306,17 +271,10 @@ export class BsGameSystem {
     return null;
   }
 
-  public async findBookByBsid(
-    bsid: string,
-    booksDate?: BooksDate
-  ): Promise<BsBook | null> {
+  public async findBookByBsid(bsid: string, booksDate?: BooksDate): Promise<BsBook | null> {
     const book = this.books.array.find((book) => book.bsid == bsid);
     if (book) {
-      const loaded = await this.loadBook(
-        book,
-        getBookDate(booksDate, book.id),
-        booksDate
-      );
+      const loaded = await this.loadBook(book, getBookDate(booksDate, book.id), booksDate);
       if (loaded) return book.data[loaded] as BsBook; // Latest version should be in id = 0
 
       // return book.data[date]; // Latest version should be in id = 0
@@ -327,11 +285,7 @@ export class BsGameSystem {
   public getBookRowByBsid(bsid: string): LoadedBookRow | undefined {
     return this.books.array.find((book) => book.bsid == bsid);
   }
-  public async findRawByBsid(
-    bsid: string,
-    date?: string | null,
-    booksDate?: BooksDate
-  ): Promise<FetchedBook | null> {
+  public async findRawByBsid(bsid: string, date?: string | null, booksDate?: BooksDate): Promise<FetchedBook | null> {
     const book = this.getBookRowByBsid(bsid);
     if (book) {
       date = date || getBookDate(booksDate, book.id);
@@ -342,10 +296,7 @@ export class BsGameSystem {
     return null;
   }
 
-  public async getBook(
-    id: number,
-    booksDate?: BooksDate
-  ): Promise<IArmyBook | null> {
+  public async getBook(id: number, booksDate?: BooksDate): Promise<IArmyBook | null> {
     const book = this.books.index[id];
     const date = getBookDate(booksDate, id);
     if (book) {
@@ -363,10 +314,7 @@ export class BsGameSystem {
     return this.getBook(list.id_book, list.booksDate);
   }
 
-  public async getBookRaw(
-    id: number,
-    booksDate?: BooksDate
-  ): Promise<FetchedBook | null> {
+  public async getBookRaw(id: number, booksDate?: BooksDate): Promise<FetchedBook | null> {
     const date = getBookDate(booksDate, id);
     const book = this.books.index[id];
     if (book) {
@@ -375,10 +323,7 @@ export class BsGameSystem {
     }
     return null;
   }
-  public async getBookRawByBsid(
-    bsid: string,
-    booksDate?: BooksDate
-  ): Promise<FetchedBook | null> {
+  public async getBookRawByBsid(bsid: string, booksDate?: BooksDate): Promise<FetchedBook | null> {
     const book = this.getBookRowByBsid(bsid);
     if (book) {
       return await this.getBookRaw(book.id, booksDate);
