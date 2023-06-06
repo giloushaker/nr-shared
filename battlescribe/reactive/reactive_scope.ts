@@ -499,7 +499,7 @@ export class BSNodeScope {
       }
     }
 
-    if (this.isGroup() && (new_added.size || old_removed.size)) {
+    if (this.isGroup() || (this.isUnit() && (new_added.size || old_removed.size))) {
       this.addEvents("categories");
     }
 

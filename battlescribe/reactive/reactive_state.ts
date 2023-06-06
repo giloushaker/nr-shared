@@ -165,7 +165,6 @@ export class BSNodeState
       }
       if (parentIsCategory) {
         this.primary = this.parent!.source.getId();
-        this.categories.add(this.primary);
       }
     }
     if (init) {
@@ -241,6 +240,7 @@ export class BSNodeState
       this.forEachParent((group) => {
         if (group.source.isGroup() || group.source.isEntry()) {
           group.categories.forEach(result.add, result);
+          if (group.primary) result.add(group.primary);
         }
       });
     }

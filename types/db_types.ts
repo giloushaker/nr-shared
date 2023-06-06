@@ -36,7 +36,7 @@ export interface GameSystemRow {
     defaultMaxCosts?: Record<string, number>;
     patch?: PatchIndex;
     profileFilter?: string;
-    profileOrder?: string[];
+    profilesOrder?: string[];
     sizes?: Record<string, { type: string; size: { w: number; h: number; r: boolean } }>;
     major?: Record<string, Array<{ name: string; date: string }>>;
     score?: ScoringSystem[];
