@@ -75,10 +75,11 @@ export function conditionToString(
   const type = condition.type || "none";
   const value = condition.value === undefined ? 1 : condition.value;
 
-  const ofWhat = fieldToString(base, condition.childId || "") + (includeId ? `(${condition.childId || "any"})` : "");
-
   const rawField = fieldToString(base, condition.field);
   const field = ["selections", "forces"].includes(rawField) ? ` ${rawField}` : ` ${rawField} of`;
+
+  const what = fieldToString(base, condition.childId || "") + (includeId ? `(${condition.childId || "any"})` : "");
+  const ofWhat = what && field ? `of ${what}` : what;
 
   const rawScope = fieldToString(base, condition.scope);
   const scope = rawScope === base.getName() ? "" : `${rawScope}`;
