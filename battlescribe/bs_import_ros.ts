@@ -100,7 +100,7 @@ async function loadBsForce(parent: Instance, roster_force: SavedForce) {
 }
 
 function loadBsUnit(unit_selector: Selector, roster_unit: SavedSelection) {
-  const unit = unit_selector.addInstance(new Instance(unit_selector));
+  const unit = unit_selector.addInstance(new Instance(unit_selector, roster_unit.id));
   for (const selection of roster_unit.selections || []) {
     loadBsSelections(selection, unit, 1);
   }
@@ -112,10 +112,10 @@ function loadBsSelections(self: SavedSelection, parent: Instance, divide: number
     console.warn("Option", "couldn't be loaded", self.name, self.entryId);
     return;
   }
-  let instance: Instance;
+  let instance: Instance | undefined;
   if (option.isInstanced) {
     for (let i = 0; i < num; i++) {
-      instance = option.addInstance(new Instance(option));
+      instance = option.addInstance(new Instance(option, self.id));
       for (const selection of self.selections || []) {
         loadBsSelections(selection, instance, divide * num);
       }
@@ -125,6 +125,14 @@ function loadBsSelections(self: SavedSelection, parent: Instance, divide: number
     instance = option.first();
     for (const selection of self.selections || []) {
       loadBsSelections(selection, instance, divide * num);
+    }
+  }
+  if (instance && self.associations) {
+    const associations = instance.getAssociations();
+    for (const association of self.associations) {
+      const found = associations.find((o) => o.getId() === association.associationId);
+      const toAdd = found?.getCandidates().find((o) => o.instance.uid === association.to);
+      if (toAdd) found?.addAssociation(toAdd.instance);
     }
   }
 }

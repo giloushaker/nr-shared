@@ -224,6 +224,7 @@ export interface SavedSelection {
   type: string;
   costs: any[];
   selections?: SavedSelection[];
+  associations?: Array<{ to: string; associationId: string }>;
   categories?: SavedCategory[];
   entryGroupId?: string;
 }

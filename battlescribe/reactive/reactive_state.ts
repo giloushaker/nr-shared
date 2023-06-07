@@ -632,7 +632,6 @@ export class BSNodeState
               this.primary = modify(this.source.getPrimaryCategory(), this.modifiers.primary);
               if (previousPrimary !== this.primary) {
                 this.onCategoriesChanged();
-                console.log(this.name, "category");
                 if (this.events?.primaryChanged) {
                   this.events.primaryChanged(this.primary!, previousPrimary);
                 }
@@ -719,9 +718,6 @@ export class BSNodeState
       const force = this.find("force") as BSNodeState;
       const total = force.scope.index[`s::${cost}::${this.source.getId()}`];
       total ? $set(this.totalCosts, cost, total) : $delete(this.totalCosts, cost);
-      if (this.name === "Other") {
-        console.log(total);
-      }
     } else {
       const selfcost = (this.costs[cost] || 0) * this.scope.amount;
       const childcost = (this.scope.index[`sf::${cost}::any`] || 0) * this.scope.amount;
