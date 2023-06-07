@@ -779,8 +779,8 @@ export class Force extends Base {
     return true;
   }
   *forcesIterator(): Iterable<Force> {
-    if (this.forces) {
-      yield* this.forces;
+    if (this.forceEntries) {
+      yield* this.forceEntries;
     }
   }
   *forcesIteratorRecursive(): Iterable<Force> {
