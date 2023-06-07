@@ -158,6 +158,7 @@ export type ItemTypeNames =
   | "publication"
   | "infoGroup"
   | "infoLink"
+  | "association"
   | "constraint"
   | "condition"
   | "modifier"
@@ -354,6 +355,8 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
     case "infoGroups":
       return "infoGroup";
 
+    case "associations":
+      return "association";
     case "constraints":
       return "constraint";
     case "conditions":
@@ -482,6 +485,9 @@ export function getName(obj: any): string {
 
     case "infoLinks":
       return obj.target ? getName(obj.target) : obj.getName();
+
+    case "associations":
+      return `${obj.label}`;
     default:
       console.log(type, obj);
       return type;
