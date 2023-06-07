@@ -320,6 +320,19 @@ export class Base implements BSModifierBase {
     if (this.selectionEntryGroups) yield* this.selectionEntryGroups;
   }
 
+  *iterateSelectionEntriesWithRoot(): Iterable<Base> {
+    if (this.selectionEntries) yield* this.selectionEntries;
+    if (this.entryLinks) yield* this.entryLinks;
+    if (this.selectionEntryGroups) yield* this.selectionEntryGroups;
+  }
+
+  *iterateRootEntries(): Iterable<Base> {
+    if (this.selectionEntries) yield* this.selectionEntries;
+    if (this.entryLinks) yield* this.entryLinks;
+    if (this.selectionEntryGroups) yield* this.selectionEntryGroups;
+    // if (this.forceEntries) yield* this.forceEntries;
+  }
+
   *categoryLinksIterator(): Iterable<CategoryLink> {
     if (this.categoryLinks) yield* this.categoryLinks;
   }
@@ -778,11 +791,13 @@ export class Force extends Base {
     }
     return true;
   }
+
   *forcesIterator(): Iterable<Force> {
-    if (this.forces) {
-      yield* this.forces;
+    if (this.forceEntries) {
+      yield* this.forceEntries;
     }
   }
+
   *forcesIteratorRecursive(): Iterable<Force> {
     if (this.forces) {
       for (const force of this.forces) {
@@ -991,6 +1006,7 @@ export const goodJsonArrayKeys = new Set([
   "sharedRules",
   "rules",
   "infoGroups",
+  "associations",
 ]);
 export const goodJsonKeys = new Set([
   ...goodJsonArrayKeys,
@@ -1033,6 +1049,20 @@ export const goodJsonKeys = new Set([
   "publisher",
   "publisherUrl",
   "shortName",
+
+  // NR SPECIFIC
+  "label",
+  "labelMembers",
+  "maxAssociationsPerMember",
+  "ids",
+  "min",
+  "max",
+  "of",
+  // "includeChildSelections",
+  // "scope",
+  // "type",
+  // "conditions",
+  // "conditionGroups",
 ]);
 export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>): string {
   const root: any = {

@@ -13,6 +13,7 @@ import {
 import { BSCatalogueManager } from "./bs_system";
 import { isObject } from "./bs_helpers";
 import { stringArrayKeys } from "./bs_convert";
+import { EditorSearchItem, getSearchElements } from "~/assets/ts/catalogue/catalogue_helpers";
 export interface hasParent<T> {
   parent?: T | undefined;
 }
@@ -157,6 +158,7 @@ export type ItemTypeNames =
   | "publication"
   | "infoGroup"
   | "infoLink"
+  | "association"
   | "constraint"
   | "condition"
   | "modifier"
@@ -353,6 +355,8 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
     case "infoGroups":
       return "infoGroup";
 
+    case "associations":
+      return "association";
     case "constraints":
       return "constraint";
     case "conditions":
@@ -481,6 +485,9 @@ export function getName(obj: any): string {
 
     case "infoLinks":
       return obj.target ? getName(obj.target) : obj.getName();
+
+    case "associations":
+      return `${obj.label}`;
     default:
       console.log(type, obj);
       return type;
@@ -508,22 +515,33 @@ export function forEachEntryRecursive(
   }
 }
 
+export function removeEntry(entry: EditorBase) {
+  const parent = entry.parent;
+  if (parent) {
+    const arr = parent[entry.parentKey] as EditorBase[];
+    const index = arr.indexOf(entry);
+    if (index !== -1) {
+      arr.splice(index, 1);
+    }
+  }
+}
+
 /**
  * Removes an entry and fixes up the index
  * Returns all the removed data for undoing
  */
-export async function onRemoveEntry(removed: EditorBase, manager: BSCatalogueManager) {
+export async function onRemoveEntry(removed: EditorBase, manager?: BSCatalogueManager) {
   const catalogue = removed.catalogue;
   forEachEntryRecursive(removed, (entry, key, parent) => {
     catalogue.removeFromIndex(entry);
-    if (entry.isLink()) {
+    if (entry.isLink && entry.isLink()) {
       catalogue.unlinkLink(entry);
       delete (entry as any).target;
     }
     delete (entry as any).parent;
     delete (entry as any).catalogue;
   });
-  if (removed instanceof CatalogueLink) {
+  if (manager && removed instanceof CatalogueLink) {
     await catalogue.reload(manager);
   }
 }
@@ -580,10 +598,10 @@ export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
   return result as any;
 }
 /**
- *  Sets an entry at the specified path
+ *  Adds an entry at the specified path
  *  returns the parent
  */
-export function setAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[], entry: EditorBase) {
+export function addAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[], entry: EditorBase) {
   let current = catalogue as any;
   // resolve path up until the last node
   for (let i = 0; i < path.length - 1; i++) {
@@ -591,6 +609,9 @@ export function setAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[], ent
     current = current[node.key][node.index];
   }
   const lastNode = path[path.length - 1];
+  if (!current[lastNode.key]) {
+    current[lastNode.key] = [];
+  }
   const arr = current[lastNode.key] as EditorBase[];
   arr.splice(lastNode.index, 0, entry);
   return current;
