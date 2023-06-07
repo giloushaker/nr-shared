@@ -991,6 +991,7 @@ export const goodJsonArrayKeys = new Set([
   "sharedRules",
   "rules",
   "infoGroups",
+  "associations",
 ]);
 export const goodJsonKeys = new Set([
   ...goodJsonArrayKeys,
@@ -1033,6 +1034,20 @@ export const goodJsonKeys = new Set([
   "publisher",
   "publisherUrl",
   "shortName",
+
+  // NR SPECIFIC
+  "label",
+  "labelMembers",
+  "maxAssociationsPerMember",
+  "ids",
+  "min",
+  "max",
+  "of",
+  // "includeChildSelections",
+  // "scope",
+  // "type",
+  // "conditions",
+  // "conditionGroups",
 ]);
 export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>): string {
   const root: any = {

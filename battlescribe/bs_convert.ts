@@ -110,17 +110,24 @@ export async function convertToJson(data: any, extension: string) {
   }
 }
 const typeMap = {} as Record<string, string>;
-function toSingle(key: string) {
+export function toSingle(key: string) {
   if (key in typeMap) {
     return typeMap[key];
   }
   if (key.endsWith("ies")) {
-    return key.substr(0, key.length - 3) + "y";
+    return key.substr(0, key.length - "ies".length) + "y";
   }
   if (key.endsWith("s")) {
-    return key.substr(0, key.length - 1);
+    return key.substr(0, key.length - "s".length);
   } else {
     throw Error(`Couldn't convert "${key}" to non-plural (modify toSingle)`);
+  }
+}
+export function toPlural(key: string) {
+  if (key.endsWith("y")) {
+    return key.substr(0, key.length - "y".length) + "ies";
+  } else {
+    return key + "s";
   }
 }
 export const stringArrayKeys = new Set(["readme", "comment", "description"]);
