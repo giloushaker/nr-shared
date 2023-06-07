@@ -13,6 +13,7 @@ import {
 import { BSCatalogueManager } from "./bs_system";
 import { isObject } from "./bs_helpers";
 import { stringArrayKeys } from "./bs_convert";
+import { EditorSearchItem, getSearchElements } from "~/assets/ts/catalogue/catalogue_helpers";
 export interface hasParent<T> {
   parent?: T | undefined;
 }

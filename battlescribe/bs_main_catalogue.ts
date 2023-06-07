@@ -228,6 +228,22 @@ export class Catalogue extends Base {
 
   *iterateSelectionEntries(): Iterable<Base> {
     for (const catalogue of this.importsWithEntries) {
+      for (const entry of catalogue.sharedSelectionEntries || []) {
+        yield entry;
+      }
+      for (const entry of catalogue.sharedSelectionEntryGroups || []) {
+        yield entry;
+      }
+    }
+
+    //if (this.selectionEntries) yield* this.selectionEntries;
+    //if (this.entryLinks) yield* this.entryLinks;
+    if (this.sharedSelectionEntries) yield* this.sharedSelectionEntries;
+    if (this.sharedSelectionEntryGroups) yield* this.sharedSelectionEntryGroups;
+  }
+
+  *iterateSelectionEntriesWithRoot(): Iterable<Base> {
+    for (const catalogue of this.importsWithEntries) {
       for (const entry of catalogue.selectionEntries || []) {
         if (entry.import !== false) yield entry;
       }
@@ -243,8 +259,8 @@ export class Catalogue extends Base {
       }
     }
 
-    //if (this.selectionEntries) yield* this.selectionEntries;
-    //if (this.entryLinks) yield* this.entryLinks;
+    if (this.selectionEntries) yield* this.selectionEntries;
+    if (this.entryLinks) yield* this.entryLinks;
     if (this.sharedSelectionEntries) yield* this.sharedSelectionEntries;
     if (this.sharedSelectionEntryGroups) yield* this.sharedSelectionEntryGroups;
   }
