@@ -18,6 +18,7 @@ export interface NRAssociation {
   label: string;
   labelMembers: string;
   ids?: string[];
+  id?: string;
 
   scope: string;
 
@@ -44,6 +45,7 @@ export class NRAssociationInstance implements NRAssociation {
   labelMembers!: string;
   maxAssociationsPerMember?: number;
   ids?: string[];
+  id?: string;
 
   scope!: string;
   min?: number;
@@ -74,6 +76,9 @@ export class NRAssociationInstance implements NRAssociation {
         this.addAssociation(associate.instance);
       }
     }
+  }
+  getId() {
+    return this.id || `${this.label}-${this.labelMembers}-${this.of}`;
   }
   autoCheckOnChecked(lastChecked: Instance) {
     if (this.min === 1) {
