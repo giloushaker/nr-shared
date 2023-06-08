@@ -1,5 +1,3 @@
-import { makeBookRow } from "../../shared/battlescribe/bs_importort";
-
 export type RescriptResult<T> = Record<unknown, T>;
 export type FROM<T = Number> = T;
 export type TO<T = Number> = T;
