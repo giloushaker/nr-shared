@@ -144,6 +144,9 @@ export class Catalogue extends Base {
     if (this.loaded_editor) return;
     this.loaded_editor = true;
     this.generateCostIndex();
+    if (this.gameSystem) {
+      addObj(this.gameSystem as any, "links", this);
+    }
 
     this.forEachObjectWhitelist<EditorBase>((cur, parent) => {
       cur.parent = parent;
