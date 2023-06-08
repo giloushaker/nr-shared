@@ -54,7 +54,7 @@ export class Instance implements IArmyUnit, IArmyOption, IArmyRoster, IArmyCateg
   selectors: Selector[] = [];
   source: Base | Link;
   propagateChanges = true;
-  uid = getRandomKey();
+  uid: string;
   isDeleted?: boolean;
   isDanglingUnit?: boolean;
   catalogueId?: string;
@@ -94,7 +94,8 @@ export class Instance implements IArmyUnit, IArmyOption, IArmyRoster, IArmyCateg
     return undefined;
   }
 
-  constructor(selector: Selector) {
+  constructor(selector: Selector, uid = getRandomKey()) {
+    this.uid = uid;
     this.selector = selector;
     this.source = selector.source;
     (this.state as any) = undefined;

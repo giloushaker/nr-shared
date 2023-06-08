@@ -2,6 +2,7 @@ import { Instance } from "./bs_instance";
 import type { Catalogue } from "./bs_main_catalogue";
 import type { BSIRule, BSIProfile, BSICharacteristic, BSISelectionCategory, BSICost } from "./bs_types";
 import type { ICost } from "../systems/army_interfaces";
+import { NRAssociationInstance } from "./bs_association";
 
 const disableRulesAndProfiles = false;
 class FormatResult {
@@ -195,6 +196,26 @@ function formatCategories(categories?: BSISelectionCategory[]): string {
   end(result, "categories");
   return result.toString();
 }
+function formatAssociations(associations?: NRAssociationInstance[]): string {
+  const result = new FormatResult();
+
+  if (!associations?.length) return result.toString();
+  associations = associations.filter((o) => o.instances.length);
+  if (!associations?.length) return result.toString();
+  begin(result, "associations");
+  for (const a of associations) {
+    for (const inst of a.instances) {
+      const _selection = {
+        to: inst.uid,
+        associationId: a.getId(),
+      } as any;
+      begin(result, "association", formatAttrs(_selection));
+      end(result, "association");
+    }
+  }
+  end(result, "associations");
+  return result.toString();
+}
 
 function formatSelections(selections?: Instance[]): string {
   const result = new FormatResult();
@@ -215,6 +236,7 @@ function formatSelections(selections?: Instance[]): string {
     begin(result, "selection", formatAttrs(_selection));
     child(result, formatRules(selection.getModifiedRules()));
     child(result, formatProfiles(selection.getModifiedProfiles()));
+    child(result, formatAssociations(selection.getAssociations()));
     child(result, formatSelections(selection.getSelections()));
     child(result, formatCosts(Object.values(selection.getTotalCosts())));
     child(result, formatCategories(selection.getSelectionCategories()));
