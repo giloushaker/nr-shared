@@ -26,6 +26,7 @@ function getUid(obj: any): string {
 }
 export class BSEventQueue {
   queue = {} as Record<string, { _this: Callback; _arg1: any; _arg2: any }>;
+  busy = false;
   enqueue(id: string, obj: Callback, val: any, old?: any) {
     this.queue[id] = {
       _this: obj,
@@ -39,6 +40,8 @@ export class BSEventQueue {
     }
   }
   empty() {
+    if (this.busy) return;
+    this.busy = true;
     let key = this.first();
     while (key) {
       const value = this.queue[key];
@@ -48,6 +51,7 @@ export class BSEventQueue {
       if (next === undefined) break;
       key = next;
     }
+    this.busy = false;
   }
 }
 
@@ -472,7 +476,6 @@ export class BSNodeScope {
     this.categories = new Set(new_categories);
     const selectionsField = this.selectionsField();
     if (!selectionsField) return [new Set(), new Set()];
-
     // array diff negative
     const old_removed = setMinus(old_categories, new_categories);
     if (old_removed.size) {
@@ -499,8 +502,10 @@ export class BSNodeScope {
       }
     }
 
-    if (this.isGroup() || (this.isUnit() && (new_added.size || old_removed.size))) {
-      this.addEvents("categories");
+    if (new_added.size || old_removed.size) {
+      if (this.isGroup() || this.isUnit()) {
+        this.addEvents("categories");
+      }
     }
 
     return [new_added, old_removed];

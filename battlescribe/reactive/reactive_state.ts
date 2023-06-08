@@ -229,6 +229,7 @@ export class BSNodeState
     if (this.source.isQuantifiable()) {
       this.forEachParentGroups((group) => {
         group.categories.forEach(result.add, result);
+        if (group.primary) result.add(group.primary);
       });
     }
     return result;
@@ -286,12 +287,12 @@ export class BSNodeState
       this.parent = newParent;
       this.scope.parent = this.parent.scope;
       this.onCategoriesChanged();
-      this.enable();
       if (this.scope) {
         this.scope.updateFilters(this.getFilters());
         this.scope.updateCostFilters(this.getCostFilters());
         this.scope.updateMultipliers(this.scope.amount, previousAmount);
       }
+      this.enable();
     }
   }
   findParent(fn: (p: BSNodeState) => any): BSNodeState | undefined {
@@ -897,7 +898,9 @@ function isIterable(obj: any) {
 }
 
 (globalThis as any).$translate = (obj: any) => {
+  if (!globalThis.$debugOption) return "$debugOption not set";
   const src = $debugOption.source;
+
   const result = {} as Record<string, any>;
   function translates(s: string): string {
     if (s.includes("::")) {
