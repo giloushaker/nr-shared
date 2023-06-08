@@ -710,7 +710,7 @@ export function fixKey(parent: EditorBase | Catalogue, key: keyof Base, catalogu
         }
         return "";
       default:
-        return key === catalogueKey ? key : "";
+        return key;
     }
   }
   return key;
