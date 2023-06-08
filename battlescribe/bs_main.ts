@@ -250,6 +250,11 @@ export class Base implements BSModifierBase {
   *forcesIterator(): Iterable<Force> {
     return;
   }
+  *associationsIterator(): Iterable<NRAssociation> {
+    if (this.associations) {
+      yield* this.associations;
+    }
+  }
   *profilesIterator(): Iterable<Profile> {
     for (const group of getAllInfoGroups(this)) {
       if (group.profiles) {
@@ -621,8 +626,9 @@ export class Link<T extends Base = Group | Entry> extends Base {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore: TS2611
   get associations(): NRAssociation[] | undefined {
-    return this.target.associations;
+    return this.target?.associations;
   }
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore: TS2611
   get defaultSelectionEntryId(): string | undefined {
@@ -634,6 +640,10 @@ export class Link<T extends Base = Group | Entry> extends Base {
   *extraConstraintsIterator(): Iterable<BSIExtraConstraint> {
     yield* this.target.extraConstraintsIterator();
     yield* super.extraConstraintsIterator();
+  }
+  *associationsIterator(): Iterable<NRAssociation> {
+    yield* this.target.associationsIterator();
+    yield* super.associationsIterator();
   }
   *rulesIterator(): Iterable<Rule> {
     yield* this.target.rulesIterator();
