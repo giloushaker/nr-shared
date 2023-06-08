@@ -265,6 +265,20 @@ export class Catalogue extends Base {
     if (this.sharedSelectionEntryGroups) yield* this.sharedSelectionEntryGroups;
   }
 
+  *iterateAllRootEntries(): Iterable<Base> {
+    for (const catalogue of this.importsWithEntries) {
+      for (const entry of catalogue.selectionEntries || []) {
+        if (entry.import !== false) yield entry;
+      }
+      for (const entry of catalogue.entryLinks || []) {
+        if (entry.import !== false) yield entry;
+      }
+    }
+
+    if (this.selectionEntries) yield* this.selectionEntries;
+    if (this.entryLinks) yield* this.entryLinks;
+  }
+
   *entriesIterator(): Iterable<Base | Link> {
     if (this.sharedSelectionEntries) yield* this.sharedSelectionEntries;
     if (this.selectionEntries) yield* this.selectionEntries;
