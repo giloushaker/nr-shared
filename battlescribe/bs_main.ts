@@ -490,6 +490,11 @@ export class Base implements BSModifierBase {
     }
     return UNCATEGORIZED_ID;
   }
+  getPrimaryCategoryLink(): CategoryLink | undefined {
+    for (const categoryLink of this.categoryLinks || []) {
+      if (categoryLink.primary) return categoryLink;
+    }
+  }
 
   // Modifiers a constraints query to have the same effect when checked from a roster/force.
   // packs modifiers & modifiers groups inside it
@@ -584,13 +589,13 @@ export class Link<T extends Base = Group | Entry> extends Base {
   isEntry() {
     return this.target.isEntry();
   }
-  isProfile() {
+  isProfile(): this is Profile | InfoLink<Profile> {
     return this.target?.isProfile();
   }
-  isRule() {
+  isRule(): this is Rule | InfoLink<Rule> {
     return this.target?.isRule();
   }
-  isInfoGroup() {
+  isInfoGroup(): this is InfoGroup | InfoLink<InfoGroup> {
     return this.target?.isInfoGroup();
   }
   isUnit(): boolean {
@@ -704,6 +709,14 @@ export class Link<T extends Base = Group | Entry> extends Base {
     }
     return UNCATEGORIZED_ID;
   }
+  getPrimaryCategoryLink(): CategoryLink | undefined {
+    for (const categoryLink of this.categoryLinks || []) {
+      if (categoryLink.primary) return categoryLink;
+    }
+    for (const categoryLink of this.target.categoryLinks || []) {
+      if (categoryLink.primary) return categoryLink;
+    }
+  }
   getCosts(): BSICost[] {
     const d = {} as Record<string, BSICost>;
     if (this.target.costs) {
@@ -717,9 +730,12 @@ export class Link<T extends Base = Group | Entry> extends Base {
 }
 (Link.prototype as any).keyInfoCache = {};
 
-export class InfoLink<T extends Base = Rule | InfoGroup | Profile> extends Link {
+export class InfoLink<T extends Rule | InfoGroup | Profile = Rule | InfoGroup | Profile> extends Link {
   declare target: T;
   declare type: "infoGroup" | "profile" | "rule";
+  getTypeName() {
+    return (this.target as Profile)?.typeName;
+  }
 }
 export class CategoryLink extends Link {
   declare targetId: string;
@@ -940,6 +956,9 @@ export class Profile extends Base implements BSIProfile {
   declare publication?: BSIPublication | undefined;
   isProfile() {
     return true;
+  }
+  getTypeName() {
+    return this.typeName;
   }
 }
 export class InfoGroup extends Base {
