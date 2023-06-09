@@ -178,13 +178,11 @@ export type ItemKeys =
   | "selectionEntryGroups"
   | "sharedSelectionEntryGroups"
   | "entryLinks"
-  | "sharedEntryLinks"
   | "forceEntries"
   | "categoryEntries"
   | "categoryLinks"
 
   //
-  | "catalogue"
   | "catalogueLinks"
   | "publications"
   | "costTypes"
@@ -443,7 +441,6 @@ export function getName(obj: any): string {
     case "selectionEntryGroups":
     case "sharedSelectionEntryGroups":
     case "entryLinks":
-    case "sharedEntryLinks":
     case "forceEntries":
     case "categoryLinks":
     case "categoryEntries":
