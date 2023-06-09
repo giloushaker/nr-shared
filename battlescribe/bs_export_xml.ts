@@ -238,7 +238,7 @@ function formatSelections(selections?: Instance[]): string {
     child(result, formatProfiles(selection.getModifiedProfiles()));
     child(result, formatAssociations(selection.getAssociations()));
     child(result, formatSelections(selection.getSelections()));
-    child(result, formatCosts(Object.values(selection.getTotalCosts())));
+    child(result, formatCosts(Object.values(selection.getCosts())));
     child(result, formatCategories(selection.getSelectionCategories()));
     end(result, "selection");
   }
