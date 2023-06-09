@@ -615,10 +615,10 @@ export class Link<T extends Base = Group | Entry> extends Base {
     return this.targetId;
   }
   getType(): string | undefined {
-    return this.target.type;
+    return this.target?.type;
   }
   getPage(): string | undefined {
-    return this.page || this.target.page;
+    return this.page || this.target?.page;
   }
   getHidden(): boolean | undefined {
     return this.target.hidden || this.hidden;
