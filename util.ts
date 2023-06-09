@@ -372,7 +372,7 @@ export function download(filename: string, mimeType: any, content: BlobPart) {
 export async function zip<T extends OutputType>(filename: string, content: string, type: T = "blob") {
   const zip = new JSZip();
   zip.file(filename, content);
-  const result = await zip.generateAsync({ type: type });
+  const result = await zip.generateAsync({ type: type, compression: "DEFLATE" });
   return result;
 }
 

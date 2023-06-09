@@ -233,12 +233,15 @@ function formatSelections(selections?: Instance[]): string {
       number: selection.getSelectionCount("root"),
       type: selection.source.getType(),
     } as any;
+
+    const costs = Object.values(selection.getCosts());
+    costs.forEach((o) => (o.value = o.value * _selection.number));
     begin(result, "selection", formatAttrs(_selection));
     child(result, formatRules(selection.getModifiedRules()));
     child(result, formatProfiles(selection.getModifiedProfiles()));
     child(result, formatAssociations(selection.getAssociations()));
     child(result, formatSelections(selection.getSelections()));
-    child(result, formatCosts(Object.values(selection.getCosts())));
+    child(result, formatCosts(costs));
     child(result, formatCategories(selection.getSelectionCategories()));
     end(result, "selection");
   }
