@@ -719,7 +719,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
   }
   getCosts(): BSICost[] {
     const d = {} as Record<string, BSICost>;
-    if (this.target.costs) {
+    if (this.target?.costs) {
       for (const cost of this.target.costs) d[cost.typeId] = cost;
     }
     if (this.costs) {
