@@ -898,8 +898,8 @@ function isIterable(obj: any) {
 }
 
 (globalThis as any).$translate = (obj: any) => {
-  if (!globalThis.$debugOption) return "$debugOption not set";
-  const src = $debugOption.source;
+  if (!(globalThis as any).$debugOption) return "$debugOption not set";
+  const src = (globalThis as any).$debugOption.source;
 
   const result = {} as Record<string, any>;
   function translates(s: string): string {
@@ -910,7 +910,8 @@ function isIterable(obj: any) {
         .join("::");
       return joined;
     }
-    const f = src.catalogue?.findOptionById(s) || $debugOption.getParentRoster().source.findOptionById(s);
+    const f =
+      src.catalogue?.findOptionById(s) || (globalThis as any).$debugOption.getParentRoster().source.findOptionById(s);
     let name = f?.getName ? f.getName() : f?.name || s;
     if (f?.isLink && f.isLink()) name += " (link)";
     return name.trim();
