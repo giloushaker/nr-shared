@@ -80,7 +80,7 @@ export function conditionToString(
   const field = ["selections", "forces"].includes(rawField) ? ` ${rawField}` : ` ${rawField} of`;
 
   const what = fieldToString(base, condition.childId || "") + (includeId ? `(${condition.childId || "any"})` : "");
-  const of = what && field ? ` of` : "";
+  const of = what && field ? ` of ` : "";
 
   const rawScope = fieldToString(base, condition.scope);
   const scope = rawScope === base.getName() ? "" : `${rawScope}`;
