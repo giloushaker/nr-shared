@@ -1,8 +1,7 @@
 import { unzip } from "unzipit";
 import { X2jOptionsOptional, XMLParser, XMLBuilder, XmlBuilderOptionsOptional } from "fast-xml-parser";
 import { fix_xml_object, forEachValueRecursive, hashFnv32a, isObject, removePrefix, to_snake_case } from "./bs_helpers";
-import { rootToJson } from "./bs_main";
-import { getDataObject } from "./bs_system";
+import { rootToJson, getDataObject } from "./bs_main";
 import { BSICatalogue, BSIData, BSIGameSystem } from "./bs_types";
 import { Catalogue } from "./bs_main_catalogue";
 

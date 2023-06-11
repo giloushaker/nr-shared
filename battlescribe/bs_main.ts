@@ -14,6 +14,8 @@ import type {
   BSIConditionGroup,
   BSIRepeat,
   BSICharacteristicType,
+  BSIData,
+  BSIGameSystem,
 } from "./bs_types";
 import { Catalogue, EditorBase } from "./bs_main_catalogue";
 import type { Roster } from "./bs_system";
@@ -86,7 +88,11 @@ const arrayKeys = [
 const arrayKeysWithoutId = ["conditions", "conditionGroups", "modifiers", "modifierGroups", "repeats"];
 export const goodKeys = new Set([...arrayKeys, ...arrayKeysWithoutId]);
 export const goodKeysWiki = new Set(arrayKeys);
-
+export function getDataObject(data: BSIData): BSIGameSystem | BSICatalogue {
+  if (data.gameSystem) return data.gameSystem;
+  if (data.catalogue) return data.catalogue;
+  throw Error("getDataObject data argument is not a valid system or catalogue");
+}
 /**
  * This is a base class with generic functions for all nodes in the BSData xml/json
  * Usage: Add it as a prototype on the json to use the functions with Object.setPrototypeOf

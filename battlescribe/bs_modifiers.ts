@@ -35,7 +35,8 @@ export function* getAllInfoGroups(group: Base): Iterable<InfoGroup> {
 }
 
 export function fieldToText(base: Base | Link, field: string): string {
-  const target = (base.catalogue || (base as Catalogue)).findOptionById(field);
+  const catalogue = base.catalogue || (base as Catalogue);
+  const target = catalogue.findOptionById(field);
   if (target) {
     const type = (target as any).type;
     if (type && ["min", "max"].includes(type)) {
@@ -51,7 +52,7 @@ export function fieldToText(base: Base | Link, field: string): string {
       return target.name;
     }
   }
-  return field;
+  return catalogue.manager.getCatalogueInfo({ targetId: field })?.name || field;
 }
 
 export function rawConditionToString(base: Base | Link, condition: BSIQuery & { value?: number }): string {
@@ -79,7 +80,7 @@ export function conditionToString(
   const field = ["selections", "forces"].includes(rawField) ? ` ${rawField}` : ` ${rawField} of`;
 
   const what = fieldToString(base, condition.childId || "") + (includeId ? `(${condition.childId || "any"})` : "");
-  const ofWhat = what && field ? `of ${what}` : what;
+  const of = what && field ? ` of` : "";
 
   const rawScope = fieldToString(base, condition.scope);
   const scope = rawScope === base.getName() ? "" : `${rawScope}`;
@@ -88,30 +89,30 @@ export function conditionToString(
 
   switch (type) {
     case "instanceOf":
-      return `${scope} is ${ofWhat}`;
+      return `${scope} is ${what}`;
     case "notInstanceOf":
-      return `${scope} is not ${ofWhat}`;
+      return `${scope} is not ${what}`;
 
     case "atLeast":
-      return `${value}+${field} ${ofWhat}${inScope}`;
+      return `${value}+${field} ${of}${what}${inScope}`;
     case "greaterThan":
-      return `${value + 1}+${field} ${ofWhat}${inScope}`;
+      return `${value + 1}+${field} ${of}${what}${inScope}`;
 
     case "atMost":
-      return `${value}${value === 0 ? "" : "-"}${field} ${ofWhat}${inScope}`;
+      return `${value}${value === 0 ? "" : "-"}${field} ${of}${what}${inScope}`;
     case "lessThan":
-      return `${value - 1}${value - 1 === 0 ? "" : "-"}${field} ${ofWhat}${inScope}`;
+      return `${value - 1}${value - 1 === 0 ? "" : "-"}${field} ${of}${what}${inScope}`;
 
     case "equalTo":
-      return `${value}${field} ${ofWhat}${inScope}`;
+      return `${value}${field} ${of}${what}${inScope}`;
     case "notEqualTo":
-      return `not ${value}${field} ${ofWhat}${inScope}`;
+      return `not ${value}${field} ${of}${what}${inScope}`;
 
     case "none":
-      return `${field} ${ofWhat}${inScope}`;
+      return `${field} ${of}${what}${inScope}`;
 
     default:
-      return `${type} ${value}${field} ${ofWhat}${inScope}`;
+      return `${type} ${value}${field} ${of}${what}${inScope}`;
   }
 }
 

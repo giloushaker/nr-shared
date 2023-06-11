@@ -397,17 +397,6 @@ export function getNameExtra(obj: EditorBase): string {
     case "modifierGroups":
       pieces.push(`(${(obj.modifiers?.length || 0) + (obj.modifierGroups?.length || 0)})`);
       break;
-    case "conditionGroups":
-    case "modifiers":
-    case "repeats":
-    case "conditions":
-    case "selectionEntryGroups":
-    case "sharedSelectionEntryGroups":
-    case "forceEntries":
-    case "categoryLinks":
-    case "categoryEntries":
-    case "sharedInfoGroups":
-    case "infoGroups":
     default:
       break;
   }

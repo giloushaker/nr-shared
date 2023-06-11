@@ -22,7 +22,7 @@ import type {
   BSIModifier,
   BSIProfileType,
 } from "./bs_types";
-import type { Force, BSIExtraConstraint } from "./bs_main";
+import type { Force, BSIExtraConstraint, getDataObject } from "./bs_main";
 import type { BsBook } from "./bs_book";
 import type { GameSystem } from "../../ts/systems/game_system";
 import type { ItemTypeNames } from "./bs_editor";
@@ -98,6 +98,7 @@ export class Catalogue extends Base {
   units!: Array<Base | Link>;
   roster_constraints!: BSIExtraConstraint[];
 
+  manager!: BSCatalogueManager;
   book!: BsBook;
   short!: string;
   version!: string;
@@ -321,7 +322,7 @@ export class Catalogue extends Base {
     if (this.book) {
       return this.book.system?.books?.array?.find((o) => o.bsid === id) as any;
     }
-    return undefined;
+    return;
   }
   findOptionsById(id: string): Base[] {
     const result = [];

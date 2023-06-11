@@ -179,7 +179,6 @@ export class BsGameSystem {
   get url(): string {
     return `%{short}/%{label}`;
   }
-
   isGameSystem(book: BookRow): boolean {
     return this.bsid !== undefined && book.bsid !== undefined && book.bsid === this.bsid;
   }

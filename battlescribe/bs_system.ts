@@ -16,7 +16,9 @@ export class BSCatalogueManager {
   async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData> {
     throw new Error("Method not implemented.");
   }
-
+  getCatalogueInfo(catalogueLink: BSICatalogueLink): { name: string } | undefined {
+    throw new Error("Method not implemented.");
+  }
   getLoadedCatalogue(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Catalogue | undefined {
     const key = catalogueLink.targetId || catalogueLink.name!;
     const date = getBookDate(booksDate, catalogueLink.targetId) || "default";
@@ -67,11 +69,6 @@ export class NRClientCatalogueManager extends BSCatalogueManager {
     const json = await this.system.getBookRaw(id, booksDate);
     return json;
   }
-}
-export function getDataObject(data: BSIData): BSIGameSystem | BSICatalogue {
-  if (data.gameSystem) return data.gameSystem;
-  if (data.catalogue) return data.catalogue;
-  throw Error("getDataObject data argument is not a valid system or catalogue");
 }
 export function getDataDbId(data: BSIData | Catalogue): string {
   if (data instanceof Catalogue) {
@@ -171,6 +168,7 @@ export async function loadData(
   if (isCatalogue) {
     system.addLoadedCatalogue(content);
   }
+  content.manager = system;
   return content;
 }
 
