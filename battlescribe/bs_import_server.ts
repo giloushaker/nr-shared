@@ -1,4 +1,4 @@
-import { BSIData, BSIDataCatalogue, BSIDataSystem, BSICatalogue } from "./bs_types";
+import { BSIData, BSIDataCatalogue, BSIDataSystem, BSICatalogue, BSIGameSystem } from "./bs_types";
 import fetch from "node-fetch";
 import { writeFileSync, readFileSync, existsSync } from "fs";
 import { delete_path_related_characters, hashFnv32a, gitSha1 } from "./bs_helpers";
@@ -201,7 +201,7 @@ export function makeSystemRowFromFileData(
   } as any;
 }
 export function makeBookRow(
-  file: BattleScribeFile | BSICatalogue,
+  file: BattleScribeFile | BSICatalogue | BSIGameSystem,
   gstname: string,
   lastUpdated: string,
   playable = true,
