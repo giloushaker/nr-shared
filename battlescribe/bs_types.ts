@@ -124,7 +124,7 @@ export interface BSICatalogueLink {
   importRootEntries?: boolean;
   targetRevision?: number;
 }
-export interface BSICatalogue {
+export interface BSIDataCommon {
   id: string;
   name: string;
   revision: number;
@@ -132,10 +132,6 @@ export interface BSICatalogue {
   authorName?: string;
   authorContact?: string;
   authorUrl?: string;
-  library: boolean;
-  gameSystemId: string;
-  gameSystemRevision: number;
-  catalogueLinks?: BSICatalogueLink[];
   publications?: Publication[];
   costTypes?: BSICostType[];
   profileTypes?: BSIProfileType[];
@@ -149,8 +145,17 @@ export interface BSICatalogue {
   selectionEntries?: Base[];
   rules?: Rule[];
 
-  xmlns: string;
   fullFilePath?: string;
+}
+export interface BSIGameSystem extends BSIDataCommon {
+  gameSystemId: undefined;
+  catalogueLinks: undefined;
+}
+export interface BSICatalogue extends BSIDataCommon {
+  library: boolean;
+  gameSystemId: string;
+  gameSystemRevision: number;
+  catalogueLinks?: BSICatalogueLink[];
 }
 export interface BSIDataCatalogue extends bookFileMetaData {
   catalogue: BSICatalogue;
@@ -176,20 +181,7 @@ export interface bookFileMetaData {
   url?: string;
   xml_hash?: string;
 }
-export interface BSIGameSystem {
-  id: string;
-  name: string;
-  revision: number;
-  battleScribeVersion: string;
-  authorName?: string;
-  authorContact?: string;
-  authorUrl?: string;
-  library?: boolean;
-  gameSystemId?: undefined;
-  catalogueLinks?: undefined;
 
-  fullFilePath?: string;
-}
 export interface BSIDataSystem extends bookFileMetaData {
   gameSystem: BSIGameSystem;
 }

@@ -20,6 +20,7 @@ import type {
   BSIRule,
   BSIPublication,
   BSIModifier,
+  BSIProfileType,
 } from "./bs_types";
 import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { BsBook } from "./bs_book";
@@ -226,6 +227,18 @@ export class Catalogue extends Base {
         yield force;
         yield* force.forcesIteratorRecursive();
       }
+    }
+  }
+
+  *iterateProfileTypes(): Iterable<BSIProfileType> {
+    for (const catalogue of this.importsWithEntries) {
+      if (catalogue.profileTypes) {
+        yield* catalogue.profileTypes;
+      }
+    }
+
+    if (this.profileTypes) {
+      yield* this.profileTypes;
     }
   }
 
