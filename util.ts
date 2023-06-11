@@ -91,6 +91,25 @@ export function dateFormat(date: Date): string {
   return year + "-" + month + "-" + day;
 }
 
+export function dateTimeFormat(p: Date | string): string {
+  const date = new Date(p);
+  const year = date.getUTCFullYear().toString();
+  let month = (date.getUTCMonth() + 1).toString();
+  let day = date.getUTCDate().toString();
+  const hour = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
+
+  // add leading zeros if necessary
+  if (month.length === 1) {
+    month = "0" + month;
+  }
+  if (day.length === 1) {
+    day = "0" + day;
+  }
+
+  return year + "-" + month + "-" + day + ` ${hour}:${minutes}`;
+}
+
 export function copyJsData(tsObject: any, json: any): void {
   for (const field in json) {
     if (!Array.isArray(json[field]) && json[field] != null) {
