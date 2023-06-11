@@ -225,6 +225,7 @@ export interface TournamentRow {
   allow_participant_report_delete: boolean;
 
   log: TournamentLogRow[];
+  agenda?: AgendaRow;
 }
 
 export interface ParticipantListRow {
@@ -521,4 +522,30 @@ export interface ExtraPoints {
   amount: number;
   stage: number | undefined;
   pairings: boolean | undefined;
+}
+
+export interface AgendaEvent {
+  start: Date;
+  time: string;
+  name: string;
+  display: number;
+  details: string;
+  round: number;
+  /*
+    display: 
+      0 : none
+      1 : pairings
+      2 : rankings
+  */
+}
+
+export interface AgendaRow {
+  events: AgendaEvent[];
+  pairingsFontSize: number;
+  detailsFontSize: number;
+  titleFontSize: number;
+  timerFontSize: number;
+  agendaFontSize: number;
+  logoHeight: number;
+  forcedDisplay: number;
 }
