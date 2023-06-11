@@ -230,7 +230,7 @@ export class Catalogue extends Base {
     }
   }
 
-  *iterateProfileTypes(): Iterable<BSIProfileType> {
+  *iterateProfileTypes(): Iterator<BSIProfileType> {
     for (const catalogue of this.importsWithEntries) {
       if (catalogue.profileTypes) {
         yield* catalogue.profileTypes;
