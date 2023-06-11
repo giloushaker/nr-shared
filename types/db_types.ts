@@ -542,6 +542,7 @@ export interface AgendaEvent {
 export interface AgendaRow {
   events: AgendaEvent[];
   pairingsFontSize: number;
+  rankingsFontSize: number;
   detailsFontSize: number;
   titleFontSize: number;
   timerFontSize: number;
