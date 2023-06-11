@@ -590,13 +590,13 @@ export class Link<T extends Base = Group | Entry> extends Base {
     return this.target.isEntry();
   }
   isProfile(): this is Profile | InfoLink<Profile> {
-    return this.target?.isProfile();
+    return this.target?.isProfile() || false;
   }
   isRule(): this is Rule | InfoLink<Rule> {
-    return this.target?.isRule();
+    return this.target?.isRule() || false;
   }
   isInfoGroup(): this is InfoGroup | InfoLink<InfoGroup> {
-    return this.target?.isInfoGroup();
+    return this.target?.isInfoGroup() || false;
   }
   isUnit(): boolean {
     if (this.target.isUnit()) return true;
