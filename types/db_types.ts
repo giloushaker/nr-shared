@@ -549,4 +549,5 @@ export interface AgendaRow {
   agendaFontSize: number;
   logoHeight: number;
   forcedDisplay: number;
+  customMessage: string;
 }
