@@ -285,7 +285,6 @@ function formatRoster(roster: Instance | any, name?: string): string {
     gameSystemId: gst.bsid,
     gameSystemName: gst.name,
     gameSystemRevision: gst.nrversion,
-    xmlns: "http://www.battlescribe.net/schema/rosterSchema",
   };
   begin(result, "roster", formatAttrs(_roster));
   child(result, formatCosts(Object.values(actualRoster.getTotalCosts())));
