@@ -28,7 +28,7 @@ export async function fetch_bs_repo_data(url: string): Promise<BattleScribeRepoD
   return result;
 }
 
-const BS_DATA_CACHE = "static/books/BSDATA_CACHE.json";
+const BS_DATA_CACHE = "data/books/BSDATA_CACHE.json";
 export function set_cached_bs_data(root: string, data: Record<string, BattleScribeRepoData>): void {
   log(1, "saving fetched bs data to cache");
   writeFileSync(`${root}/${BS_DATA_CACHE}`, JSON.stringify(data), "utf8");
@@ -40,7 +40,7 @@ export function get_cached_bs_data(root: string): Record<string, BattleScribeRep
   return JSON.parse(f);
 }
 
-const BS_SYSTEMS_CACHE = "static/books/BATTLESCRIBE_SYSTEMS.json";
+const BS_SYSTEMS_CACHE = "data/books/BATTLESCRIBE_SYSTEMS.json";
 export function set_cached_systems(root: string, data: Record<string, GameSystemRow>): void {
   log(1, `saving bs systems at ${`${root}/${BS_SYSTEMS_CACHE}`}`);
   writeFileSync(`${root}/${BS_SYSTEMS_CACHE}`, JSON.stringify(data), "utf8");
@@ -445,7 +445,7 @@ export function getBookPath(root: string, game: string, gst: string, name: strin
   game = delete_path_related_characters(game);
   gst = delete_path_related_characters(gst);
   name = delete_path_related_characters(name);
-  return `${root}/static/books/${game}/${gst}/${name}${name.endsWith(".json") ? "" : ".json"}`;
+  return `${root}/data/books/${game}/${gst}/${name}${name.endsWith(".json") ? "" : ".json"}`;
 }
 
 async function githubFetchIsOk(url: string) {
