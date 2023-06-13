@@ -1,6 +1,5 @@
 import type {
   BSIConstraint,
-  BSIInfoGroup,
   BSIModifier,
   BSIModifierGroup,
   BSIQuery,
@@ -10,7 +9,7 @@ import type {
   BSIRepeat,
 } from "./bs_types";
 import type { Base, InfoGroup, Link } from "./bs_main";
-import { Catalogue } from "./bs_main_catalogue";
+import type { Catalogue } from "./bs_main_catalogue";
 
 export function* getAllQueries(queries: SupportedQueries): Iterable<BSIQuery> {
   for (const condition of queries.conditions || []) yield condition;

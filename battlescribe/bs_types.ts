@@ -1,5 +1,5 @@
-import { Base, Group, Rule } from "./bs_main";
-import { Publication } from "./bs_main_catalogue";
+import type { Base, Group, Rule } from "./bs_main";
+import type { Publication } from "./bs_main_catalogue";
 
 export interface BSINamed {
   name: string;
@@ -305,4 +305,29 @@ export interface BSIPublication {
   publisher?: string;
   publicationDate?: string | number;
   publisherUrl?: string;
+}
+
+export interface AssociationConstraint {
+  type: "min" | "max";
+  value: number;
+  childId: string;
+  field: "associations";
+}
+export interface NRAssociation {
+  label: string;
+  labelMembers: string;
+  ids?: string[];
+  id?: string;
+
+  scope: string;
+
+  min?: number;
+  max?: number;
+  includeChildSelections?: boolean;
+  of: string;
+
+  type?: "and" | "or";
+  // constraints?: AssociationConstraint[];
+  conditions?: BSICondition[];
+  conditionGroups?: BSIConditionGroup[];
 }

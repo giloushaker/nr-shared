@@ -1,16 +1,6 @@
 import { groupBy, sortBy, clone, addObj, textSearchRegex, generateBattlescribeId } from "./bs_helpers";
-import {
-  Base,
-  UNCATEGORIZED_ID,
-  ILLEGAL_ID,
-  Category,
-  Link,
-  goodKeys,
-  Rule,
-  goodKeysWiki,
-  goodJsonKeys,
-  goodJsonArrayKeys,
-} from "./bs_main";
+import { Base, Link } from "./bs_main";
+import { UNCATEGORIZED_ID, ILLEGAL_ID, Category, goodKeys, Rule, goodKeysWiki, goodJsonArrayKeys } from "./bs_main";
 import type {
   BSICostType,
   BSICondition,
@@ -19,14 +9,11 @@ import type {
   BSIProfile,
   BSIRule,
   BSIPublication,
-  BSIModifier,
   BSIProfileType,
 } from "./bs_types";
-import type { Force, BSIExtraConstraint, getDataObject } from "./bs_main";
-import type { BsBook } from "./bs_book";
-import type { GameSystem } from "../../ts/systems/game_system";
+import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { ItemTypeNames } from "./bs_editor";
-import { BSCatalogueManager } from "./bs_system";
+import type { BSCatalogueManager } from "./bs_system";
 
 export interface WikiLink extends Link {
   parent: WikiBase;
@@ -99,7 +86,7 @@ export class Catalogue extends Base {
   roster_constraints!: BSIExtraConstraint[];
 
   manager!: BSCatalogueManager;
-  book!: BsBook;
+  book!: any;
   short!: string;
   version!: string;
   nrversion!: string;
@@ -117,7 +104,7 @@ export class Catalogue extends Base {
     this.generateExtraConstraints();
     this.generateCostIndex();
   }
-  processForWiki(system: GameSystem) {
+  processForWiki(system: Record<string, any>) {
     if (this.loaded_wiki) return;
     this.loaded_wiki = true;
     this.process();
