@@ -695,3 +695,7 @@ export function* enumerate_zip<T, U>(a: T[], b: U[]) {
   }
   return;
 }
+
+export function escapeXml(str: any): string {
+  return str.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
