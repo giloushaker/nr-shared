@@ -108,7 +108,13 @@ export async function convertToJson(data: any, extension: string) {
       throw new Error("Extension not supported " + extension);
   }
 }
-const typeMap = {} as Record<string, string>;
+const typeMap = {
+  sharedRules: "rule",
+  sharedProfiles: "profile",
+  sharedInfoGroups: "infoGroup",
+  sharedSelectionEntries: "selectionEntry",
+  sharedSelectionEntryGroups: "selectionEntryGroup",
+} as Record<string, string>;
 export function toSingle(key: string) {
   if (key in typeMap) {
     return typeMap[key];
