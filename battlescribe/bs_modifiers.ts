@@ -33,25 +33,28 @@ export function* getAllInfoGroups(group: Base): Iterable<InfoGroup> {
   }
 }
 
-export function fieldToText(base: Base | Link, field: string): string {
-  const catalogue = base.catalogue || (base as Catalogue);
-  const target = catalogue.findOptionById(field);
-  if (target) {
-    const type = (target as any).type;
-    if (type && ["min", "max"].includes(type)) {
-      return constraintToText(base, target as any);
-    }
-    if (target.name) {
-      if (target.isCategory && target.isCategory()) {
-        return `${target.name}`;
+export function fieldToText(base: Base | Link | undefined, field: string): string {
+  if (base) {
+    const catalogue = base.catalogue || (base as Catalogue);
+    const target = catalogue.findOptionById(field);
+    if (target) {
+      const type = (target as any).type;
+      if (type && ["min", "max"].includes(type)) {
+        return constraintToText(base, target as any);
       }
-      if (target.url) {
-        return `${target.name}`;
+      if (target.name) {
+        if (target.isCategory && target.isCategory()) {
+          return `${target.name}`;
+        }
+        if (target.url) {
+          return `${target.name}`;
+        }
+        return target.name;
       }
-      return target.name;
     }
+    return catalogue.manager.getCatalogueInfo({ targetId: field })?.name || field;
   }
-  return catalogue.manager.getCatalogueInfo({ targetId: field })?.name || field;
+  return field;
 }
 
 export function rawConditionToString(base: Base | Link, condition: BSIQuery & { value?: number }): string {
@@ -67,7 +70,7 @@ export function rawConditionToString(base: Base | Link, condition: BSIQuery & { 
   return `${type} ${value}${field} ${ofWhat}${inScope}`;
 }
 export function conditionToString(
-  base: Base | Link,
+  base: Base | Link | undefined,
   condition: BSIQuery & { value?: number },
   includeId = false,
   fieldToString = fieldToText
@@ -82,7 +85,7 @@ export function conditionToString(
   const of = what && field ? ` of ` : "";
 
   const rawScope = fieldToString(base, condition.scope);
-  const scope = rawScope === base.getName() ? "" : `${rawScope}`;
+  const scope = rawScope === base?.getName() ? "" : `${rawScope}`;
   const recursive = condition.includeChildSelections ? " (recursive)" : "";
   const inScope = scope ? ` in ${scope}${recursive}` : "";
 
@@ -127,7 +130,11 @@ export function constraintToString(base: Base | Link, constraint: BSIConstraint,
     constraint.scope === "parent" ? "" : `<span class=grey>(${fieldToString(base, constraint.scope)})</span>`;
   return `${constraint.type}${field}${scope}`;
 }
-export function modifierToString(base: Base | Link, modifier: BSIModifier, fieldToString = fieldToText): string {
+export function modifierToString(
+  base: Base | Link | undefined,
+  modifier: BSIModifier,
+  fieldToString = fieldToText
+): string {
   return `${modifier.type} ${fieldToString(base, modifier.field)} ${fieldToString(base, modifier.value?.toString())}`;
 }
 

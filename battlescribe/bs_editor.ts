@@ -417,9 +417,6 @@ export function getModifierOrConditionParent(obj: EditorBase) {
     if (o instanceof ModifierGroup) return false;
     return true;
   });
-  if (!parent) {
-    throw new Error("no parent found");
-  }
   return parent;
 }
 export function getName(obj: any): string {
