@@ -137,10 +137,7 @@ export async function updateCssVars(appearence, algo) {
     const bgRgb = hexToRgb(appearence.background);
     if (bgRgb != null) {
       for (const field in bgRgb) {
-        document.documentElement.style.setProperty(
-          `--bg-${field}`,
-          bgRgb[field]
-        );
+        document.documentElement.style.setProperty(`--bg-${field}`, bgRgb[field]);
       }
     }
   }
@@ -149,23 +146,14 @@ export async function updateCssVars(appearence, algo) {
     const titleRgb = hexToRgb(appearence.title);
     if (titleRgb != null) {
       for (const field in titleRgb) {
-        document.documentElement.style.setProperty(
-          `--title-${field}`,
-          titleRgb[field]
-        );
+        document.documentElement.style.setProperty(`--title-${field}`, titleRgb[field]);
       }
     }
   }
   if (appearence.forcesBackground) {
-    document.documentElement.style.setProperty(
-      `--forces_background`,
-      appearence.forcesBackground
-    );
+    document.documentElement.style.setProperty(`--forces_background`, appearence.forcesBackground);
   } else if (appearence.title) {
-    document.documentElement.style.setProperty(
-      `--forces_background`,
-      appearence.title
-    );
+    document.documentElement.style.setProperty(`--forces_background`, appearence.title);
     appearence.forcesBackground = appearence.title;
   }
 
@@ -173,19 +161,13 @@ export async function updateCssVars(appearence, algo) {
     const titleRgb = hexToRgb(appearence.highlight);
     if (titleRgb != null) {
       for (const field in titleRgb) {
-        document.documentElement.style.setProperty(
-          `--highlight-${field}`,
-          titleRgb[field]
-        );
+        document.documentElement.style.setProperty(`--highlight-${field}`, titleRgb[field]);
       }
     }
   }
 
   if (appearence.borderColor) {
-    document.documentElement.style.setProperty(
-      `--box-border`,
-      `${appearence.borderColor}`
-    );
+    document.documentElement.style.setProperty(`--box-border`, `${appearence.borderColor}`);
   }
 
   let filter = "";
@@ -208,31 +190,19 @@ export async function updateCssVars(appearence, algo) {
   }
 
   if (appearence.backgroundTexture) {
-    document.documentElement.style.setProperty(
-      `--bg-texture`,
-      appearence.backgroundTexture
-    );
+    document.documentElement.style.setProperty(`--bg-texture`, appearence.backgroundTexture);
   }
 
   if (appearence.backgroundTexture) {
-    document.documentElement.style.setProperty(
-      `--backgroundSize`,
-      appearence.backgroundSize
-    );
+    document.documentElement.style.setProperty(`--backgroundSize`, appearence.backgroundSize);
   }
 
   if (appearence.inputRadius) {
-    document.documentElement.style.setProperty(
-      `--input-radius`,
-      appearence.inputRadius + "px"
-    );
+    document.documentElement.style.setProperty(`--input-radius`, appearence.inputRadius + "px");
   }
 
   if (appearence.inputBackground) {
-    document.documentElement.style.setProperty(
-      `--input-background`,
-      appearence.inputBackground
-    );
+    document.documentElement.style.setProperty(`--input-background`, appearence.inputBackground);
   }
 
   if (algo.unitColor) {
@@ -244,45 +214,27 @@ export async function updateCssVars(appearence, algo) {
   }
 
   if (appearence.fontColor) {
-    document.documentElement.style.setProperty(
-      `--font-color`,
-      appearence.fontColor
-    );
+    document.documentElement.style.setProperty(`--font-color`, appearence.fontColor);
   }
 
   if (appearence.colorGray) {
-    document.documentElement.style.setProperty(
-      `--color-gray`,
-      appearence.colorGray
-    );
+    document.documentElement.style.setProperty(`--color-gray`, appearence.colorGray);
   }
 
   if (appearence.colorRed) {
-    document.documentElement.style.setProperty(
-      `--color-red`,
-      appearence.colorRed
-    );
+    document.documentElement.style.setProperty(`--color-red`, appearence.colorRed);
   }
 
   if (appearence.colorGreen) {
-    document.documentElement.style.setProperty(
-      `--color-green`,
-      appearence.colorGreen
-    );
+    document.documentElement.style.setProperty(`--color-green`, appearence.colorGreen);
   }
 
   if (appearence.colorBlue) {
-    document.documentElement.style.setProperty(
-      `--color-blue`,
-      appearence.colorBlue
-    );
+    document.documentElement.style.setProperty(`--color-blue`, appearence.colorBlue);
   }
 
   if (appearence.colorLightblue) {
-    document.documentElement.style.setProperty(
-      `--color-lightblue`,
-      appearence.colorLightblue
-    );
+    document.documentElement.style.setProperty(`--color-lightblue`, appearence.colorLightblue);
   }
 
   if (appearence.bga) {
@@ -300,10 +252,7 @@ export async function updateCssVars(appearence, algo) {
       `invert(${appearence.invertImagesBrightness}%) hue-rotate(${deg}deg)`
     );
   } else if (appearence.invertImages) {
-    document.documentElement.style.setProperty(
-      `--image-filter`,
-      "invert(100%) hue-rotate(180deg)"
-    );
+    document.documentElement.style.setProperty(`--image-filter`, "invert(100%) hue-rotate(180deg)");
   } else {
     document.documentElement.style.setProperty(`--image-filter`, "");
   }
@@ -316,24 +265,28 @@ export async function updateCssVars(appearence, algo) {
   setAppearanceFont(appearence, "");
   setAppearanceFont(appearence, "Header");
   setAppearanceFont(appearence, "Button");
-  document.documentElement.style.setProperty(
-    `--fontHeaderTransform`,
-    appearence.headerTransform
-  );
+  document.documentElement.style.setProperty(`--fontHeaderTransform`, appearence.headerTransform);
 
   if (appearence.inputHighlights) {
     const fontColor = appearence.inputHighlights;
     document.documentElement.style.setProperty(`--input-highlights`, fontColor);
   }
+
+  if (appearence.dark) {
+    document.documentElement.style.setProperty(`--hover-brighten-color`, "rgba(0, 0, 0, 0.15)");
+    document.documentElement.style.setProperty(`--hover-darken-color`, "rgba(255, 255, 255, 0.15)");
+  } else {
+    document.documentElement.style.setProperty(`--hover-darken-color`, "rgba(0, 0, 0, 0.15)");
+    document.documentElement.style.setProperty(`--hover-brighten-color`, "rgba(255, 255, 255, 0.15)");
+  }
+
+  if (appearence.titleBarColor) {
+    document.documentElement.style.setProperty(`--titleBarColor`, appearence.titleBarColor);
+  }
 }
 
 const _fontDynamicImportCache = {};
-export async function setAppearanceFont(
-  appearence,
-  key,
-  _defaultFamily = "sans-serif",
-  _defaultSize = 16
-) {
+export async function setAppearanceFont(appearence, key, _defaultFamily = "sans-serif", _defaultSize = 16) {
   const keyFont = `font${key}`;
   const keyFontSize = `font${key}Size`;
   let value = appearence[keyFont] || "sans-serif";
@@ -397,14 +350,8 @@ export async function setAppearanceFont(
   } //
 
   appearence[keyFontSize] = Math.max(Math.min(appearence[keyFontSize], 40), 12);
-  document.documentElement.style.setProperty(
-    `--${keyFont}`,
-    value || _defaultFamily
-  );
-  document.documentElement.style.setProperty(
-    `--${keyFontSize}`,
-    (appearence[keyFontSize] || _defaultSize) + "px"
-  );
+  document.documentElement.style.setProperty(`--${keyFont}`, value || _defaultFamily);
+  document.documentElement.style.setProperty(`--${keyFontSize}`, (appearence[keyFontSize] || _defaultSize) + "px");
 }
 
 /**

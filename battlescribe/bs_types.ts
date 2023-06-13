@@ -157,7 +157,7 @@ export interface BSICatalogue extends BSIDataCommon {
   gameSystemRevision: number;
   catalogueLinks?: BSICatalogueLink[];
 }
-export interface BSIDataCatalogue extends bookFileMetaData {
+export interface BSIDataCatalogue extends Partial<bookFileMetaData> {
   catalogue: BSICatalogue;
   gameSystemId?: string;
 }
@@ -182,7 +182,7 @@ export interface bookFileMetaData {
   xml_hash?: string;
 }
 
-export interface BSIDataSystem extends bookFileMetaData {
+export interface BSIDataSystem extends Partial<bookFileMetaData> {
   gameSystem: BSIGameSystem;
 }
 export interface SavedRoster {
