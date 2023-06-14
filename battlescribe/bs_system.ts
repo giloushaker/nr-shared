@@ -13,9 +13,9 @@ export class BSCatalogueManager {
   getCatalogueInfo(catalogueLink: BSICatalogueLink): { name: string } | undefined {
     throw new Error("Method not implemented.");
   }
-  getLoadedCatalogue(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Catalogue | undefined {
-    const key = catalogueLink.targetId || catalogueLink.name!;
-    const date = getBookDate(booksDate, catalogueLink.targetId) || "default";
+  getLoadedCatalogue(catalogueLink: BSICatalogueLink | string, booksDate?: BooksDate): Catalogue | undefined {
+    const key = typeof catalogueLink === "string" ? catalogueLink : catalogueLink.targetId || catalogueLink.name!;
+    const date = getBookDate(booksDate, key) || "default";
 
     const dateIndex = this.catalogues[key];
     return dateIndex ? dateIndex[date] : undefined;
