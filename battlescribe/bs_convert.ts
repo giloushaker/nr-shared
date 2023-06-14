@@ -119,7 +119,9 @@ function normalize(x: any) {
       delete x[attr];
     } else if (containerTags[attr] && x[attr]) {
       if (attr in oldBuggedTypes) {
-        x[attr] = [...(x[attr][containerTags[attr]] || []), ...(x[attr][oldBuggedTypes[attr]] || [])];
+        const normal = x[attr][containerTags[attr]];
+        const old = x[attr][oldBuggedTypes[attr]];
+        x[attr] = [...(Array.isArray(normal) ? normal : []), ...(Array.isArray(old) ? old : [])];
       } else {
         x[attr] = x[attr][containerTags[attr]];
       }

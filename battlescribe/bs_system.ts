@@ -30,7 +30,7 @@ export class BSCatalogueManager {
   addLoadedSystem(system: Catalogue, booksDate?: BooksDate) {
     return this.addLoadedCatalogue(system, booksDate);
   }
-  async unloadAll() {
+  unloadAll() {
     this.catalogues = {};
   }
 
