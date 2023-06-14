@@ -1085,7 +1085,7 @@ export const goodJsonKeys = new Set([
   // "conditions",
   // "conditionGroups",
 ]);
-export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>): string {
+export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>, fixRoot = false): string {
   const root: any = {
     catalogue: undefined,
     gameSystem: undefined,
@@ -1093,12 +1093,16 @@ export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>)
   const copy = { ...data }; // ensure there is no recursivity by making sure only this copy is put in the json
   if (!data.gameSystemId) {
     root.gameSystem = copy;
+    root.gameSystem.type = "gameSystem";
     delete root.catalogue;
   } else {
     root.catalogue = copy;
+    root.catalogue.type = "catalogue";
     delete root.gameSystem;
   }
-  const stringed = JSON.stringify(root, (k, v) => {
+
+  const obj = fixRoot ? getDataObject(root) : root;
+  const stringed = JSON.stringify(obj, (k, v) => {
     if (Array.isArray(v) && v.length === 0) return undefined;
     if (v === copy || goodJsonKeys.has(k) || isFinite(Number(k))) return v;
     return undefined;
