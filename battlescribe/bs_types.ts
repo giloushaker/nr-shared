@@ -25,6 +25,7 @@ export interface BSISelectionCategory {
   id: string;
   primary?: boolean;
   entryId: string;
+  defaultCostLimit: number;
 }
 export interface BSICost extends BSINamed {
   value: number;
