@@ -7,6 +7,20 @@ import { Catalogue } from "./bs_main_catalogue";
 
 import _containerTags from "./containerTags.json";
 import { entries } from "~/assets/json/entries";
+
+const escapedHtml = /&(?:amp|lt|gt|quot|#39|apos);/g;
+const htmlUnescapes = {
+  "&amp;": "&",
+  "&apos;": "'",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#39;": "'",
+};
+
+const unescape = (string: string) =>
+  escapedHtml.test(string) ? string.replace(escapedHtml, (match) => htmlUnescapes[match]) : string;
+
 const containerTags = _containerTags as Record<string, string>;
 const containers = {} as Record<string, string>;
 for (const key in containerTags) {
@@ -34,6 +48,8 @@ export function xmlToJson(data: string, arrayKeys: Set<string>) {
     isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
       return !isAttribute && tagName in containers;
     },
+    attributeValueProcessor: (name, val) => unescape(val),
+    tagValueProcessor: (name, val) => unescape(val),
   };
   return new XMLParser(options).parse(data);
 }
@@ -181,11 +197,11 @@ export async function convertToJson(data: any, extension: string) {
 }
 
 export function toSingle(key: string) {
-  return containers[key];
+  return containerTags[key];
 }
 
 export function toPlural(key: string) {
-  return containerTags[key];
+  return containers[key];
 }
 export const stringArrayKeys = new Set(["readme", "comment", "description"]);
 const skipKeys = new Set(["?xml", "$text", "_"]);

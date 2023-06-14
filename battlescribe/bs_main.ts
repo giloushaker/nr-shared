@@ -1068,6 +1068,8 @@ export const goodJsonKeys = new Set([
   "publisher",
   "publisherUrl",
   "shortName",
+  "repeats",
+  "roundUp",
 
   // NR SPECIFIC
   "label",
