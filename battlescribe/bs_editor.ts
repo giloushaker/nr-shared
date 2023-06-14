@@ -550,6 +550,7 @@ export async function onAddEntry(
     if (entry instanceof CatalogueLink && entry.targetId) {
       reload = true;
     }
+    catalogue.refreshErrors(entry);
   }
   if (reload && parent) {
     const catalogue = parent.catalogue || parent;
