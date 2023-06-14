@@ -101,17 +101,28 @@ export function isAllowedExtension(file: string) {
   }
   return true;
 }
-
+const oldBuggedTypes = {
+  sharedRules: "shareRule",
+  sharedProfiles: "sharedProfile",
+  sharedInfoGroups: "sharedInfoGroup",
+  sharedSelectionEntries: "sharedSelectionEntry",
+  sharedSelectionEntryGroups: "sharedSelectionEntryGroup",
+} as Record<string, string>;
 /**
  * Converts a {profiles: [{profile: {}}]} to {profiles: [{}]}
  * From https://github.com/BlueWinds/bsd-schema/blob/main/index.js
  */
+
 function normalize(x: any) {
   for (let attr in x) {
     if (x[attr] === "") {
       delete x[attr];
     } else if (containerTags[attr] && x[attr]) {
-      x[attr] = x[attr][containerTags[attr]];
+      if (attr in oldBuggedTypes) {
+        x[attr] = [...(x[attr][containerTags[attr]] || []), ...(x[attr][oldBuggedTypes[attr]] || [])];
+      } else {
+        x[attr] = x[attr][containerTags[attr]];
+      }
       x[attr]?.forEach(normalize);
     }
   }
@@ -151,7 +162,6 @@ export function allowed_children(obj: any, key: string): Set<string> {
     }
   }
   if (!result) {
-    console.warn(`Couldn't find allowed children for ${key}`);
     return empty;
   }
   return result as Set<string>;
