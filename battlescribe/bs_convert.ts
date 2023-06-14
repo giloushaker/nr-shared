@@ -141,7 +141,7 @@ export function clean(x: any, k: string) {
   const allowedChilds = (typeof lookedUp === "string" ? allowed[x[lookedUp]] : lookedUp) as Set<string>;
   for (let attr in x) {
     if (attr in containerTags && Array.isArray(x[attr])) {
-      if (allowedChilds && allowedChilds.has(attr)) {
+      if (allowedChilds && !allowedChilds.has(attr)) {
         delete x[attr];
       } else {
         x[attr].forEach((o: any) => clean(o, attr));
