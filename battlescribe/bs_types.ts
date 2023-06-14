@@ -19,13 +19,14 @@ export interface BSILink extends BSINamed, BSIOption, BSIHidden {
 export interface BSICategoryLink extends BSILink {
   primary?: boolean;
 }
-export interface BSICostType extends BSIOption, BSIHidden, BSINamed {}
+export interface BSICostType extends BSIOption, BSIHidden, BSINamed {
+  defaultCostLimit: number;
+}
 export interface BSISelectionCategory {
   name: string;
   id: string;
   primary?: boolean;
   entryId: string;
-  defaultCostLimit: number;
 }
 export interface BSICost extends BSINamed {
   value: number;
@@ -112,7 +113,7 @@ export interface SupportedQueries {
   modifiers?: BSIModifier[];
 }
 
-export interface BSIData extends bookFileMetaData {
+export interface BSIData extends Partial<bookFileMetaData> {
   gameSystem?: BSIGameSystem;
   catalogue?: BSICatalogue;
   xml_hash?: string;

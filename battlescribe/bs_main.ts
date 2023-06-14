@@ -94,7 +94,7 @@ export function getDataObject(data: BSIData): BSIGameSystem | BSICatalogue {
   throw Error("getDataObject data argument is not a valid system or catalogue");
 }
 export function getDataDbId(data: BSIData | Catalogue): string {
-  if (data.isCatalogue && data.isCatalogue()) {
+  if ((data as Catalogue).isCatalogue && (data as Catalogue).isCatalogue()) {
     if (data.id && data.gameSystemId) {
       return `${data.gameSystemId}-${data.id}`;
     }

@@ -1,11 +1,11 @@
 import { getRandomInt } from "../util";
-import { entryToJson } from "./bs_main";
+import { entryToJson, goodJsonArrayKeys } from "./bs_main";
 import type { BSIProfile, BSICharacteristic } from "./bs_types";
-
 export type Modify<T, R> = Omit<T, keyof R> & R;
 export function stripNumber(str: string): string {
   return str.replace(/[0-9]+ *[.-] *(.*)/, "$1");
 }
+
 export function fix_xml_object(obj: any): void {
   const O = [obj]; // ensure that f is called with the top-level object
   while (O.length) {
