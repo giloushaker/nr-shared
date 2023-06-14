@@ -298,16 +298,13 @@ export class Catalogue extends Base {
   *selectionsIterator(): Iterable<Base> {
     yield* this.forces;
   }
-  // findOptionById(id: string) {
-  //   return this.index[id];
-  // }
   findOptionById(id: string): Base | undefined {
     const found = this.index[id];
     if (found) return found;
     const found_import = this.imports.find((o) => id in o.index)?.index[id];
     if (found_import) return found_import;
     if (this.book) {
-      return this.book.system?.books?.array?.find((o) => o.bsid === id) as any;
+      this.manager.getLoadedCatalogue(id);
     }
     return;
   }
