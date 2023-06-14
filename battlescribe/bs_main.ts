@@ -1070,6 +1070,7 @@ export const goodJsonKeys = new Set([
   "shortName",
   "repeats",
   "roundUp",
+  "defaultCostLimit",
 
   // NR SPECIFIC
   "label",
