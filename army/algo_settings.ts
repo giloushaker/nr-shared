@@ -1,4 +1,3 @@
-import { ErrorMessage } from "../../shared/error_manager";
 import { BuilderErrorMessage, IArmyEntry } from "../../shared/systems/army_interfaces";
 
 interface OptionMod {

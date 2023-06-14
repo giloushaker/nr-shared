@@ -105,7 +105,7 @@ export class BsGameSystem {
   protected id_unit_stats?: number;
 
   private fetchStrategy: BookFetchFunction;
-  public language = "EN";
+  public language = "en";
 
   constructor(systemRow: GameSystemRow, lang: string, fetchStrategy: BookFetchFunction, manager?: BSCatalogueManager) {
     this.fetchStrategy = fetchStrategy;
