@@ -550,6 +550,7 @@ export async function onAddEntry(
     if (entry instanceof CatalogueLink && entry.targetId) {
       reload = true;
     }
+    catalogue.refreshErrors(entry);
   }
   if (reload && parent) {
     const catalogue = parent.catalogue || parent;
@@ -644,7 +645,7 @@ export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {
   });
 }
 
-export function fixKey(parent: EditorBase | Catalogue, key: keyof Base, catalogueKey?: string): keyof Base | "" {
+export function fixKey(parent: EditorBase | Catalogue, key: keyof Base, catalogueKey?: string) {
   if (!parent.isCatalogue()) {
     switch (key) {
       case "sharedRules":

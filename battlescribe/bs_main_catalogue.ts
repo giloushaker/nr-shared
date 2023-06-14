@@ -14,6 +14,7 @@ import type {
 import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { ItemTypeNames } from "./bs_editor";
 import type { BSCatalogueManager } from "./bs_system";
+import { IErrorMessage } from "~/components/ErrorIcon.vue";
 
 export interface WikiLink extends Link {
   parent: WikiBase;
@@ -35,6 +36,8 @@ export interface EditorBase extends Base {
   showInEditor?: boolean;
   showChildsInEditor?: boolean;
   highlight?: boolean;
+
+  errors?: IErrorMessage[];
 }
 export class CatalogueLink extends Base {
   targetId!: string;
@@ -94,6 +97,8 @@ export class Catalogue extends Base {
   costIndex!: Record<string, BSICostType>;
 
   fullFilePath?: string;
+
+  errors?: IErrorMessage[];
   process() {
     if (this.loaded) return;
     this.loaded = true;
@@ -163,6 +168,7 @@ export class Catalogue extends Base {
           addObj(target, "other_links", cur);
         }
       }
+      this.refreshErrors(cur);
     }, goodJsonArrayKeys);
   }
   get url(): string {
@@ -183,6 +189,16 @@ export class Catalogue extends Base {
   }
   getSystemId(): string {
     return this.isGameSystem() ? this.id : this.gameSystemId!;
+  }
+  updateErrors(obj: EditorBase, newErrors: IErrorMessage[]) {
+    if (this.errors?.length && newErrors.length) {
+      this.errors = this.errors.filter((o) => !newErrors.includes(o));
+    }
+    if (!this.errors) {
+      this.errors = [];
+    }
+    obj.errors = newErrors;
+    this.errors.push(...newErrors);
   }
   *iterateCategoryEntries(): Iterable<Category> {
     for (const catalogue of this.imports) {
@@ -662,15 +678,27 @@ export class Catalogue extends Base {
     const loaded = await sys.loadData({ [key]: this } as any);
     return loaded;
   }
+  refreshErrors(cur: EditorBase) {
+    if (cur.isLink() && !cur.target) {
+      this.updateErrors(cur, [{ source: cur, severity: "error", msg: "Link has no target" }]);
+    } else {
+      this.updateErrors(cur, []);
+    }
+  }
   addToIndex(cur: Base) {
     if (cur.id) {
       cur.catalogue = this;
       this.index[cur.id] = cur;
     }
   }
-  removeFromIndex(cur: Base) {
+  removeFromIndex(cur: EditorBase) {
     if (cur.id && this.index[cur.id] === cur) {
       delete this.index[cur.id];
+    }
+    this.updateErrors(cur, []);
+    for (const ref of cur.links || []) {
+      delete ref.target;
+      ref.catalogue.refreshErrors(ref);
     }
   }
   resolveAllLinks(imports: Catalogue[], deleteBadLinks = true) {
@@ -727,6 +755,7 @@ export class Catalogue extends Base {
         link.type = targetType;
       }
     }
+    this.refreshErrors(link);
     return link.target !== undefined;
   }
 
