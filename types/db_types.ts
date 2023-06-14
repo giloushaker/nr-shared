@@ -1,12 +1,8 @@
 import type { ObjectId } from "bson";
-
 import type { SetupCategory, IArmyBook, IArmyRoster, ReportRoster } from "../systems/army_interfaces";
-
 import type { PatchIndex } from "../battlescribe/bs_helpers";
 import type { BSICost } from "../battlescribe/bs_types";
 import type { BooksDate } from "../battlescribe/bs_versioning";
-
-import type { StateOptions } from "./stateOptions";
 import type { ScoringSystem } from "../systems/bs_game_system";
 
 export interface GameSystemRow {
@@ -139,7 +135,7 @@ export interface UserRow {
   timezone?: TimezoneRow;
   email: string;
   permission: number;
-  options: StateOptions;
+  options: any; // StateOptions TODO: probably move this out of db_types
   sub?: SubRow;
   last_connection?: Date;
   elo?: any;

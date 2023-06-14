@@ -1,15 +1,9 @@
-import type { IArmyEntry } from "./systems/army_interfaces";
-import type { BSIConstraint } from "./battlescribe/bs_types";
-
 export interface ErrorMessage {
   msg: string;
   skip?: boolean;
-  unit?: IArmyEntry | null;
-  parent?: IArmyEntry | null;
   type: number;
   depth?: number;
   scope?: string;
-  constraint?: BSIConstraint;
   severity?: "error" | "warning" | "info" | "debug";
 }
 export interface ErrorMessageWithHash extends ErrorMessage {
@@ -60,7 +54,7 @@ export default class ErrorManager {
   private alreadyHasMessage(msgObj: ErrorMessage): boolean {
     let res = false;
     for (const elt of this.errors) {
-      if (res == false && elt.msg == msgObj.msg && elt.unit == msgObj.unit) {
+      if (res == false && elt.msg == msgObj.msg) {
         res = true;
       }
     }

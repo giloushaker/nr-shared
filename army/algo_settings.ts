@@ -1,5 +1,5 @@
 import { ErrorMessage } from "../../shared/error_manager";
-import { IArmyEntry } from "../../shared/systems/army_interfaces";
+import { BuilderErrorMessage, IArmyEntry } from "../../shared/systems/army_interfaces";
 
 interface OptionMod {
   option: any;
@@ -8,8 +8,8 @@ interface OptionMod {
 
 export default class AlgoSettings {
   public currentDepth = 0;
-  public errorStack: Array<ErrorMessage> = [];
-  public warningStack: Array<ErrorMessage> = [];
+  public errorStack: Array<BuilderErrorMessage> = [];
+  public warningStack: Array<BuilderErrorMessage> = [];
   public modStack: Array<OptionMod> = [];
 
   public logWarnings = true;

@@ -6,8 +6,15 @@ import AlgoSettings from "../army/algo_settings";
 import { sortByDescending } from "../../shared/battlescribe/bs_helpers";
 import type { BooksDate } from "../../shared/battlescribe/bs_versioning";
 import type { NRAssociationInstance } from "../../shared/battlescribe/bs_association";
+import { BSIConstraint } from "../battlescribe/bs_types";
 
 type CostIndex = { [key: string]: ICost };
+
+export interface BuilderErrorMessage extends ErrorMessage {
+  constraint?: BSIConstraint;
+  unit?: IArmyEntry | null;
+  parent?: IArmyEntry | null;
+}
 
 export interface ICost {
   name: string;
@@ -80,7 +87,7 @@ export interface IArmyRoster extends IArmyEntry {
   getForces(): IArmyForce[];
   getAvailableForces(): IForce[];
   toJson(): any;
-  validateArmy(): ErrorMessage[];
+  validateArmy(): BuilderErrorMessage[];
   calcTotalCosts(): ICost[];
   getMaxCosts(): ICost[];
   setMaxCosts(costs: ICost[]): void;
@@ -122,7 +129,7 @@ export interface IArmyUnit extends IArmyEntry {
   calcTotalCosts(): ICost[];
   calcTotalUnitSize(): number;
   applyModifications(settings: AlgoSettings): void;
-  dupe(): Promise<Array<ErrorMessage> | null>;
+  dupe(): Promise<Array<BuilderErrorMessage> | null>;
   delete(settings: AlgoSettings): number;
   updateDisplayStatus(): void;
   getCategoryIcon(): string | null;
@@ -179,7 +186,7 @@ export interface IArmyEntry {
   isGroup(): boolean;
   getParentUnit(): IArmyUnit;
   getTags(): (string | { ref: string; amount: number })[];
-  getErrors(): ErrorMessage[];
+  getErrors(): BuilderErrorMessage[];
   calcTotalCostsForOne(): ICost[];
 
   getParent(): IArmyEntry | null;
