@@ -682,7 +682,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
     yield* super.profilesIterator();
   }
   *constraintsIterator(): Iterable<BSIConstraint> {
-    yield* this.target.constraintsIterator();
+    if (this.target) yield* this.target.constraintsIterator();
     yield* super.constraintsIterator();
   }
   *modifierGroupsIterator(): Iterable<BSIModifierGroup> {
