@@ -122,10 +122,14 @@ function normalize(x: any) {
         const normal = x[attr][containerTags[attr]];
         const old = x[attr][oldBuggedTypes[attr]];
         x[attr] = [...(Array.isArray(normal) ? normal : []), ...(Array.isArray(old) ? old : [])];
+        x[attr]?.forEach(normalize);
       } else {
-        x[attr] = x[attr][containerTags[attr]];
+        const val = x[attr][containerTags[attr]];
+        if (val) {
+          x[attr] = val;
+          x[attr]?.forEach(normalize);
+        }
       }
-      x[attr]?.forEach(normalize);
     }
   }
 }
