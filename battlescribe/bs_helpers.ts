@@ -1,3 +1,4 @@
+import JSZip, { OutputType } from "jszip";
 import { getRandomInt } from "../util";
 import { entryToJson, goodJsonArrayKeys } from "./bs_main";
 import type { BSIProfile, BSICharacteristic } from "./bs_types";
@@ -698,4 +699,11 @@ export function* enumerate_zip<T, U>(a: T[], b: U[]) {
 
 export function escapeXml(str: any): string {
   return str.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+export async function zipCompress<T extends OutputType>(nameInZip: string, content: string, type: T) {
+  var zip = new JSZip();
+  zip.file(nameInZip, content);
+  const result = await zip.generateAsync({ type: type, compression: "DEFLATE" });
+  return result;
 }
