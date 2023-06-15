@@ -148,6 +148,7 @@ export interface BSIDataCommon {
   rules?: Rule[];
 
   fullFilePath?: string;
+  xmlns: string;
 }
 export interface BSIGameSystem extends BSIDataCommon {
   gameSystemId: undefined;
