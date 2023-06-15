@@ -285,11 +285,7 @@ function putAttributesIn$(first: any) {
 
 export function convertToXml(data: BSICatalogue | Catalogue | BSIGameSystem) {
   const json = JSON.parse(rootToJson(data));
-  const obj = getDataObject(json);
-  obj.xmlns = json.gameSystem
-    ? "http://www.battlescribe.net/schema/gameSystemSchema"
-    : "http://www.battlescribe.net/schema/catalogueSchema";
-  putAttributesIn$(obj);
+  putAttributesIn$(json);
   const options: XmlBuilderOptionsOptional = {
     textNodeName: "$text",
     format: true,
