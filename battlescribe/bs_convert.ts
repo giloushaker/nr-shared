@@ -294,6 +294,12 @@ export function convertToXml(data: BSICatalogue | Catalogue | BSIGameSystem) {
     suppressBooleanAttributes: false,
     suppressEmptyNode: true,
   };
+  if (json.gameSystem) {
+    json.gameSystem.xmlns = "http://www.battlescribe.net/schema/gameSystemSchema";
+  }
+  if (json.catalogue) {
+    json.catalogue.xmlns = "http://www.battlescribe.net/schema/catalogueSchema";
+  }
   const builder = new XMLBuilder(options);
   const xml = builder.build(json);
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n` + xml;
