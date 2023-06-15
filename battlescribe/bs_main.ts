@@ -16,13 +16,13 @@ import type {
   BSICharacteristicType,
   BSIData,
   BSIGameSystem,
+  NRAssociation,
+  AssociationConstraint,
 } from "./bs_types";
-import { Catalogue, EditorBase } from "./bs_main_catalogue";
-import type { Roster } from "./bs_system";
-import type { IModel } from "../systems/army_interfaces";
-import type { NRAssociation, AssociationConstraint } from "./bs_association";
+import type { EditorBase, Catalogue } from "./bs_main_catalogue";
 import { clone, isObject } from "./bs_helpers";
 import { getAllInfoGroups } from "./bs_modifiers";
+
 const isNonEmptyIfHasOneOf = [
   "modifiers",
   "modifierGroups",
@@ -92,6 +92,23 @@ export function getDataObject(data: BSIData): BSIGameSystem | BSICatalogue {
   if (data.gameSystem) return data.gameSystem;
   if (data.catalogue) return data.catalogue;
   throw Error("getDataObject data argument is not a valid system or catalogue");
+}
+export function getDataDbId(data: BSIData | Catalogue): string {
+  if ((data as Catalogue).isCatalogue && (data as Catalogue).isCatalogue()) {
+    if (data.id && data.gameSystemId) {
+      return `${data.gameSystemId}-${data.id}`;
+    }
+    if (data.id) {
+      return `${data.id}`;
+    }
+  }
+  if (data.catalogue) {
+    return `${data.catalogue.gameSystemId}-${data.catalogue.id}`;
+  }
+  if (data.gameSystem) {
+    return data.gameSystem.id;
+  }
+  throw Error("getDataId data argument is not a valid system or catalogue");
 }
 /**
  * This is a base class with generic functions for all nodes in the BSData xml/json
@@ -201,7 +218,7 @@ export class Base implements BSModifierBase {
   isCategory(): this is Category {
     return false;
   }
-  isRoster(): this is Roster {
+  isRoster(): boolean {
     return false;
   }
   isQuantifiable(): boolean {
@@ -665,7 +682,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
     yield* super.profilesIterator();
   }
   *constraintsIterator(): Iterable<BSIConstraint> {
-    yield* this.target.constraintsIterator();
+    if (this.target) yield* this.target.constraintsIterator();
     yield* super.constraintsIterator();
   }
   *modifierGroupsIterator(): Iterable<BSIModifierGroup> {
@@ -905,46 +922,6 @@ export function getTheoreticalMaxes(
   return maxConstraints;
 }
 
-export function entryIsModel(entry: Base | Link): boolean {
-  if (entry.isGroup() == true) {
-    return false;
-  }
-  return entry.getType() === "model" || entry.getType() === "crew";
-}
-
-export function entryIsCrew(entry: Base | Link): boolean {
-  if (entry.isGroup() == true) {
-    return false;
-  }
-  return entry.getType() === "crew";
-}
-
-export function entryIsWarMachine(entry: Base | Link): boolean {
-  if (entry.getType() == "unit") {
-    if (entry.profiles) {
-      for (const prf of entry.profiles) {
-        if (prf.typeName === "War Machine") {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
-
-export function getAllModels(entry: Base | Link): IModel[] {
-  const result: IModel[] = [];
-
-  entry.forEachNode((o) => {
-    if (entryIsModel(o)) {
-      result.push({
-        name: o.getName(),
-      });
-    }
-  });
-  return result;
-}
-
 export interface BSIExtraConstraint extends BSIConstraint, BSINamed {
   parent: Base;
   modifiers: BSIModifier[];
@@ -1091,6 +1068,9 @@ export const goodJsonKeys = new Set([
   "publisher",
   "publisherUrl",
   "shortName",
+  "repeats",
+  "roundUp",
+  "defaultCostLimit",
 
   // NR SPECIFIC
   "label",
@@ -1106,7 +1086,7 @@ export const goodJsonKeys = new Set([
   // "conditions",
   // "conditionGroups",
 ]);
-export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>): string {
+export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>, fixRoot = false): string {
   const root: any = {
     catalogue: undefined,
     gameSystem: undefined,
@@ -1114,12 +1094,16 @@ export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>)
   const copy = { ...data }; // ensure there is no recursivity by making sure only this copy is put in the json
   if (!data.gameSystemId) {
     root.gameSystem = copy;
+    root.gameSystem.type = "gameSystem";
     delete root.catalogue;
   } else {
     root.catalogue = copy;
+    root.catalogue.type = "catalogue";
     delete root.gameSystem;
   }
-  const stringed = JSON.stringify(root, (k, v) => {
+
+  const obj = fixRoot ? getDataObject(root) : root;
+  const stringed = JSON.stringify(obj, (k, v) => {
     if (Array.isArray(v) && v.length === 0) return undefined;
     if (v === copy || goodJsonKeys.has(k) || isFinite(Number(k))) return v;
     return undefined;

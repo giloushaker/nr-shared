@@ -1,24 +1,55 @@
 import { unzip } from "unzipit";
 import { X2jOptionsOptional, XMLParser, XMLBuilder, XmlBuilderOptionsOptional } from "fast-xml-parser";
-import { fix_xml_object, forEachValueRecursive, hashFnv32a, isObject, removePrefix, to_snake_case } from "./bs_helpers";
-import { rootToJson, getDataObject } from "./bs_main";
-import { BSICatalogue, BSIData, BSIGameSystem } from "./bs_types";
+import { forEachValueRecursive, hashFnv32a, isObject, removePrefix, to_snake_case } from "./bs_helpers";
+import { rootToJson, getDataObject, goodJsonArrayKeys } from "./bs_main";
+import { BSICatalogue, BSIGameSystem } from "./bs_types";
 import { Catalogue } from "./bs_main_catalogue";
 
-export function xmlToJson(data: string) {
-  try {
-    // remove self-closing tags (<image />)
-    data = data.replace(/<[a-zA-Z0-9]+ *[/]>/g, "");
-  } catch {}
+import _containerTags from "./containerTags.json";
+import { entries } from "~/assets/json/entries";
+
+const escapedHtml = /&(?:amp|lt|gt|quot|#39|apos);/g;
+const htmlUnescapes = {
+  "&amp;": "&",
+  "&apos;": "'",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#39;": "'",
+};
+
+const unescape = (string: string) =>
+  escapedHtml.test(string) ? string.replace(escapedHtml, (match) => htmlUnescapes[match]) : string;
+
+const containerTags = _containerTags as Record<string, string>;
+const containers = {} as Record<string, string>;
+for (const key in containerTags) {
+  containers[containerTags[key]] = key;
+}
+const allowed = {} as Record<string, Set<string> | string>;
+for (const [key, value] of Object.entries(entries)) {
+  if (typeof value.allowedChildrens === "string") {
+    allowed[key] = value.allowedChildrens;
+  } else {
+    allowed[key] = new Set(value.allowedChildrens);
+  }
+}
+
+export function xmlToJson(data: string, arrayKeys: Set<string>) {
   const options: X2jOptionsOptional = {
+    allowBooleanAttributes: true,
     ignoreAttributes: false,
     attributeNamePrefix: "",
     textNodeName: "$text",
     parseAttributeValue: true,
-    trimValues: true,
+    processEntities: false,
+    parseTagValue: false,
+    ignoreDeclaration: true,
     isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
-      return !isAttribute && tagName !== "catalogue" && tagName !== "gameSystem";
+      return !isAttribute && tagName in containers;
     },
+    attributeValueProcessor: (name, val) => unescape(val),
+    tagValueProcessor: (name, val) => unescape(val),
   };
   return new XMLParser(options).parse(data);
 }
@@ -70,9 +101,79 @@ export function isAllowedExtension(file: string) {
   }
   return true;
 }
+const oldBuggedTypes = {
+  sharedRules: "shareRule",
+  sharedProfiles: "sharedProfile",
+  sharedInfoGroups: "sharedInfoGroup",
+  sharedSelectionEntries: "sharedSelectionEntry",
+  sharedSelectionEntryGroups: "sharedSelectionEntryGroup",
+} as Record<string, string>;
+/**
+ * Converts a {profiles: [{profile: {}}]} to {profiles: [{}]}
+ * From https://github.com/BlueWinds/bsd-schema/blob/main/index.js
+ */
+
+function normalize(x: any) {
+  for (let attr in x) {
+    if (x[attr] === "") {
+      delete x[attr];
+    } else if (containerTags[attr] && x[attr]) {
+      if (attr in oldBuggedTypes) {
+        const normal = x[attr][containerTags[attr]];
+        const old = x[attr][oldBuggedTypes[attr]];
+        x[attr] = [...(Array.isArray(normal) ? normal : []), ...(Array.isArray(old) ? old : [])];
+        x[attr]?.forEach(normalize);
+      } else {
+        const val = x[attr][containerTags[attr]];
+        if (val) {
+          x[attr] = val;
+          x[attr]?.forEach(normalize);
+        }
+      }
+    }
+  }
+}
+export function is_allowed(x: any, parentKey: string, k: string) {
+  const lookedUp = allowed[k];
+  if (typeof lookedUp === "string") {
+    return x.target[lookedUp] === parentKey;
+  }
+  return lookedUp?.has(parentKey);
+}
+export function clean(x: any, k: string) {
+  const lookedUp = allowed[k];
+  const allowedChilds = (typeof lookedUp === "string" ? allowed[x[lookedUp]] : lookedUp) as Set<string>;
+  for (let attr in x) {
+    if (attr in containerTags && Array.isArray(x[attr])) {
+      if (allowedChilds && !allowedChilds.has(attr)) {
+        delete x[attr];
+      } else {
+        x[attr].forEach((o: any) => clean(o, attr));
+      }
+    }
+  }
+}
+const empty = new Set<string>();
+export function allowed_children(obj: any, key: string): Set<string> {
+  let result = allowed[key];
+  if (typeof result === "string") {
+    const val = obj[result];
+    if (val) {
+      const new_key = toPlural(val);
+      if (typeof new_key !== "string" || new_key === result) {
+        return empty;
+      }
+      result = allowed[new_key];
+    }
+  }
+  if (!result) {
+    return empty;
+  }
+  return result as Set<string>;
+}
 export function BSXmlToJson(data: string) {
-  const result = xmlToJson(data);
-  fix_xml_object(result);
+  const result = xmlToJson(data, goodJsonArrayKeys);
+  normalize(getDataObject(result));
   const type = result.catalogue ? "catalogue" : "gameSystem";
   if (!result.catalogue) {
     result.playable = 0;
@@ -91,6 +192,7 @@ export function BSXmlToJson(data: string) {
   result.nrversion = content.revision;
   return result;
 }
+
 export async function convertToJson(data: any, extension: string) {
   extension = getExtension(extension);
   switch (extension) {
@@ -108,26 +210,13 @@ export async function convertToJson(data: any, extension: string) {
       throw new Error("Extension not supported " + extension);
   }
 }
-const typeMap = {} as Record<string, string>;
+
 export function toSingle(key: string) {
-  if (key in typeMap) {
-    return typeMap[key];
-  }
-  if (key.endsWith("ies")) {
-    return key.substr(0, key.length - "ies".length) + "y";
-  }
-  if (key.endsWith("s")) {
-    return key.substr(0, key.length - "s".length);
-  } else {
-    throw Error(`Couldn't convert "${key}" to non-plural (modify toSingle)`);
-  }
+  return containerTags[key];
 }
+
 export function toPlural(key: string) {
-  if (key.endsWith("y")) {
-    return key.substr(0, key.length - "y".length) + "ies";
-  } else {
-    return key + "s";
-  }
+  return containers[key];
 }
 export const stringArrayKeys = new Set(["readme", "comment", "description"]);
 const skipKeys = new Set(["?xml", "$text", "_"]);
@@ -137,8 +226,6 @@ function renestChilds(obj: any) {
       obj[key] = Array.isArray(value) ? value : [value];
     } else if (Array.isArray(value) && !skipKeys.has(key)) {
       obj[key] = [{ [toSingle(key)]: value }];
-    } else if (key in typeMap) {
-      obj[key] = [value];
     }
   }
 }

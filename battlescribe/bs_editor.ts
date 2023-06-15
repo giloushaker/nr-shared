@@ -375,7 +375,7 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
   }
 }
 
-export function getNameExtra(obj: EditorBase): string {
+export function getNameExtra(obj: EditorBase, _refs = true): string {
   const type = obj.parentKey;
   const pieces = [];
   switch (type) {
@@ -417,9 +417,6 @@ export function getModifierOrConditionParent(obj: EditorBase) {
     if (o instanceof ModifierGroup) return false;
     return true;
   });
-  if (!parent) {
-    throw new Error("no parent found");
-  }
   return parent;
 }
 export function getName(obj: any): string {
@@ -553,6 +550,7 @@ export async function onAddEntry(
     if (entry instanceof CatalogueLink && entry.targetId) {
       reload = true;
     }
+    catalogue.refreshErrors(entry);
   }
   if (reload && parent) {
     const catalogue = parent.catalogue || parent;
@@ -647,7 +645,7 @@ export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {
   });
 }
 
-export function fixKey(parent: EditorBase | Catalogue, key: keyof Base, catalogueKey?: string): keyof Base | "" {
+export function fixKey(parent: EditorBase | Catalogue, key: keyof Base, catalogueKey?: string) {
   if (!parent.isCatalogue()) {
     switch (key) {
       case "sharedRules":

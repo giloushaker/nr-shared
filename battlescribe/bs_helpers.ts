@@ -1,11 +1,11 @@
 import { getRandomInt } from "../util";
-import { entryToJson } from "./bs_main";
+import { entryToJson, goodJsonArrayKeys } from "./bs_main";
 import type { BSIProfile, BSICharacteristic } from "./bs_types";
-
 export type Modify<T, R> = Omit<T, keyof R> & R;
 export function stripNumber(str: string): string {
   return str.replace(/[0-9]+ *[.-] *(.*)/, "$1");
 }
+
 export function fix_xml_object(obj: any): void {
   const O = [obj]; // ensure that f is called with the top-level object
   while (O.length) {
@@ -694,4 +694,8 @@ export function* enumerate_zip<T, U>(a: T[], b: U[]) {
     yield [a[i], b[i]] as [T, U];
   }
   return;
+}
+
+export function escapeXml(str: any): string {
+  return str.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }

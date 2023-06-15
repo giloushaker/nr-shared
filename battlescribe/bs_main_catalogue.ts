@@ -1,16 +1,6 @@
 import { groupBy, sortBy, clone, addObj, textSearchRegex, generateBattlescribeId } from "./bs_helpers";
-import {
-  Base,
-  UNCATEGORIZED_ID,
-  ILLEGAL_ID,
-  Category,
-  Link,
-  goodKeys,
-  Rule,
-  goodKeysWiki,
-  goodJsonKeys,
-  goodJsonArrayKeys,
-} from "./bs_main";
+import { Base, Link } from "./bs_main";
+import { UNCATEGORIZED_ID, ILLEGAL_ID, Category, goodKeys, Rule, goodKeysWiki, goodJsonArrayKeys } from "./bs_main";
 import type {
   BSICostType,
   BSICondition,
@@ -19,14 +9,12 @@ import type {
   BSIProfile,
   BSIRule,
   BSIPublication,
-  BSIModifier,
   BSIProfileType,
 } from "./bs_types";
-import type { Force, BSIExtraConstraint, getDataObject } from "./bs_main";
-import type { BsBook } from "./bs_book";
-import type { GameSystem } from "../../ts/systems/game_system";
+import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { ItemTypeNames } from "./bs_editor";
-import { BSCatalogueManager } from "./bs_system";
+import type { BSCatalogueManager } from "./bs_system";
+import { IErrorMessage } from "~/components/ErrorIcon.vue";
 
 export interface WikiLink extends Link {
   parent: WikiBase;
@@ -48,6 +36,8 @@ export interface EditorBase extends Base {
   showInEditor?: boolean;
   showChildsInEditor?: boolean;
   highlight?: boolean;
+
+  errors?: IErrorMessage[];
 }
 export class CatalogueLink extends Base {
   targetId!: string;
@@ -99,7 +89,7 @@ export class Catalogue extends Base {
   roster_constraints!: BSIExtraConstraint[];
 
   manager!: BSCatalogueManager;
-  book!: BsBook;
+  book!: any;
   short!: string;
   version!: string;
   nrversion!: string;
@@ -107,6 +97,8 @@ export class Catalogue extends Base {
   costIndex!: Record<string, BSICostType>;
 
   fullFilePath?: string;
+
+  errors?: IErrorMessage[];
   process() {
     if (this.loaded) return;
     this.loaded = true;
@@ -117,7 +109,7 @@ export class Catalogue extends Base {
     this.generateExtraConstraints();
     this.generateCostIndex();
   }
-  processForWiki(system: GameSystem) {
+  processForWiki(system: Record<string, any>) {
     if (this.loaded_wiki) return;
     this.loaded_wiki = true;
     this.process();
@@ -176,6 +168,7 @@ export class Catalogue extends Base {
           addObj(target, "other_links", cur);
         }
       }
+      this.refreshErrors(cur);
     }, goodJsonArrayKeys);
   }
   get url(): string {
@@ -196,6 +189,16 @@ export class Catalogue extends Base {
   }
   getSystemId(): string {
     return this.isGameSystem() ? this.id : this.gameSystemId!;
+  }
+  updateErrors(obj: EditorBase, newErrors: IErrorMessage[]) {
+    if (this.errors?.length && newErrors.length) {
+      this.errors = this.errors.filter((o) => !newErrors.includes(o));
+    }
+    if (!this.errors) {
+      this.errors = [];
+    }
+    obj.errors = newErrors;
+    this.errors.push(...newErrors);
   }
   *iterateCategoryEntries(): Iterable<Category> {
     for (const catalogue of this.imports) {
@@ -311,16 +314,13 @@ export class Catalogue extends Base {
   *selectionsIterator(): Iterable<Base> {
     yield* this.forces;
   }
-  // findOptionById(id: string) {
-  //   return this.index[id];
-  // }
   findOptionById(id: string): Base | undefined {
     const found = this.index[id];
     if (found) return found;
     const found_import = this.imports.find((o) => id in o.index)?.index[id];
     if (found_import) return found_import;
     if (this.book) {
-      return this.book.system?.books?.array?.find((o) => o.bsid === id) as any;
+      this.manager.getLoadedCatalogue(id);
     }
     return;
   }
@@ -678,15 +678,27 @@ export class Catalogue extends Base {
     const loaded = await sys.loadData({ [key]: this } as any);
     return loaded;
   }
+  refreshErrors(cur: EditorBase) {
+    if (cur.isLink() && !cur.target) {
+      this.updateErrors(cur, [{ source: cur, severity: "error", msg: "Link has no target" }]);
+    } else {
+      this.updateErrors(cur, []);
+    }
+  }
   addToIndex(cur: Base) {
     if (cur.id) {
       cur.catalogue = this;
       this.index[cur.id] = cur;
     }
   }
-  removeFromIndex(cur: Base) {
+  removeFromIndex(cur: EditorBase) {
     if (cur.id && this.index[cur.id] === cur) {
       delete this.index[cur.id];
+    }
+    this.updateErrors(cur, []);
+    for (const ref of cur.links || []) {
+      delete ref.target;
+      ref.catalogue.refreshErrors(ref);
     }
   }
   resolveAllLinks(imports: Catalogue[], deleteBadLinks = true) {
@@ -743,6 +755,7 @@ export class Catalogue extends Base {
         link.type = targetType;
       }
     }
+    this.refreshErrors(link);
     return link.target !== undefined;
   }
 

@@ -1,5 +1,5 @@
-import { Base, Group, Rule } from "./bs_main";
-import { Publication } from "./bs_main_catalogue";
+import type { Base, Group, Rule } from "./bs_main";
+import type { Publication } from "./bs_main_catalogue";
 
 export interface BSINamed {
   name: string;
@@ -19,7 +19,9 @@ export interface BSILink extends BSINamed, BSIOption, BSIHidden {
 export interface BSICategoryLink extends BSILink {
   primary?: boolean;
 }
-export interface BSICostType extends BSIOption, BSIHidden, BSINamed {}
+export interface BSICostType extends BSIOption, BSIHidden, BSINamed {
+  defaultCostLimit: number;
+}
 export interface BSISelectionCategory {
   name: string;
   id: string;
@@ -111,7 +113,7 @@ export interface SupportedQueries {
   modifiers?: BSIModifier[];
 }
 
-export interface BSIData extends bookFileMetaData {
+export interface BSIData extends Partial<bookFileMetaData> {
   gameSystem?: BSIGameSystem;
   catalogue?: BSICatalogue;
   xml_hash?: string;
@@ -158,7 +160,7 @@ export interface BSICatalogue extends BSIDataCommon {
   gameSystemRevision: number;
   catalogueLinks?: BSICatalogueLink[];
 }
-export interface BSIDataCatalogue extends bookFileMetaData {
+export interface BSIDataCatalogue extends Partial<bookFileMetaData> {
   catalogue: BSICatalogue;
   gameSystemId?: string;
 }
@@ -183,7 +185,7 @@ export interface bookFileMetaData {
   xml_hash?: string;
 }
 
-export interface BSIDataSystem extends bookFileMetaData {
+export interface BSIDataSystem extends Partial<bookFileMetaData> {
   gameSystem: BSIGameSystem;
 }
 export interface SavedRoster {
@@ -306,4 +308,29 @@ export interface BSIPublication {
   publisher?: string;
   publicationDate?: string | number;
   publisherUrl?: string;
+}
+
+export interface AssociationConstraint {
+  type: "min" | "max";
+  value: number;
+  childId: string;
+  field: "associations";
+}
+export interface NRAssociation {
+  label: string;
+  labelMembers: string;
+  ids?: string[];
+  id?: string;
+
+  scope: string;
+
+  min?: number;
+  max?: number;
+  includeChildSelections?: boolean;
+  of: string;
+
+  type?: "and" | "or";
+  // constraints?: AssociationConstraint[];
+  conditions?: BSICondition[];
+  conditionGroups?: BSIConditionGroup[];
 }
