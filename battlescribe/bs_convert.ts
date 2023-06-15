@@ -2,11 +2,46 @@ import { unzip } from "unzipit";
 import { X2jOptionsOptional, XMLParser, XMLBuilder, XmlBuilderOptionsOptional } from "fast-xml-parser";
 import { forEachValueRecursive, hashFnv32a, isObject, removePrefix, to_snake_case } from "./bs_helpers";
 import { rootToJson, getDataObject, goodJsonArrayKeys } from "./bs_main";
-import { BSICatalogue, BSIGameSystem } from "./bs_types";
-import { Catalogue } from "./bs_main_catalogue";
+import type { BSICatalogue, BSIGameSystem } from "./bs_types";
+import type { Catalogue } from "./bs_main_catalogue";
+export const containerTags = {
+  categories: "category",
+  catalogueLinks: "catalogueLink",
+  categoryEntries: "categoryEntry",
+  categoryLinks: "categoryLink",
+  characteristics: "characteristic",
+  characteristicTypes: "characteristicType",
+  conditions: "condition",
+  conditionGroups: "conditionGroup",
+  constraints: "constraint",
+  costs: "cost",
+  costLimits: "costLimit",
+  costTypes: "costType",
+  entryLinks: "entryLink",
+  forceEntries: "forceEntry",
+  infoGroups: "infoGroup",
+  infoLinks: "infoLink",
+  forces: "force",
+  modifiers: "modifier",
+  modifierGroups: "modifierGroup",
+  profiles: "profile",
+  profileTypes: "profileType",
+  publications: "publication",
+  repeats: "repeat",
+  rules: "rule",
+  selections: "selection",
+  selectionEntries: "selectionEntry",
+  selectionEntryGroups: "selectionEntryGroup",
+  sharedInfoGroups: "infoGroup",
+  sharedProfiles: "profile",
+  sharedRules: "rule",
+  sharedSelectionEntries: "selectionEntry",
+  sharedSelectionEntryGroups: "selectionEntryGroup",
 
-import _containerTags from "./containerTags.json";
-import { entries } from "~/assets/json/entries";
+  associations: "association",
+} as Record<string, string | undefined>;
+
+import { entries } from "./entries";
 
 const escapedHtml = /&(?:amp|lt|gt|quot|#39|apos);/g;
 const htmlUnescapes = {
@@ -21,7 +56,6 @@ const htmlUnescapes = {
 const unescape = (string: string) =>
   escapedHtml.test(string) ? string.replace(escapedHtml, (match) => htmlUnescapes[match]) : string;
 
-const containerTags = _containerTags as Record<string, string>;
 const containers = {} as Record<string, string>;
 for (const key in containerTags) {
   containers[containerTags[key]] = key;
@@ -119,12 +153,12 @@ function normalize(x: any) {
       delete x[attr];
     } else if (containerTags[attr] && x[attr]) {
       if (attr in oldBuggedTypes) {
-        const normal = x[attr][containerTags[attr]];
+        const normal = x[attr][containerTags[attr] as string];
         const old = x[attr][oldBuggedTypes[attr]];
         x[attr] = [...(Array.isArray(normal) ? normal : []), ...(Array.isArray(old) ? old : [])];
         x[attr]?.forEach(normalize);
       } else {
-        const val = x[attr][containerTags[attr]];
+        const val = x[attr][containerTags[attr] as string];
         if (val) {
           x[attr] = val;
           x[attr]?.forEach(normalize);
