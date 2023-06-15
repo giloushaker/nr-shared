@@ -52,7 +52,7 @@ export function fieldToText(base: Base | Link, field: string): string {
       return target.name;
     }
   }
-  return catalogue.manager.getCatalogueInfo({ targetId: field })?.name || field;
+  return catalogue.manager?.getCatalogueInfo({ targetId: field })?.name || field;
 }
 
 export function rawConditionToString(base: Base | Link, condition: BSIQuery & { value?: number }): string {
@@ -77,7 +77,7 @@ export function conditionToString(
   const value = condition.value === undefined ? 1 : condition.value;
 
   const rawField = fieldToString(base, condition.field);
-  const field = ["selections", "forces"].includes(rawField) ? ` ${rawField}` : ` ${rawField} of`;
+  const field = ["selections", "forces"].includes(rawField) ? ` ${rawField}` : ` ${rawField}`;
 
   const what = fieldToString(base, condition.childId || "") + (includeId ? `(${condition.childId || "any"})` : "");
   const of = what && field ? ` of ` : "";

@@ -17,7 +17,7 @@ export class BSCatalogueManager {
     throw new Error("Method not implemented.");
   }
   getCatalogueInfo(catalogueLink: BSICatalogueLink): { name: string } | undefined {
-    throw new Error("Method not implemented.");
+    return undefined;
   }
   getLoadedCatalogue(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Catalogue | undefined {
     const key = catalogueLink.targetId || catalogueLink.name!;
