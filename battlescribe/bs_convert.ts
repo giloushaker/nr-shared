@@ -155,7 +155,6 @@ export function clean(x: any, k: string) {
 }
 const empty = new Set<string>();
 export function allowed_children(obj: any, key: string): Set<string> {
-  const lookup = entries as Record<string, any>;
   let result = allowed[key];
   if (typeof result === "string") {
     const val = obj[result];
