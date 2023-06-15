@@ -375,7 +375,7 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
   }
 }
 
-export function getNameExtra(obj: EditorBase): string {
+export function getNameExtra(obj: EditorBase, refs = true): string {
   const type = obj.parentKey;
   const pieces = [];
   switch (type) {
@@ -400,7 +400,7 @@ export function getNameExtra(obj: EditorBase): string {
     default:
       break;
   }
-  if (obj.links?.length || obj.other_links?.length) {
+  if ((refs && obj.links?.length) || obj.other_links?.length) {
     const s = obj.links?.length === 1 ? "" : "s";
     pieces.push(`(${obj.links?.length || 0} ref${s})`);
   }
