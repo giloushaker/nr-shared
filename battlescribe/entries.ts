@@ -139,7 +139,7 @@ export const entries = {
   },
   catalogue: {
     allowedChildrens: [
-      "categoryLinks",
+      "catalogueLinks",
       "publications",
       "costTypes",
       "profileTypes",
