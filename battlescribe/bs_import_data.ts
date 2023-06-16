@@ -1,4 +1,6 @@
-import nodefetch from "node-fetch";
+import type { GameSystemRow, BookRow } from "~/assets/ts/types/db_types";
+import { delete_path_related_characters, hashFnv32a, to_snake_case } from "./bs_helpers";
+import type { BSICatalogue, BSIDataSystem, BSIGameSystem } from "./bs_types";
 
 type URL = string;
 export interface BattleScribeDataIndex {
@@ -53,57 +55,72 @@ export function github_contents_api(user: string, repo: string, dir?: string) {
   return `https://api.github.com/repos/${user}/${repo}/contents` + (dir ? `/${dir}` : "");
 }
 
-// unused
-export async function github_download_blob(blob_url: string): Promise<Buffer> {
-  const fetched = await nodefetch(blob_url);
-  const content = (await fetched.json()) as any;
-  return Buffer.from(content.content, content.encoding);
+export const CURRENT_ROW_META = "3";
+export function makeSystemRowFromFileData(
+  repo_name: string,
+  gst_file: BattleScribeFile,
+  repoLastUpdated: string,
+  fileLastUpdated: string,
+  meta = CURRENT_ROW_META
+): GameSystemRow {
+  const pathname = delete_path_related_characters(gst_file.name);
+  return {
+    bsid: gst_file.id,
+    id: hashFnv32a(gst_file.name),
+
+    short: repo_name,
+    name: gst_file.name,
+    path: `${repo_name}/${pathname}`,
+    engine: "bs",
+    books: [makeBookRow(gst_file, gst_file.name, fileLastUpdated, false)],
+
+    nrversion: gst_file.revision,
+    last_updated: repoLastUpdated,
+
+    meta: meta,
+  } as any;
+}
+export function makeSystemRowFromJson(system: BSIDataSystem): GameSystemRow {
+  const gst_file = system.gameSystem;
+  const date = Date.now().toString();
+  return {
+    bsid: gst_file.id,
+    id: hashFnv32a(gst_file.name),
+    _id: gst_file.id,
+    short: gst_file.name,
+    name: gst_file.name,
+    path: `${gst_file.name}/${gst_file.name}`,
+    engine: "bs",
+    books: [makeBookRow(gst_file, gst_file.name, date, false)],
+
+    nrversion: gst_file.revision,
+    last_updated: date,
+
+    meta: CURRENT_ROW_META,
+  };
 }
 
-export async function fetch_bs_repos_data(): Promise<BattleScribeDataIndex> {
-  const url =
-    "https://github.com/BSData/gallery/releases/latest/download/bsdata.catpkg-gallery.json" ||
-    `https://battlescribedata.appspot.com/repos`;
-  const response = await nodefetch(url);
-  if (!response.ok) {
-    throw Error("Unable to fetch repos from appspot");
-  }
-  const result = (await response.json()) as BattleScribeDataIndex;
-  return result;
-}
+export function makeBookRow(
+  file: BattleScribeFile | BSICatalogue | BSIGameSystem,
+  gstname: string,
+  lastUpdated: string | undefined,
+  playable = true,
+  meta = CURRENT_ROW_META
+): BookRow {
+  const pathname = delete_path_related_characters(file.name);
+  return {
+    bsid: file.id,
+    id: hashFnv32a(file.id),
+    id_game_system: hashFnv32a(gstname),
 
-export async function fetch_bs_repos_datas(): Promise<BattleScribeDataIndex> {
-  const urls = [
-    "https://github.com/BSData/gallery/releases/download/index-v1/bsdata.catpkg-gallery.json",
-    `https://battlescribedata.appspot.com/repos`,
-  ];
+    name: file.name,
+    filename: pathname,
+    short: pathname,
+    playable: playable,
 
-  const result = {} as Record<string, BattleScribeRepoData>;
-  let firstResponse = null as BattleScribeDataIndex | null;
-  for (const url of urls) {
-    try {
-      const _url = url;
-      const response = await nodefetch(_url);
+    nrversion: file.revision,
+    last_updated: lastUpdated,
 
-      if (!response.ok) {
-        console.log("Unable to fetch repos from appspot");
-      }
-      const fetched = (await response.json()) as BattleScribeDataIndex;
-      if (!firstResponse) {
-        firstResponse = fetched;
-      }
-      for (const repo of fetched.repositories || []) {
-        if (!(repo.name in result)) {
-          result[repo.name] = repo;
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  if (!firstResponse) {
-    throw new Error("Unable to fetch repos from any of the provided repo urls");
-  }
-  firstResponse.repositories = Object.values(result);
-  return firstResponse;
+    meta: meta,
+  };
 }
