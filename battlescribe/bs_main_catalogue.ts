@@ -261,6 +261,40 @@ export class Catalogue extends Base {
     if (this.sharedSelectionEntries) yield* this.sharedSelectionEntries;
     if (this.sharedSelectionEntryGroups) yield* this.sharedSelectionEntryGroups;
   }
+  *iterateAllImported(): Iterable<Base> {
+    const shared = [
+      "sharedSelectionEntries",
+      "sharedSelectionEntryGroups",
+      "sharedProfiles",
+      "sharedRules",
+      "sharedInfoGroups",
+    ];
+    const root = ["rules", "entryLinks", "profiles", "infoGroups", "selectionEntries", "selectionEntryGroups"];
+    for (const catalogue of this.importsWithEntries) {
+      for (const key of root) {
+        for (const entry of catalogue[key as keyof Catalogue] || []) {
+          if (entry.import !== false) yield entry;
+        }
+      }
+    }
+    for (const catalogue of this.imports) {
+      for (const key of shared) {
+        for (const entry of catalogue[key as keyof Catalogue] || []) {
+          yield entry;
+        }
+      }
+    }
+    for (const key of root) {
+      for (const entry of this[key as keyof Catalogue] || []) {
+        if (entry.import !== false) yield entry;
+      }
+    }
+    for (const key of shared) {
+      for (const entry of this[key as keyof Catalogue] || []) {
+        yield entry;
+      }
+    }
+  }
 
   *iterateSelectionEntriesWithRoot(): Iterable<Base> {
     for (const catalogue of this.importsWithEntries) {

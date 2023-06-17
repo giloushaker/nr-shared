@@ -1071,6 +1071,7 @@ export const goodJsonKeys = new Set([
   "repeats",
   "roundUp",
   "defaultCostLimit",
+  "publicationId",
 
   // NR SPECIFIC
   "label",
