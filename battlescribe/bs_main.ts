@@ -1066,6 +1066,7 @@ export const goodJsonKeys = new Set([
   "comment",
   "publicationDate",
   "publisher",
+  "publisherId",
   "publisherUrl",
   "shortName",
   "repeats",
