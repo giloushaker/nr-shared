@@ -245,7 +245,13 @@ export class Catalogue extends Base {
       yield* this.profileTypes;
     }
   }
-
+  *iteratePublications(): Iterable<BSIPublication> {
+    for (const catalogue of this.imports) {
+      for (const publication of catalogue.publications || []) {
+        yield publication;
+      }
+    }
+  }
   *iterateSelectionEntries(): Iterable<Base> {
     for (const catalogue of this.importsWithEntries) {
       for (const entry of catalogue.sharedSelectionEntries || []) {
