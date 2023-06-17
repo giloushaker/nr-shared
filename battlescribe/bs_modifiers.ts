@@ -52,7 +52,7 @@ export function fieldToText(base: Base | Link | undefined, field: string): strin
         return target.name;
       }
     }
-    return catalogue.manager.getCatalogueInfo({ targetId: field })?.name || field;
+    return catalogue.manager?.getCatalogueInfo({ targetId: field })?.name || field;
   }
   return field;
 }
@@ -79,10 +79,10 @@ export function conditionToString(
   const value = condition.value === undefined ? 1 : condition.value;
 
   const rawField = fieldToString(base, condition.field);
-  const field = ["selections", "forces"].includes(rawField) ? ` ${rawField}` : ` ${rawField} of`;
+  const field = ["selections", "forces"].includes(rawField) ? ` ${rawField}` : ` ${rawField}`;
 
   const what = fieldToString(base, condition.childId || "") + (includeId ? `(${condition.childId || "any"})` : "");
-  const of = what && field ? ` of ` : "";
+  const of = what && field ? `of ` : "";
 
   const rawScope = fieldToString(base, condition.scope);
   const scope = rawScope === base?.getName() ? "" : `${rawScope}`;
