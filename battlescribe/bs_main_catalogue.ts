@@ -10,11 +10,12 @@ import type {
   BSIRule,
   BSIPublication,
   BSIProfileType,
+  BSIReference,
 } from "./bs_types";
 import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { ItemTypeNames } from "./bs_editor";
 import type { BSCatalogueManager } from "./bs_system";
-import { IErrorMessage } from "~/components/ErrorIcon.vue";
+import type { IErrorMessage } from "~/components/ErrorIcon.vue";
 
 export interface WikiLink extends Link {
   parent: WikiBase;
@@ -752,7 +753,7 @@ export class Catalogue extends Base {
       this.index = {};
       this.forEachObjectWhitelist((cur, parent) => {
         this.addToIndex(cur);
-        if ((cur as any).publicationId) {
+        if ((cur as BSIReference).publicationId) {
           unresolvedPublications.push(cur as any);
         }
         if (cur.isLink()) {
