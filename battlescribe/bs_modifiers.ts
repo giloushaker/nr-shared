@@ -39,7 +39,7 @@ export function fieldToText(base: Base | Link | undefined, field: string): strin
     const target = catalogue.findOptionById(field);
     if (target) {
       const type = (target as any).type;
-      if (type && ["min", "max"].includes(type)) {
+      if (type && ["min", "max", "exactly"].includes(type)) {
         return constraintToText(base, target as any);
       }
       if (target.name) {

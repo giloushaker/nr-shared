@@ -58,14 +58,14 @@ export interface BSICondition extends BSIQuery, BSIValued {
   type: "instanceOf" | "notInstanceOf" | "atLeast" | "greaterThan" | "atMost" | "lessThan" | "equalTo" | "notEqualTo";
 }
 export interface BSIConditionGroup {
-  type?: "and" | "or";
+  type?: "and" | "or" | "exactly";
   conditions?: BSICondition[];
   conditionGroups?: BSIConditionGroup[];
 }
 
 export interface BSIConstraint extends BSIQuery, BSIValued, BSIOption {
   isLimit?: boolean;
-  type: "min" | "max";
+  type: "min" | "max" | "exactly";
   shared?: boolean;
 }
 
@@ -163,6 +163,9 @@ export interface BSICatalogue extends BSIDataCommon {
 export interface BSIDataCatalogue extends Partial<bookFileMetaData> {
   catalogue: BSICatalogue;
   gameSystemId?: string;
+}
+export interface BSIReference {
+  publicationId: string;
 }
 export interface bookFileMetaData {
   name: string;
