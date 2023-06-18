@@ -122,6 +122,7 @@ export class Base implements BSModifierBase {
   import?: boolean;
   collective?: boolean;
   comment?: string[];
+  publicationId!: string;
 
   // Maybe move this to catalogue
   profileTypes?: BSIProfileType[];
@@ -131,7 +132,6 @@ export class Base implements BSModifierBase {
   hidden!: boolean;
   value?: number | string | boolean;
   page?: string;
-  publicationId!: string;
 
   profiles?: Profile[];
   rules?: Rule[];

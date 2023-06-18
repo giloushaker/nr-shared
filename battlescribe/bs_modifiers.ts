@@ -76,7 +76,7 @@ export function conditionToString(
   fieldToString = fieldToText
 ): string {
   const type = condition.type || "none";
-  const value = condition.value === undefined ? 1 : condition.value;
+  const value = condition.value === undefined ? 1 : condition.percentValue ? `${condition.value}%` : condition.value;
 
   const rawField = fieldToString(base, condition.field);
   const field = ["selections", "forces"].includes(rawField) ? ` ${rawField}` : ` ${rawField}`;
