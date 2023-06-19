@@ -252,6 +252,9 @@ export class Catalogue extends Base {
         yield publication;
       }
     }
+    for (const publication of this.publications || []) {
+      yield publication;
+    }
   }
   *iterateSelectionEntries(): Iterable<Base> {
     for (const catalogue of this.importsWithEntries) {

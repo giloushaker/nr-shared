@@ -103,6 +103,7 @@ export class GameSystemFiles extends BSCatalogueManager {
       }
     }
   }
+  onFileChanged(id: string) {}
 }
 
 export function saveCatalogueInDb(data: Catalogue | BSICatalogue | BSIGameSystem) {
