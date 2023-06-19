@@ -548,14 +548,28 @@ export function modify<T>(_default: T & any, modifiers?: ReactiveModifier[]): T 
         case "set":
           _default = modifier.value;
           break;
-        case "append":
-          _default += modifier.value;
-          break;
+      }
+    }
+  }
+  for (const reactive of modifiers) {
+    if (reactive.computed) {
+      const modifier = reactive.source;
+      switch (modifier.type) {
         case "increment":
           _default = (_default || 0) + (modifier.value as number) * reactive.computed;
           break;
         case "decrement":
           _default = (_default || 0) - (modifier.value as number) * reactive.computed;
+          break;
+      }
+    }
+  }
+  for (const reactive of modifiers) {
+    if (reactive.computed) {
+      const modifier = reactive.source;
+      switch (modifier.type) {
+        case "append":
+          _default += modifier.value;
           break;
       }
     }
