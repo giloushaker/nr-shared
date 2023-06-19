@@ -636,6 +636,7 @@ export class Catalogue extends Base {
       localAddBoundCategoryConstraints(this, category, category.constraintsIterator());
       const force_extra_constraints = {} as Record<string, BSIExtraConstraint>;
       category.forEachNodeCb((node) => {
+        if (!node) return;
         if (node.isForce()) return;
         // Categories & Units are always initialized within forces so there is no need to make them extra
 
