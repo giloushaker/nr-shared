@@ -77,6 +77,5 @@ export abstract class GameSystemFiles extends BSCatalogueManager {
   }
   onFileChanged(id: string) {}
 
-  abstract saveCatalogue(data: Catalogue | BSICatalogue | BSIGameSystem): void;
   abstract getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData>;
 }
