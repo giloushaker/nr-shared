@@ -4,8 +4,9 @@ import { BooksDate } from "./bs_versioning";
 import { Catalogue } from "./bs_main_catalogue";
 import { loadData } from "./bs_load_data";
 import type { GithubIntegration } from "./github";
+import { db } from "./cataloguesdexie";
 
-export abstract class GameSystemFiles extends BSCatalogueManager {
+export class GameSystemFiles extends BSCatalogueManager {
   gameSystem: BSIDataSystem | null = null;
   catalogueFiles: Record<string, BSIDataCatalogue> = {};
   allLoaded?: boolean;
@@ -77,5 +78,27 @@ export abstract class GameSystemFiles extends BSCatalogueManager {
   }
   onFileChanged(id: string) {}
 
-  abstract getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData>;
+  async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData> {
+    if (catalogueLink.targetId == this.gameSystem?.gameSystem.id) {
+      return this.gameSystem;
+    }
+    if (catalogueLink.targetId in this.catalogueFiles) {
+      return this.catalogueFiles[catalogueLink.targetId];
+    }
+
+    const catalogue = await db.catalogues.get({
+      "content.catalogue.id": catalogueLink.targetId,
+    });
+    if (catalogue) {
+      return catalogue.content;
+    }
+
+    const system = await db.systems.get(catalogueLink.targetId);
+    if (system) {
+      return system.content;
+    }
+
+    const errorPart = catalogueLink.name ? `name ${catalogueLink.name}` : `id ${catalogueLink.targetId}`;
+    throw Error(`Couldn't import catalogue with ${errorPart}, perhaps it wasnt uploaded?`);
+  }
 }

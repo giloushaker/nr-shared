@@ -707,3 +707,18 @@ export async function zipCompress<T extends OutputType>(nameInZip: string, conte
   const result = await zip.generateAsync({ type: type, compression: "DEFLATE" });
   return result;
 }
+
+export function debouncePromise(func: (...args: any[]) => unknown, delay: number) {
+  let timeoutId: NodeJS.Timeout;
+
+  return function (...args: any[]) {
+    clearTimeout(timeoutId);
+
+    return new Promise((resolve) => {
+      timeoutId = setTimeout(() => {
+        const result = func.apply(this, args);
+        resolve(result);
+      }, delay);
+    });
+  };
+}

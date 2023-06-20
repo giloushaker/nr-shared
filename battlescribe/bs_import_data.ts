@@ -91,7 +91,7 @@ export function makeSystemRowFromJson(system: BSIDataSystem): GameSystemRow {
     name: gst_file.name,
     path: `${gst_file.name}/${gst_file.name}`,
     engine: "bs",
-    books: [makeBookRow(gst_file, gst_file.name, date, false)],
+    books: [],
 
     nrversion: gst_file.revision,
     last_updated: date,
