@@ -279,16 +279,9 @@ export class Catalogue extends Base {
       "sharedProfiles",
       "sharedRules",
       "sharedInfoGroups",
-    ];
-    const root = [
-      "rules",
-      "entryLinks",
-      "profiles",
-      "infoGroups",
-      "selectionEntries",
-      "selectionEntryGroups",
       "categoryEntries",
     ];
+    const root = ["rules", "entryLinks", "profiles", "infoGroups", "selectionEntries", "selectionEntryGroups"];
     for (const catalogue of this.importsWithEntries) {
       for (const key of root) {
         for (const entry of catalogue[key as keyof Catalogue] || []) {
