@@ -5,6 +5,7 @@ import { Catalogue } from "./bs_main_catalogue";
 import { loadData } from "./bs_load_data";
 import type { GithubIntegration } from "./github";
 import { db } from "./cataloguesdexie";
+import { getDataObject } from "./bs_main";
 
 export class GameSystemFiles extends BSCatalogueManager {
   gameSystem: BSIDataSystem | null = null;
@@ -21,6 +22,11 @@ export class GameSystemFiles extends BSCatalogueManager {
   unloadAll() {
     super.unloadAll();
     this.loadedCatalogues = {};
+    for (const file of this.getAllCatalogueFiles()) {
+      const obj = getDataObject(file) as any as Catalogue;
+      delete obj.loaded;
+      delete obj.loaded_editor;
+    }
     delete this.allLoaded;
   }
   async loadAll() {
