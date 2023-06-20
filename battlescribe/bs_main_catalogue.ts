@@ -15,7 +15,8 @@ import type {
 import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { ItemTypeNames } from "./bs_editor";
 import type { BSCatalogueManager } from "./bs_system";
-import type { IErrorMessage } from "~/components/ErrorIcon.vue";
+
+type IErrorMessage = any;
 
 export interface WikiLink extends Link {
   parent: WikiBase;
