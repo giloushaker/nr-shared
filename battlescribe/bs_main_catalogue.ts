@@ -16,8 +16,6 @@ import type { Force, BSIExtraConstraint } from "./bs_main";
 import type { ItemTypeNames } from "./bs_editor";
 import type { BSCatalogueManager } from "./bs_system";
 
-type IErrorMessage = any;
-
 export interface WikiLink extends Link {
   parent: WikiBase;
   links?: WikiLink[];
@@ -38,8 +36,6 @@ export interface EditorBase extends Base {
   showInEditor?: boolean;
   showChildsInEditor?: boolean;
   highlight?: boolean;
-
-  errors?: IErrorMessage[];
 }
 export class CatalogueLink extends Base {
   targetId!: string;
@@ -99,8 +95,6 @@ export class Catalogue extends Base {
   costIndex!: Record<string, BSICostType>;
 
   fullFilePath?: string;
-
-  errors?: IErrorMessage[];
   process() {
     if (this.loaded) return;
     this.loaded = true;
@@ -191,16 +185,6 @@ export class Catalogue extends Base {
   }
   getSystemId(): string {
     return this.isGameSystem() ? this.id : this.gameSystemId!;
-  }
-  updateErrors(obj: EditorBase, newErrors: IErrorMessage[]) {
-    if (this.errors?.length && newErrors.length) {
-      this.errors = this.errors.filter((o) => !newErrors.includes(o));
-    }
-    if (!this.errors) {
-      this.errors = [];
-    }
-    obj.errors = newErrors;
-    this.errors.push(...newErrors);
   }
   *iterateCategoryEntries(): Iterable<Category> {
     for (const catalogue of this.imports) {
