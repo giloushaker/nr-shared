@@ -16,7 +16,6 @@ export class GameSystemFiles extends BSCatalogueManager {
 
   async loadData(data: BSIData, booksDate?: BooksDate): Promise<Catalogue> {
     const loaded = await loadData(this, data, booksDate, { deleteBadLinks: false });
-    loaded.processForEditor();
     return loaded;
   }
   unloadAll() {
@@ -82,7 +81,6 @@ export class GameSystemFiles extends BSCatalogueManager {
       }
     }
   }
-  onFileChanged(id: string) {}
 
   async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData> {
     if (catalogueLink.targetId == this.gameSystem?.gameSystem.id) {
