@@ -51,14 +51,14 @@ const htmlUnescapes = {
   "&gt;": ">",
   "&quot;": '"',
   "&#39;": "'",
-};
+} as Record<string, string | undefined>;
 
 const unescape = (string: string) =>
-  escapedHtml.test(string) ? string.replace(escapedHtml, (match) => htmlUnescapes[match]) : string;
+  escapedHtml.test(string) ? string.replace(escapedHtml, (match) => htmlUnescapes[match]!) : string;
 
 const containers = {} as Record<string, string>;
 for (const key in containerTags) {
-  containers[containerTags[key]] = key;
+  containers[containerTags[key]!] = key;
 }
 const allowed = {} as Record<string, Set<string> | string>;
 for (const [key, value] of Object.entries(entries)) {
