@@ -654,7 +654,7 @@ export class Catalogue extends Base {
         if (!node.constraints && !node.target?.constraints) return;
 
         for (const constraint of node.constraintsIterator()) {
-          if (constraint.type === "min") {
+          if (constraint.type === "min" || constraint.type === "exactly") {
             const hash = `${constraint.id}::${node.id}`;
             switch (constraint.scope) {
               case "parent":

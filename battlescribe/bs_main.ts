@@ -553,7 +553,7 @@ export class Base implements BSModifierBase {
     for (const child of this.selectionsIterator()) {
       if (skipGroup && child.isGroup()) continue;
       for (const constraint of child.constraintsIterator()) {
-        if (constraint.type === "min") {
+        if (constraint.type === "min" || constraint.type === "exactly") {
           if (constraint.scope === "parent") result.push(child.getBoundConstraint(constraint));
         }
       }
