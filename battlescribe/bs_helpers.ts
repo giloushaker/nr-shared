@@ -113,7 +113,7 @@ let gitSha1: (content: string | Buffer | ArrayBuffer) => Promise<string>;
 if (typeof window === "undefined") {
   gitSha1 = (async (content: string | Buffer) => {
     const gitstring = `blob ${content.length}\0`;
-    const shasum = require("crypto").createHash("sha1");
+    const shasum = (await import("crypto")).createHash("sha1");
     shasum.update(gitstring);
     shasum.update(content);
     const result = shasum.digest("hex");
