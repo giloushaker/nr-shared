@@ -590,6 +590,9 @@ export class Entry extends Base {
 }
 export class Group extends Base {
   declare defaultSelectionEntryId?: string;
+  getDefaultSelectionEntryId() {
+    return this.defaultSelectionEntryId;
+  }
   isGroup() {
     return true;
   }
@@ -646,6 +649,11 @@ export class Link<T extends Base = Group | Entry> extends Base {
   getHidden(): boolean | undefined {
     return this.target.hidden || this.hidden;
   }
+  getDefaultSelectionEntryId() {
+    return (
+      (this as any as Group).defaultSelectionEntryId || (this.target as any as Group)?.getDefaultSelectionEntryId()
+    );
+  }
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore: TS2611
   get associationConstraints(): AssociationConstraint[] | undefined {
@@ -655,12 +663,6 @@ export class Link<T extends Base = Group | Entry> extends Base {
   // @ts-ignore: TS2611
   get associations(): NRAssociation[] | undefined {
     return this.target?.associations;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore: TS2611
-  get defaultSelectionEntryId(): string | undefined {
-    return (this.target as Group).defaultSelectionEntryId;
   }
   isCollective(): boolean | undefined {
     return super.isCollective() || this.target.isCollective();
