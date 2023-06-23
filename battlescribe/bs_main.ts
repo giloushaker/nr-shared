@@ -132,6 +132,7 @@ export class Base implements BSModifierBase {
   hidden!: boolean;
   value?: number | string | boolean;
   page?: string;
+  defaultAmount?: number;
 
   profiles?: Profile[];
   rules?: Rule[];
@@ -256,6 +257,9 @@ export class Base implements BSModifierBase {
   }
   getName(): string {
     return this.name;
+  }
+  getDefaultAmount(): number | undefined {
+    return this.defaultAmount;
   }
   isCollective(): boolean | undefined {
     return this.collective;
@@ -719,6 +723,9 @@ export class Link<T extends Base = Group | Entry> extends Base {
     yield* this.target.infoProfilesIterator();
     yield* super.infoProfilesIterator();
   }
+  getDefaultAmount(): number | undefined {
+    return this.defaultAmount === undefined ? this.target.defaultAmount : this.defaultAmount;
+  }
   getName(): string {
     return this.target?.name || this.name;
   }
@@ -1028,6 +1035,7 @@ export const goodJsonArrayKeys = new Set([
   "rules",
   "infoGroups",
   "associations",
+  "defaultAmount",
 ]);
 export const goodJsonKeys = new Set([
   ...goodJsonArrayKeys,
