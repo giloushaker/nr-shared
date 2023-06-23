@@ -12,7 +12,7 @@ import type {
   BSIProfileType,
   BSIReference,
 } from "./bs_types";
-import type { Force, BSIExtraConstraint } from "./bs_main";
+import type { Force, BSIExtraConstraint, Profile } from "./bs_main";
 import type { ItemTypeNames } from "./bs_editor";
 import type { BSCatalogueManager } from "./bs_system";
 
@@ -88,6 +88,7 @@ export class Catalogue extends Base {
   imports!: Catalogue[];
   importsWithEntries!: Catalogue[];
   index!: Record<string, Base>;
+  unresolvedLinks: Record<string, Array<Link & EditorBase>> = {};
 
   forces!: Force[];
   categories!: Category[];
@@ -143,7 +144,9 @@ export class Catalogue extends Base {
   processForEditor() {
     if (this.loaded_editor) return;
     this.loaded_editor = true;
+    this.refIndex = {};
     this.generateCostIndex();
+
     if (this.gameSystem) {
       addObj(this.gameSystem as any, "links", this);
     }
@@ -163,6 +166,7 @@ export class Catalogue extends Base {
       const childId = (cur as any).childId;
       if (childId) {
         const target = this.findOptionById(childId) as EditorBase;
+
         if (target) {
           addObj(target, "other_links", cur);
         }
@@ -197,14 +201,16 @@ export class Catalogue extends Base {
     return this.isGameSystem() ? this.id : this.gameSystemId!;
   }
   updateErrors(obj: EditorBase, newErrors: IErrorMessage[]) {
-    if (this.errors?.length && newErrors.length) {
-      this.errors = this.errors.filter((o) => !newErrors.includes(o));
-    }
-    if (!this.errors) {
-      this.errors = [];
+    if (this.errors?.length && obj.errors?.length) {
+      this.errors = this.errors.filter((o) => !obj.errors!.includes(toRaw(o)));
     }
     obj.errors = newErrors;
-    this.errors.push(...newErrors);
+    if (newErrors.length) {
+      if (!this.errors) {
+        this.errors = [];
+      }
+      this.errors.push(...newErrors);
+    }
   }
   *iterateCategoryEntries(): Iterable<Category> {
     for (const catalogue of this.imports) {
@@ -730,16 +736,32 @@ export class Catalogue extends Base {
     return loaded;
   }
   refreshErrors(cur: EditorBase) {
-    if (cur.isLink() && !cur.target) {
-      this.updateErrors(cur, [{ source: cur, severity: "error", msg: "Link has no target" }]);
+    if (cur.isLink()) {
+      if (!cur.target) {
+        this.updateErrors(cur, [{ source: cur, severity: "error", msg: "Link has no target" }]);
+        addObj(this.unresolvedLinks, cur.targetId, cur);
+      } else {
+        if (cur.errors) {
+          this.updateErrors(cur, []);
+        }
+      }
+    } else if (cur.isProfile() && !(cur as Profile).typeId) {
+      this.updateErrors(cur, [{ source: cur, severity: "error", msg: "Profile has no type" }]);
     } else {
-      this.updateErrors(cur, []);
+      if (cur.errors) {
+        this.updateErrors(cur, []);
+      }
     }
   }
   addToIndex(cur: Base) {
     if (cur.id) {
       cur.catalogue = this;
       this.index[cur.id] = cur;
+    }
+    if (this.unresolvedLinks) {
+      for (const lnk of this.unresolvedLinks[cur.id] || []) {
+        this.updateLink(lnk);
+      }
     }
   }
   removeFromIndex(cur: EditorBase) {
@@ -780,9 +802,15 @@ export class Catalogue extends Base {
     for (const importedCatalogue of imports) {
       indexes.push(importedCatalogue.index);
     }
-    resolveLinks(unresolvedLinks, indexes, parents, deleteBadLinks);
+    const unresolved = resolveLinks(unresolvedLinks, indexes, parents, deleteBadLinks);
     resolvePublications(unresolvedPublications, indexes);
     resolveChildIds(unresolvedChildIds, indexes);
+    if (!deleteBadLinks) {
+      this.unresolvedLinks = {};
+      for (const lnk of unresolved) {
+        addObj(this.unresolvedLinks, lnk.targetId, lnk);
+      }
+    }
   }
   updateLink(link: Link & EditorBase) {
     if (link.target) {
@@ -894,7 +922,7 @@ export function resolveLinks(
       }
     }
   }
-  return resolved;
+  return unresolved;
 }
 /**
  * Fills in the `.publication` field with the value of the first matching key inside nodeIndexes

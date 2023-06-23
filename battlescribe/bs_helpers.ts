@@ -568,6 +568,16 @@ export function addObj<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>
   }
   (obj[key] as unknown as T[]) = [val];
 }
+export function popObj<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
+  const found = obj[key] as unknown as T[];
+  if (found) {
+    found.filter((o) => o !== val);
+    if (!found.length) {
+      delete obj[key];
+    }
+    return;
+  }
+}
 
 export function add(obj: any, key: string, amount = 1) {
   const prev = obj[key] || 0;
