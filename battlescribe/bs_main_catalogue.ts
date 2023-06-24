@@ -808,6 +808,9 @@ export class Catalogue extends Base {
       delete ref.target;
       ref.catalogue.refreshErrors(ref);
     }
+    for (const ref of cur.other_links || []) {
+      ref.catalogue.refreshErrors(ref);
+    }
   }
   resolveAllLinks(imports: Catalogue[], deleteBadLinks = true) {
     const unresolvedLinks: Array<Link> = [];
