@@ -1,6 +1,3 @@
-import type { Base, Group, Rule } from "./bs_main";
-import type { Publication } from "./bs_main_catalogue";
-
 export interface BSINamed {
   name: string;
 }
@@ -112,7 +109,45 @@ export interface SupportedQueries {
   repeats?: BSIRepeat[];
   modifiers?: BSIModifier[];
 }
+export interface BSIModifiable {
+  modifers?: BSIModifier[];
+  modiferGroups?: BSIModifierGroup[];
+}
+export interface BSIConstrainable {
+  constraints?: BSIConstraint[];
+}
 
+export interface BSIForce extends BSINamed, BSIOption, BSIReference, BSIHidden {
+  categoryLinks?: BSICategoryLink[];
+  forceEntries?: BSIForce[];
+}
+export interface BSISelectionEntryGroup
+  extends BSINamed,
+    BSIOption,
+    BSIReference,
+    BSIModifiable,
+    BSIConstrainable,
+    BSIHidden {
+  selectionEntries?: BSISelectionEntry[];
+  selectionEntryGroups?: BSISelectionEntryGroup[];
+  entryLinks?: BSILink[];
+  categoryLinks?: BSICategoryLink[];
+  import?: boolean;
+}
+export interface BSISelectionEntry
+  extends BSINamed,
+    BSIOption,
+    BSIReference,
+    BSIModifiable,
+    BSIConstrainable,
+    BSIHidden {
+  type: string;
+  selectionEntries?: BSISelectionEntry[];
+  selectionEntryGroups?: BSISelectionEntryGroup[];
+  entryLinks?: BSILink[];
+  categoryLinks?: BSICategoryLink[];
+  import?: boolean;
+}
 export interface BSIData extends Partial<bookFileMetaData> {
   gameSystem?: BSIGameSystem;
   catalogue?: BSICatalogue;
@@ -134,25 +169,25 @@ export interface BSIDataCommon {
   authorName?: string;
   authorContact?: string;
   authorUrl?: string;
-  publications?: Publication[];
+  publications?: BSIPublication[];
   costTypes?: BSICostType[];
   profileTypes?: BSIProfileType[];
   categoryEntries?: BSICategory[];
-  forceEntries?: Publication[];
-  sharedSelectionEntries?: Base[];
-  sharedSelectionEntryGroups?: Group[];
+  forceEntries?: BSIForce[];
+  sharedSelectionEntries?: BSISelectionEntry[];
+  sharedSelectionEntryGroups?: BSISelectionEntryGroup[];
   sharedProfiles?: BSIProfile[];
   sharedRules?: BSIRule[];
   sharedInfoGroups?: BSIInfoGroup[];
-  selectionEntries?: Base[];
-  rules?: Rule[];
+  selectionEntries?: BSISelectionEntry[];
+  rules?: BSIRule[];
 
   fullFilePath?: string;
-  xmlns: string;
+  xmlns?: string;
 }
 export interface BSIGameSystem extends BSIDataCommon {
-  gameSystemId: undefined;
-  catalogueLinks: undefined;
+  gameSystemId?: undefined;
+  catalogueLinks?: undefined;
 }
 export interface BSICatalogue extends BSIDataCommon {
   library: boolean;
@@ -165,7 +200,8 @@ export interface BSIDataCatalogue extends Partial<bookFileMetaData> {
   gameSystemId?: string;
 }
 export interface BSIReference {
-  publicationId: string;
+  publicationId?: string;
+  page?: string;
 }
 export interface bookFileMetaData {
   name: string;
