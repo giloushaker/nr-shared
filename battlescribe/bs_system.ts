@@ -1,16 +1,21 @@
-import type { BSICatalogueLink, BSIData } from "./bs_types";
+import type { BSICatalogue, BSICatalogueLink, BSIData, BSIGameSystem } from "./bs_types";
 import type { Catalogue } from "./bs_main_catalogue";
 import { getBookDate, BooksDate } from "./bs_versioning";
 import { loadData } from "./bs_load_data";
+import type { Base } from "./bs_main";
 
 export class BSCatalogueManager {
   catalogues = {} as Record<string, Record<string, Catalogue>>;
+  unresolvedLinks?: Record<string, Array<Base>>;
   // Must implement
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData> {
     throw new Error("Method not implemented.");
   }
-  getCatalogueInfo(catalogueLink: BSICatalogueLink): { name: string } | undefined {
+  getCatalogueInfo(catalogueLink: BSICatalogueLink): BSICatalogue | BSIGameSystem | undefined {
+    return undefined;
+  }
+  findOptionById(id: string): Base | undefined {
     return undefined;
   }
   getLoadedCatalogue(catalogueLink: BSICatalogueLink | string, booksDate?: BooksDate): Catalogue | undefined {

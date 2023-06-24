@@ -1,20 +1,35 @@
-import { groupBy, sortBy, clone, addObj, textSearchRegex, generateBattlescribeId } from "./bs_helpers";
-import { Base, Link } from "./bs_main";
-import { UNCATEGORIZED_ID, ILLEGAL_ID, Category, goodKeys, Rule, goodKeysWiki, goodJsonArrayKeys } from "./bs_main";
+import type { ItemTypeNames } from "./bs_editor";
+import { addObj, clone, generateBattlescribeId, groupBy, popObj, sortBy, textSearchRegex } from "./bs_helpers";
+import {
+  BSIExtraConstraint,
+  Base,
+  Category,
+  Condition,
+  Force,
+  ILLEGAL_ID,
+  Link,
+  Profile,
+  Rule,
+  UNCATEGORIZED_ID,
+  basicQueryFields,
+  goodJsonArrayKeys,
+  goodKeys,
+  goodKeysWiki,
+} from "./bs_main";
+import type { BSCatalogueManager } from "./bs_system";
 import type {
-  BSICostType,
+  BSICatalogue,
   BSICondition,
   BSIConstraint,
+  BSICostType,
+  BSIGameSystem,
   BSIInfoLink,
   BSIProfile,
-  BSIRule,
-  BSIPublication,
   BSIProfileType,
+  BSIPublication,
   BSIReference,
+  BSIRule,
 } from "./bs_types";
-import type { Force, BSIExtraConstraint, Profile } from "./bs_main";
-import type { ItemTypeNames } from "./bs_editor";
-import type { BSCatalogueManager } from "./bs_system";
 
 export interface IErrorMessage {
   msg: string;
@@ -88,7 +103,7 @@ export class Catalogue extends Base {
   imports!: Catalogue[];
   importsWithEntries!: Catalogue[];
   index!: Record<string, Base>;
-  unresolvedLinks: Record<string, Array<Link & EditorBase>> = {};
+  unresolvedLinks: Record<string, Array<(Condition | Link) & EditorBase>> = {};
 
   forces!: Force[];
   categories!: Category[];
@@ -144,7 +159,6 @@ export class Catalogue extends Base {
   processForEditor() {
     if (this.loaded_editor) return;
     this.loaded_editor = true;
-    this.refIndex = {};
     this.generateCostIndex();
 
     if (this.gameSystem) {
@@ -163,13 +177,8 @@ export class Catalogue extends Base {
           addObj(target, "links", cur);
         }
       }
-      const childId = (cur as any).childId;
-      if (childId) {
-        const target = this.findOptionById(childId) as EditorBase;
-
-        if (target) {
-          addObj(target, "other_links", cur);
-        }
+      if (cur instanceof Condition) {
+        this.updateCondition(cur as Condition & EditorBase);
       }
       const value = (cur as any).value;
       if (value) {
@@ -378,6 +387,19 @@ export class Catalogue extends Base {
     if (this.book) {
       this.manager.getLoadedCatalogue(id);
     }
+    return;
+  }
+  findOptionByIdGlobal(id: string): Base | undefined | BSICatalogue | BSIGameSystem {
+    const found = this.index[id];
+    if (found) return found;
+    const found_import = this.imports.find((o) => id in o.index)?.index[id];
+    if (found_import) return found_import;
+    if (this.manager) {
+      const globalOption = this.manager.findOptionById(id);
+      if (globalOption) return globalOption;
+      return this.manager.getCatalogueInfo({ targetId: id });
+    }
+
     return;
   }
   findOptionsById(id: string): Base[] {
@@ -739,7 +761,9 @@ export class Catalogue extends Base {
     if (cur.isLink()) {
       if (!cur.target) {
         this.updateErrors(cur, [{ source: cur, severity: "error", msg: "Link has no target" }]);
-        addObj(this.unresolvedLinks, cur.targetId, cur);
+        if (!this.unresolvedLinks[cur.targetId]?.includes(toRaw(cur))) {
+          addObj(this.unresolvedLinks, cur.targetId, toRaw(cur));
+        }
       } else {
         if (cur.errors) {
           this.updateErrors(cur, []);
@@ -747,6 +771,8 @@ export class Catalogue extends Base {
       }
     } else if (cur.isProfile() && !(cur as Profile).typeId) {
       this.updateErrors(cur, [{ source: cur, severity: "error", msg: "Profile has no type" }]);
+    } else if (cur instanceof Condition) {
+      this.updateCondition(cur);
     } else {
       if (cur.errors) {
         this.updateErrors(cur, []);
@@ -757,10 +783,19 @@ export class Catalogue extends Base {
     if (cur.id) {
       cur.catalogue = this;
       this.index[cur.id] = cur;
-    }
-    if (this.unresolvedLinks) {
-      for (const lnk of this.unresolvedLinks[cur.id] || []) {
-        this.updateLink(lnk);
+      if (this.unresolvedLinks && this.unresolvedLinks[cur.id]) {
+        for (const lnk of this.unresolvedLinks[cur.id]) {
+          if (!lnk.isLink()) {
+            this.updateLink(lnk as Link & EditorBase);
+          } else {
+            this.refreshErrors(lnk);
+          }
+        }
+      }
+      if (this.manager?.unresolvedLinks && this.manager.unresolvedLinks![cur.id]?.length) {
+        for (const lnk of this.manager.unresolvedLinks[cur.id]) {
+          lnk.catalogue.refreshErrors(lnk as EditorBase);
+        }
       }
     }
   }
@@ -808,22 +843,35 @@ export class Catalogue extends Base {
     if (!deleteBadLinks) {
       this.unresolvedLinks = {};
       for (const lnk of unresolved) {
-        addObj(this.unresolvedLinks, lnk.targetId, lnk);
+        addObj(this.unresolvedLinks, lnk.targetId, lnk as Link & EditorBase);
       }
     }
   }
+  removeRef(from: EditorBase, to: EditorBase) {
+    if (!to.links) to.links = [];
+    const idx = to.links.indexOf(from);
+    if (idx >= 0) to.links.splice(idx, 1);
+  }
+  addRef(from: EditorBase, to: EditorBase) {
+    if (!to.links) to.links = [];
+    to.links.push(from);
+  }
+  removeOtherRef(from: EditorBase, to: EditorBase) {
+    if (!to.other_links) to.other_links = [];
+    const idx = to.other_links.indexOf(from);
+    if (idx >= 0) to.other_links.splice(idx, 1);
+  }
+  addOtherRef(from: EditorBase, to: EditorBase) {
+    if (!to.other_links) to.other_links = [];
+    to.other_links.push(from);
+  }
   updateLink(link: Link & EditorBase) {
     if (link.target) {
-      const target = link.target as EditorBase;
-      if (!target.links) target.links = [];
-      const idx = target.links.indexOf(link);
-      if (idx >= 0) target.links.splice(idx, 1);
+      this.removeRef(link, link.target as EditorBase);
     }
     link.target = this.findOptionById(link.targetId)!;
     if (link.target) {
-      const target = link.target as EditorBase;
-      if (!target.links) target.links = [];
-      target.links.push(link);
+      this.addRef(link, link.target as EditorBase);
     }
     if (link.target == null) {
     } else {
@@ -838,14 +886,38 @@ export class Catalogue extends Base {
     return link.target !== undefined;
   }
 
-  updateCondition(condition: (BSICondition | BSIConstraint) & EditorBase) {}
+  updateCondition(condition: (BSICondition | BSIConstraint | Condition) & EditorBase, previousField?: string) {
+    if (["exactly", "min", "max"].includes(condition.type)) return;
+    const isInstanceOf = ["instanceOf", "notInstanceOf"].includes(condition.type);
+    if (previousField && !basicQueryFields.has(previousField)) {
+      const found = isInstanceOf ? this.findOptionByIdGlobal(previousField) : this.findOptionById(previousField);
+      if (found) this.removeOtherRef(condition, found as EditorBase);
+    }
+    if (condition.childId) {
+      if (basicQueryFields.has(condition.childId)) {
+        this.updateErrors(condition, []);
+        return;
+      }
+      const target = isInstanceOf
+        ? this.findOptionByIdGlobal(condition.childId)
+        : this.findOptionById(condition.childId);
+      if (target) {
+        this.addOtherRef(condition, target as EditorBase);
+        this.updateErrors(condition, []);
+        popObj(this.manager.unresolvedLinks!, condition.childId, condition as Condition & EditorBase);
+        return;
+      }
+      if (!this.manager.unresolvedLinks![condition.childId]?.includes(condition)) {
+        addObj(this.manager.unresolvedLinks!, condition.childId, condition as Condition & EditorBase);
+      }
+    }
+    this.updateErrors(condition, [{ source: condition, severity: "warning", msg: "Field does not exist" }]);
+    return;
+  }
 
   unlinkLink(link: Link & EditorBase) {
     if (link.target) {
-      const target = link.target as EditorBase;
-      if (!target.links) target.links = [];
-      const idx = target.links.indexOf(link);
-      if (idx >= 0) target.links.splice(idx, 1);
+      this.removeRef(link, link.target as EditorBase);
     }
   }
 }

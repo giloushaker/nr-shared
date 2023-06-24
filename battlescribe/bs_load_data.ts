@@ -28,6 +28,7 @@ export async function loadData(
   // Prevent infinite loops by checking if prototype is already set
   setPrototypeRecursive(obj);
   const content = setPrototype(obj, key);
+  content.manager = system;
 
   // Resolve gameSystem
   if (isCatalogue) {
@@ -51,6 +52,11 @@ export async function loadData(
   // Resolve catalogue Links
   const promises = [];
   for (const link of content?.catalogueLinks || []) {
+    if (!link.targetId) {
+      console.warn(`invalid link: no targetId in link: ${link}, found in ${obj.name}`);
+      continue;
+    }
+
     if (link.targetId === content.id) {
       link.target = content;
       continue;
@@ -76,9 +82,6 @@ export async function loadData(
   // Resolve Imports
   content.generateImports();
 
-  // Resolve links
-  content.resolveAllLinks(content.imports, options?.deleteBadLinks);
-
   // Add loaded catalogue to Manager
   if (isSystem) {
     system.addLoadedSystem(content);
@@ -86,6 +89,8 @@ export async function loadData(
   if (isCatalogue) {
     system.addLoadedCatalogue(content);
   }
-  content.manager = system;
+  // Resolve links
+  content.resolveAllLinks(content.imports, options?.deleteBadLinks);
+
   return content;
 }

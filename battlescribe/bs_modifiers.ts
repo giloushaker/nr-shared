@@ -52,7 +52,11 @@ export function fieldToText(base: Base | Link | undefined, field: string): strin
         return target.name;
       }
     }
-    return catalogue.manager?.getCatalogueInfo({ targetId: field })?.name || field;
+    const manager = catalogue.manager;
+    if (manager) {
+      const found = catalogue.manager.findOptionById(field) || manager.getCatalogueInfo({ targetId: field });
+      return found?.name || field;
+    }
   }
   return field;
 }

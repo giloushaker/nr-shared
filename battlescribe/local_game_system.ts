@@ -5,7 +5,7 @@ import { Catalogue } from "./bs_main_catalogue";
 import { loadData } from "./bs_load_data";
 import type { GithubIntegration } from "./github";
 import { db } from "./cataloguesdexie";
-import { getDataObject } from "./bs_main";
+import { Base, getDataObject } from "./bs_main";
 
 export class GameSystemFiles extends BSCatalogueManager {
   gameSystem: BSIDataSystem | null = null;
@@ -13,10 +13,15 @@ export class GameSystemFiles extends BSCatalogueManager {
   allLoaded?: boolean;
   loadedCatalogues: Record<string, Catalogue> = {};
   github?: GithubIntegration;
-
+  unresolvedLinks: Record<string, Array<Base>> = {};
   async loadData(data: BSIData, booksDate?: BooksDate): Promise<Catalogue> {
     const loaded = await loadData(this, data, booksDate, { deleteBadLinks: false });
     return loaded;
+  }
+  findOptionById(id: string): Base | undefined {
+    for (const catalogue of Object.values(this.loadedCatalogues)) {
+      if (catalogue.index[id]) return catalogue.index[id];
+    }
   }
   unloadAll() {
     super.unloadAll();
@@ -53,13 +58,13 @@ export class GameSystemFiles extends BSCatalogueManager {
     }
     return [];
   }
-  getCatalogueInfo(catalogueLink: BSICatalogueLink): { name: string } | undefined {
+  getCatalogueInfo(catalogueLink: BSICatalogueLink) {
     if (this.gameSystem?.gameSystem.id === catalogueLink.targetId) {
-      return { name: this.gameSystem?.gameSystem.name };
+      return this.gameSystem?.gameSystem;
     }
     for (const catalogue of Object.values(this.catalogueFiles)) {
       if (catalogue.catalogue.id === catalogueLink.targetId) {
-        return { name: catalogue.catalogue.name };
+        return catalogue.catalogue;
       }
     }
   }

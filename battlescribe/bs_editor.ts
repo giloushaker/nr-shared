@@ -538,19 +538,20 @@ export async function onAddEntry(
   for (const entry of Array.isArray(entries) ? entries : [entries]) {
     forEachEntryRecursive(entry, (entry, key, _parent) => {
       if (isObject(entry)) {
-      }
-      entry.parent = _parent || (parent as any);
+        entry.parent = _parent || (parent as any);
 
-      entry.catalogue = catalogue;
-      catalogue.addToIndex(entry);
-      if (entry.isLink()) {
-        catalogue.updateLink(entry);
+        entry.catalogue = catalogue;
+        catalogue.addToIndex(entry);
+        if (entry.isLink()) {
+          catalogue.updateLink(entry);
+        }
+
+        if (entry instanceof CatalogueLink && entry.targetId) {
+          reload = true;
+        }
+        catalogue.refreshErrors(entry);
       }
     });
-    if (entry instanceof CatalogueLink && entry.targetId) {
-      reload = true;
-    }
-    catalogue.refreshErrors(entry);
   }
   if (reload && parent) {
     const catalogue = parent.catalogue || parent;

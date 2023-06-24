@@ -962,7 +962,15 @@ export class InfoGroup extends Base {
     return true;
   }
 }
-export class Condition extends Base {}
+
+export const basicQueryFields = new Set(["any", "model", "unit", "upgrade", "mount", "crew"]);
+export class Condition extends Base {
+  declare childId: string;
+  declare scope: string;
+  declare type: string;
+  declare includeChildSelections: boolean;
+  declare includeChildForces: boolean;
+}
 export class Modifier extends Base {}
 export class ModifierGroup extends Base {}
 
