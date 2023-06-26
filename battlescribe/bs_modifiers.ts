@@ -9,7 +9,8 @@ import type {
   BSIRepeat,
 } from "./bs_types";
 import type { Base, InfoGroup, Link } from "./bs_main";
-import type { Catalogue } from "./bs_main_catalogue";
+import type { Catalogue, EditorBase } from "./bs_main_catalogue";
+import { getModifierOrConditionParent } from "./bs_editor";
 
 export function* getAllQueries(queries: SupportedQueries): Iterable<BSIQuery> {
   for (const condition of queries.conditions || []) yield condition;
@@ -33,10 +34,24 @@ export function* getAllInfoGroups(group: Base): Iterable<InfoGroup> {
   }
 }
 
+function getModifiedField(base: Base | Link | undefined, field: string) {
+  if (!base) return;
+  const catalogue = base.getCatalogue();
+  if ((base as EditorBase).parent) {
+    const parent = getModifierOrConditionParent(base as EditorBase);
+    if (parent) {
+      for (const constraint of parent.constraintsIterator()) {
+        if (constraint.id === field) return constraint as any as Base;
+      }
+    }
+  }
+  const target = catalogue.findOptionById(field);
+  return target;
+}
 export function fieldToText(base: Base | Link | undefined, field: string): string {
   if (base) {
     const catalogue = base.catalogue || (base as Catalogue);
-    const target = catalogue.findOptionById(field);
+    const target = getModifiedField(base, field);
     if (target) {
       const type = (target as any).type;
       if (type && ["min", "max", "exactly"].includes(type)) {
@@ -102,12 +117,12 @@ export function conditionToString(
     case "atLeast":
       return `${value}+${field} ${of}${what}${inScope}`;
     case "greaterThan":
-      return `${value + 1}+${field} ${of}${what}${inScope}`;
+      return `${Number(value) + 1}+${field} ${of}${what}${inScope}`;
 
     case "atMost":
       return `${value}${value === 0 ? "" : "-"}${field} ${of}${what}${inScope}`;
     case "lessThan":
-      return `${value - 1}${value - 1 === 0 ? "" : "-"}${field} ${of}${what}${inScope}`;
+      return `${Number(value) - 1}${Number(value) - 1 === 0 ? "" : "-"}${field} ${of}${what}${inScope}`;
 
     case "equalTo":
       return `${value}${field} ${of}${what}${inScope}`;
