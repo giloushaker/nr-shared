@@ -366,7 +366,7 @@ export function baseLog(x: number, y: number): number {
   return Math.log(y) / Math.log(x);
 }
 
-export function bookUrl(id_sys: number, id: number, date?: string | null) {
+export function bookUrl(id_sys: number | string, id: number | string, date?: string | null) {
   let res = `/api/rpc?m=books_get_book&id_sys=${id_sys}&id=${id}`;
 
   if (date != null) {
