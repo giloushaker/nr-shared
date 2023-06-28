@@ -262,20 +262,20 @@ export interface Sortable {
 
 export function sortBy<T>(array: T[], getKey: (item: T) => Sortable): T[] {
   return array
-    .map((o) => [getKey(o).toString(), o] as [string, T])
+    .map((o) => [(getKey(o) ?? "").toString(), o] as [string, T])
     .sort(keyCmp)
     .map(([, v]) => v);
 }
 export function sortByAscending<T>(array: T[], getKey: (item: T) => Sortable): T[] {
   return array
-    .map((o) => [getKey(o).toString(), o] as [string, T])
+    .map((o) => [(getKey(o) ?? "").toString(), o] as [string, T])
     .sort(keyCmp)
     .map(([, v]) => v);
 }
 
 export function sortByDescending<T>(array: T[], getKey: (item: T) => Sortable): T[] {
   return array
-    .map((o) => [getKey(o).toString(), o] as [string, T])
+    .map((o) => [(getKey(o) ?? "").toString(), o] as [string, T])
     .sort(keyCmpInversed)
     .map(([, v]) => v);
 }
@@ -283,10 +283,10 @@ export function findMax<T>(array: T[], getKey: (item: T) => any): T {
   if (!array.length) return undefined as any;
   let last = array[0];
   let lastVal = getKey(last).toString();
-  for (const v of array) {
-    const newVal = getKey(v).toString();
+  for (const o of array) {
+    const newVal = (getKey(o) ?? "").toString();
     if (newVal.localeCompare(lastVal, undefined, { numeric: true }) === 1) {
-      last = v;
+      last = o;
       lastVal = newVal;
     }
   }
@@ -297,10 +297,10 @@ export function findMin<T>(array: T[], getKey: (item: T) => any): T {
   if (!array.length) return undefined as any;
   let last = array[0];
   let lastVal = getKey(last).toString();
-  for (const v of array) {
-    const newVal = getKey(v).toString();
+  for (const o of array) {
+    const newVal = (getKey(o) ?? "").toString();
     if (newVal.localeCompare(lastVal, undefined, { numeric: true }) === -1) {
-      last = v;
+      last = o;
       lastVal = newVal;
     }
   }
