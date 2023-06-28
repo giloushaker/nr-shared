@@ -1,6 +1,6 @@
 import { Base, Condition, Link, Modifier, ModifierGroup, goodJsonKeys } from "./bs_main";
 import { Catalogue, CatalogueLink, EditorBase } from "./bs_main_catalogue";
-import { conditionToString, fieldToText, modifierToString } from "./bs_modifiers";
+import { conditionToString, fieldToText, getModifierOrConditionParent, modifierToString } from "./bs_modifiers";
 import {
   BSICondition,
   BSIConditionGroup,
@@ -13,9 +13,7 @@ import {
 import { BSCatalogueManager } from "./bs_system";
 import { isObject } from "./bs_helpers";
 import { stringArrayKeys } from "./bs_convert";
-export interface hasParent<T> {
-  parent?: T | undefined;
-}
+
 export interface CategoryEntry {
   name: string;
   type: ItemKeys;
@@ -204,31 +202,6 @@ export type ItemKeys =
   | "repeats"
   | "conditionGroups";
 
-export function findSelfOrParentWhere<T extends hasParent<T>>(self: T, fn: (node: T) => boolean): T | undefined {
-  let current = self as T | undefined;
-  while (current && !Object.is(current, current.parent)) {
-    if (fn(current)) return current;
-    current = current.parent;
-  }
-  return undefined;
-}
-export function findParentWhere<T extends hasParent<T>>(self: T, fn: (node: T) => any): T | undefined {
-  let current = self.parent;
-  while (current && !Object.is(current, current.parent)) {
-    if (fn(current)) return current;
-    current = current.parent;
-  }
-  return undefined;
-}
-export function forEachParent<T extends hasParent<T>>(self: T, cb: (node: T) => unknown) {
-  let current = self.parent;
-  while (current) {
-    if (!current || cb(current) === false) {
-      break;
-    }
-    current = current.parent;
-  }
-}
 export function getTypeLabel(key: string, obj?: any): string {
   switch (key) {
     case "selectionEntry":
@@ -410,15 +383,7 @@ export function getNameExtra(obj: EditorBase, _refs = true): string {
 
   return pieces.join(" ");
 }
-export function getModifierOrConditionParent(obj: EditorBase) {
-  const parent = findSelfOrParentWhere(obj, (o) => {
-    if (o instanceof Modifier) return false;
-    if (o instanceof Condition) return false;
-    if (o instanceof ModifierGroup) return false;
-    return true;
-  });
-  return parent;
-}
+
 export function getName(obj: any): string {
   const type = obj.parentKey;
   switch (type) {

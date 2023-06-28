@@ -35,6 +35,7 @@ export interface IErrorMessage {
   msg: string;
   severity?: "error" | "warning" | "info" | "debug";
   source?: any;
+  id?: string;
 }
 
 export interface WikiLink extends Link {
@@ -96,6 +97,7 @@ export class Catalogue extends Base {
 
   // Processed
   gameSystem!: Catalogue;
+  initialized?: boolean;
   declare loaded?: boolean;
   loaded_wiki?: boolean;
   loaded_editor?: boolean;
@@ -121,15 +123,24 @@ export class Catalogue extends Base {
   fullFilePath?: string;
 
   errors?: IErrorMessage[];
+
+  init() {
+    if (this.initialized) return;
+    this.initialized = true;
+    this.generateImports();
+    this.resolveAllLinks(this.imports, true);
+    this.generateCostIndex();
+  }
+
   process() {
     if (this.loaded) return;
     this.loaded = true;
+    this.init();
     const units = this.generateUnits();
     const categories = this.generateCategories(units);
     this.categories = Object.values(categories);
     this.generateForces(categories);
     this.generateExtraConstraints();
-    this.generateCostIndex();
   }
   processForWiki(system: Record<string, any>) {
     if (this.loaded_wiki) return;
@@ -159,7 +170,7 @@ export class Catalogue extends Base {
   processForEditor() {
     if (this.loaded_editor) return;
     this.loaded_editor = true;
-    this.generateCostIndex();
+    this.init();
 
     if (this.gameSystem) {
       addObj(this.gameSystem as any, "links", this);
@@ -473,6 +484,7 @@ export class Catalogue extends Base {
     const importsWithEntries: Record<string, Catalogue> = {};
     const imports: Record<string, Catalogue> = {};
     if (this.gameSystem) {
+      this.gameSystem.init();
       importsWithEntries[this.gameSystem.id] = this.gameSystem;
       imports[this.gameSystem.id] = this.gameSystem;
       if (!this.gameSystem.import) this.gameSystem.imports = [];
@@ -481,7 +493,7 @@ export class Catalogue extends Base {
     for (const link of this.catalogueLinks || []) {
       const catalogue = link.target;
       if (!catalogue) continue;
-      // catalogue.generateImports();
+      catalogue.init();
 
       for (const imported of catalogue.imports) {
         imports[imported.id] = imported;
@@ -531,7 +543,6 @@ export class Catalogue extends Base {
         forceCategories.push(illegal_clone);
       }
 
-      // console.log(`${this.name}/${copied.name} is missing ${missingUnits.map((o) => o.getName())}`);
       copied.childs = forceCategories;
       copied.categories = forceCategories;
       this.index[copied.id] = copied;

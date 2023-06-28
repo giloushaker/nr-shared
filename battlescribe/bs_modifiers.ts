@@ -8,9 +8,19 @@ import type {
   BSICondition,
   BSIRepeat,
 } from "./bs_types";
-import type { Base, InfoGroup, Link } from "./bs_main";
+import { Condition, Modifier, ModifierGroup, type Base, type InfoGroup, type Link } from "./bs_main";
 import type { Catalogue, EditorBase } from "./bs_main_catalogue";
-import { getModifierOrConditionParent } from "./bs_editor";
+import { findSelfOrParentWhere } from "./bs_helpers";
+
+export function getModifierOrConditionParent(obj: EditorBase) {
+  const parent = findSelfOrParentWhere(obj, (o) => {
+    if (o instanceof Modifier) return false;
+    if (o instanceof Condition) return false;
+    if (o instanceof ModifierGroup) return false;
+    return true;
+  });
+  return parent;
+}
 
 export function* getAllQueries(queries: SupportedQueries): Iterable<BSIQuery> {
   for (const condition of queries.conditions || []) yield condition;
@@ -21,16 +31,6 @@ export function* getAllQueries(queries: SupportedQueries): Iterable<BSIQuery> {
   }
   for (const modifier of queries.modifiers || []) {
     for (const condition of getAllQueries(modifier)) yield condition;
-  }
-}
-
-export function* getAllInfoGroups(group: Base): Iterable<InfoGroup> {
-  yield group as InfoGroup;
-  for (const grp of group.infoGroups || []) {
-    yield* getAllInfoGroups(grp);
-  }
-  for (const link of group.infoLinks || []) {
-    if (link.type === "infoGroup") yield* getAllInfoGroups(link.target as InfoGroup);
   }
 }
 

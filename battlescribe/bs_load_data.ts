@@ -79,9 +79,6 @@ export async function loadData(
   }
   await Promise.all(promises);
 
-  // Resolve Imports
-  content.generateImports();
-
   // Add loaded catalogue to Manager
   if (isSystem) {
     system.addLoadedSystem(content);
@@ -89,8 +86,6 @@ export async function loadData(
   if (isCatalogue) {
     system.addLoadedCatalogue(content);
   }
-  // Resolve links
-  content.resolveAllLinks(content.imports, options?.deleteBadLinks);
 
   return content;
 }
