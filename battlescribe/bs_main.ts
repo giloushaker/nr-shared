@@ -21,7 +21,6 @@ import type {
 } from "./bs_types";
 import type { EditorBase, Catalogue } from "./bs_main_catalogue";
 import { clone, isObject } from "./bs_helpers";
-import { getAllInfoGroups } from "./bs_modifiers";
 
 const isNonEmptyIfHasOneOf = [
   "modifiers",
@@ -226,6 +225,9 @@ export class Base implements BSModifierBase {
     return false;
   }
   isEntry(): this is Entry {
+    return false;
+  }
+  isIdUnique() {
     return false;
   }
   isRule(): this is Rule | InfoLink<Rule> {
@@ -441,7 +443,7 @@ export class Base implements BSModifierBase {
 
     while (stack.length) {
       const current = stack.pop()!;
-      for (const key of Object.keys(current)) {
+      for (const key in current) {
         const value = current[key];
         if (!whiteList.has(key)) {
           // addOne(keys, key);
@@ -452,7 +454,7 @@ export class Base implements BSModifierBase {
         if (isObject(value)) {
           if (Array.isArray(value)) {
             if (value.length && isObject(value[0])) {
-              for (let i = value.length; i--; ) {
+              for (let i = 0; i < value.length; i++) {
                 const cur = value[i];
                 callbackfn(cur, current);
                 stack.push(cur);
@@ -591,6 +593,9 @@ export class Entry extends Base {
   isQuantifiable(): boolean {
     return true;
   }
+  isIdUnique() {
+    return true;
+  }
 }
 export class Group extends Base {
   declare defaultSelectionEntryId?: string;
@@ -598,6 +603,9 @@ export class Group extends Base {
     return this.defaultSelectionEntryId;
   }
   isGroup() {
+    return true;
+  }
+  isIdUnique() {
     return true;
   }
 }
@@ -618,6 +626,9 @@ export class Link<T extends Base = Group | Entry> extends Base {
   }
   isEntry() {
     return this.target.isEntry();
+  }
+  isIdUnique() {
+    return true;
   }
   isProfile(): this is Profile | InfoLink<Profile> {
     return this.target?.isProfile() || false;
@@ -768,6 +779,9 @@ export class InfoLink<T extends Rule | InfoGroup | Profile = Rule | InfoGroup | 
   getTypeName() {
     return (this.target as Profile)?.typeName;
   }
+  isIdUnique() {
+    return true;
+  }
 }
 export class CategoryLink extends Link {
   declare targetId: string;
@@ -783,6 +797,9 @@ export class CategoryLink extends Link {
   }
   isEmpty(): boolean {
     return this.target.isEmpty();
+  }
+  isIdUnique() {
+    return false;
   }
 }
 
@@ -802,6 +819,9 @@ export class Category extends Base {
   isEmpty(): boolean {
     return !Boolean(this.units.length);
   }
+  isIdUnique() {
+    return true;
+  }
 }
 export class Force extends Base {
   declare name: string;
@@ -813,6 +833,9 @@ export class Force extends Base {
     return true;
   }
   isEntry() {
+    return true;
+  }
+  isIdUnique() {
     return true;
   }
   *selectionsIterator(): Iterable<Base> {
@@ -952,6 +975,9 @@ export class Profile extends Base implements BSIProfile {
   getTypeName() {
     return this.typeName;
   }
+  isIdUnique() {
+    return true;
+  }
 }
 export class InfoGroup extends Base {
   declare characteristics: BSICharacteristic[];
@@ -959,6 +985,9 @@ export class InfoGroup extends Base {
   declare typeName: string;
   declare publication?: BSIPublication | undefined;
   isInfoGroup() {
+    return true;
+  }
+  isIdUnique() {
     return true;
   }
 }
@@ -988,6 +1017,9 @@ export class Rule extends Base implements BSIRule {
   isRule() {
     return true;
   }
+  isIdUnique() {
+    return true;
+  }
 }
 
 export function getStaticFilters(source: Base): string[] {
@@ -1001,7 +1033,15 @@ export function getStaticFilters(source: Base): string[] {
 export function getIds(source: Base): string[] {
   return source.isLink() ? [source.id, source.targetId] : [source.id];
 }
-
+export function* getAllInfoGroups(group: Base): Iterable<InfoGroup> {
+  yield group as InfoGroup;
+  for (const grp of group.infoGroups || []) {
+    yield* getAllInfoGroups(grp);
+  }
+  for (const link of group.infoLinks || []) {
+    if (link.type === "infoGroup") yield* getAllInfoGroups(link.target as InfoGroup);
+  }
+}
 export function* iterateModifierGroupsRecursive(
   groups?: Iterable<BSIModifierGroup>
 ): Generator<BSIModifierGroup, void, undefined> {

@@ -612,3 +612,37 @@ export function debouncePromise(func: (...args: any[]) => unknown, delay: number
     });
   };
 }
+export interface hasParent<T> {
+  parent?: T | undefined;
+}
+export function findSelfOrParentWhere<T extends hasParent<T>>(self: T, fn: (node: T) => boolean): T | undefined {
+  let current = self as T | undefined;
+  while (current && !Object.is(current, current.parent)) {
+    if (fn(current)) return current;
+    current = current.parent;
+  }
+  return undefined;
+}
+export function findParentWhere<T extends hasParent<T>>(self: T, fn: (node: T) => any): T | undefined {
+  let current = self.parent;
+  while (current && !Object.is(current, current.parent)) {
+    if (fn(current)) return current;
+    current = current.parent;
+  }
+  return undefined;
+}
+export function forEachParent<T extends hasParent<T>>(self: T, cb: (node: T) => unknown) {
+  let current = self.parent;
+  while (current) {
+    if (!current || cb(current) === false) {
+      break;
+    }
+    current = current.parent;
+  }
+}
+
+export function first<T>(arr: Iterable<T>): T | undefined {
+  for (const item of arr) {
+    return item;
+  }
+}
