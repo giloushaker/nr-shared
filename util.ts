@@ -261,16 +261,10 @@ export function findSysIndex(lib: any, id_book: number): any {
 }
 
 export function logError(e: any): void {
-  let str = e;
-  if (typeof e == "object") {
-    str = e.message;
-  }
-  // eslint-disable-next-line no-console
-  console.error(str);
+  console.error(e);
 }
 
 export function logInfo(e: any): void {
-  // eslint-disable-next-line no-console
   console.log(`INFO: ${e}`);
 }
 
