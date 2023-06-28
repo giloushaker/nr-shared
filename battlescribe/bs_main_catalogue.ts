@@ -1012,8 +1012,8 @@ export class Catalogue extends Base {
 }
 
 /**
- * Fills in the `.target` field with the value of the first matching key inside nodeIndexes
- * Example: nodeIndex: [{A: 1}, {A: 2}] targetId `A` target would result in `1`
+ * Fills in the `.target` field with the value of the first matching key inside indexes
+ * Example: indexes: [{A: 1}, {A: 2}] targetId `A` target would result in `1`
  * @param unresolved The links to resolve
  * @param indexes Array of indexes which match an id to a node
  */
@@ -1086,8 +1086,8 @@ export function resolveLinks(
   return unresolved;
 }
 /**
- * Fills in the `.publication` field with the value of the first matching key inside nodeIndexes
- * Example: nodeIndex: [{A: 1}, {A: 2}] targetId `A` target would result in `1`
+ * Fills in the `.publication` field with the value of the first matching key inside indexes
+ * Example: indexes: [{A: 1}, {A: 2}] targetId `A` target would result in `1`
  * @param unresolvedPublications The publications to resolve
  * @param indexes Array of indexes which match an id to a node
  */
@@ -1123,4 +1123,4 @@ function hasSharedChildId(obj: any): obj is BSICondition {
   return obj.shared !== false && obj.childId !== undefined;
 }
 
-const enableDuplicateIdError = false;
+const enableDuplicateIdError = true;
