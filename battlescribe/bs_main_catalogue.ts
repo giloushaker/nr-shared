@@ -124,11 +124,11 @@ export class Catalogue extends Base {
 
   errors?: IErrorMessage[];
 
-  init() {
+  init(deleteBadLinks = true) {
     if (this.initialized) return;
     this.initialized = true;
-    this.generateImports();
-    this.resolveAllLinks(this.imports, true);
+    this.generateImports(deleteBadLinks);
+    this.resolveAllLinks(this.imports, deleteBadLinks);
     this.generateCostIndex();
   }
 
@@ -170,7 +170,7 @@ export class Catalogue extends Base {
   processForEditor() {
     if (this.loaded_editor) return;
     this.loaded_editor = true;
-    this.init();
+    this.init(false);
 
     if (this.gameSystem) {
       addObj(this.gameSystem as any, "links", this);
@@ -210,6 +210,9 @@ export class Catalogue extends Base {
   isGameSystem(): boolean {
     return this.gameSystemId === this.id || !this.gameSystemId;
   }
+  isIdUnique() {
+    return true;
+  }
   getCatalogue() {
     return this;
   }
@@ -220,16 +223,42 @@ export class Catalogue extends Base {
   getSystemId(): string {
     return this.isGameSystem() ? this.id : this.gameSystemId!;
   }
-  updateErrors(obj: EditorBase, newErrors: IErrorMessage[]) {
-    if (this.errors?.length && obj.errors?.length) {
-      this.errors = this.errors.filter((o) => !obj.errors!.includes(toRaw(o)));
+  addError(obj: EditorBase, newError: IErrorMessage & { id: string }) {
+    this.removeError(obj, newError.id);
+    if (!obj.errors) {
+      obj.errors = [];
     }
-    obj.errors = newErrors;
-    if (newErrors.length) {
-      if (!this.errors) {
-        this.errors = [];
+    if (!this.errors) {
+      this.errors = [];
+    }
+    obj.errors.push(newError);
+    this.errors.push(newError);
+  }
+  onRemoveError(error: IErrorMessage, recurse = true) {
+    if (this.errors) {
+      const idx = this.errors.indexOf(error);
+      if (idx >= 0) {
+        this.errors.splice(idx, 1);
       }
-      this.errors.push(...newErrors);
+    }
+    if (error.other && recurse) {
+      const other = error.other as EditorBase;
+      other.getCatalogue().removeError(other, "duplicate-id-1", false);
+      other.getCatalogue().removeError(other, "duplicate-id-2", false);
+    }
+  }
+  removeErrors(obj: EditorBase) {
+    obj.errors?.forEach((o) => this.onRemoveError(o));
+    delete obj.errors;
+  }
+  removeError(obj: EditorBase, id: string, event = true) {
+    if (obj.errors?.length) {
+      obj.errors = obj.errors.filter((error) => {
+        if (error.id === id) {
+          this.onRemoveError(error, event);
+        }
+        return error.id !== id;
+      });
     }
   }
   *iterateCategoryEntries(): Iterable<Category> {
@@ -480,11 +509,11 @@ export class Catalogue extends Base {
     this.costIndex = result;
     return result;
   }
-  generateImports() {
+  generateImports(deleteBadLinks = true) {
     const importsWithEntries: Record<string, Catalogue> = {};
     const imports: Record<string, Catalogue> = {};
     if (this.gameSystem) {
-      this.gameSystem.init();
+      this.gameSystem.init(deleteBadLinks);
       importsWithEntries[this.gameSystem.id] = this.gameSystem;
       imports[this.gameSystem.id] = this.gameSystem;
       if (!this.gameSystem.import) this.gameSystem.imports = [];
@@ -493,7 +522,7 @@ export class Catalogue extends Base {
     for (const link of this.catalogueLinks || []) {
       const catalogue = link.target;
       if (!catalogue) continue;
-      catalogue.init();
+      catalogue.init(deleteBadLinks);
 
       for (const imported of catalogue.imports) {
         imports[imported.id] = imported;
@@ -771,28 +800,70 @@ export class Catalogue extends Base {
   refreshErrors(cur: EditorBase) {
     if (cur.isLink()) {
       if (!cur.target) {
-        this.updateErrors(cur, [{ source: cur, severity: "error", msg: "Link has no target" }]);
+        this.addError(cur, { source: cur, severity: "error", msg: "Link has no target", id: "no-target" });
         if (!this.unresolvedLinks[cur.targetId]?.includes(toRaw(cur))) {
           addObj(this.unresolvedLinks, cur.targetId, toRaw(cur));
         }
       } else {
-        if (cur.errors) {
-          this.updateErrors(cur, []);
-        }
+        this.removeError(cur, "no-target");
       }
-    } else if (cur.isProfile() && !(cur as Profile).typeId) {
-      this.updateErrors(cur, [{ source: cur, severity: "error", msg: "Profile has no type" }]);
+    } else if (cur.isProfile()) {
+      if (!(cur as Profile).typeId) {
+        this.addError(cur, { source: cur, severity: "error", msg: "Profile has no type", id: "no-profile-type" });
+      } else {
+        this.removeError(cur, "no-profile-type");
+      }
     } else if (cur instanceof Condition) {
       this.updateCondition(cur);
-    } else {
-      if (cur.errors) {
-        this.updateErrors(cur, []);
-      }
     }
   }
   addToIndex(cur: Base) {
     if (cur.id) {
       cur.catalogue = this;
+      if (enableDuplicateIdError) {
+        if (this.manager.index[cur.id] && this.manager.index[cur.id] !== cur) {
+          if (cur.isIdUnique() || this.manager.index[cur.id].isIdUnique()) {
+            const existing = this.manager.index[cur.id];
+            const existingCatalogue = existing.getCatalogue();
+            const isCatalogueDifferent = this !== existingCatalogue;
+            if (existingCatalogue && isCatalogueDifferent) {
+              existingCatalogue.addError(existing as EditorBase, {
+                source: existing,
+                severity: "error",
+                msg: `Duplicate id ${cur.id} ${cur.getName()}`,
+                id: "duplicate-id-1",
+                other: cur,
+                extra: existingCatalogue.name,
+              });
+              existingCatalogue.addError(cur as EditorBase, {
+                source: cur,
+                severity: "error",
+                msg: `Duplicate id ${cur.id} ${existing.getName()}`,
+                id: "duplicate-id-2",
+                other: existing,
+                extra: this.name,
+              });
+            }
+            this.addError(existing as EditorBase, {
+              source: existing,
+              severity: "error",
+              msg: `Duplicate id ${cur.id}  ${cur.getName()}`,
+              id: "duplicate-id-1",
+              other: cur,
+              extra: isCatalogueDifferent ? existingCatalogue.name : undefined,
+            });
+            this.addError(cur as EditorBase, {
+              source: cur,
+              severity: "error",
+              msg: `Duplicate id ${cur.id} ${existing.getName()}`,
+              id: "duplicate-id-2",
+              other: existing,
+              extra: isCatalogueDifferent ? this.name : undefined,
+            });
+          }
+        }
+        this.manager.index[cur.id] = cur;
+      }
       this.index[cur.id] = cur;
       if (this.unresolvedLinks && this.unresolvedLinks[cur.id]) {
         for (const lnk of this.unresolvedLinks[cur.id]) {
@@ -814,7 +885,7 @@ export class Catalogue extends Base {
     if (cur.id && this.index[cur.id] === cur) {
       delete this.index[cur.id];
     }
-    this.updateErrors(cur, []);
+    this.removeErrors(cur);
     for (const ref of cur.links || []) {
       delete ref.target;
       ref.catalogue.refreshErrors(ref);
@@ -829,7 +900,6 @@ export class Catalogue extends Base {
     const unresolvedChildIds: Array<BSICondition> = [];
     const parents: Array<Base> = [];
     const indexes = [];
-
     if (!this.index) {
       this.index = {};
       this.forEachObjectWhitelist((cur, parent) => {
@@ -909,7 +979,7 @@ export class Catalogue extends Base {
     }
     if (condition.childId) {
       if (basicQueryFields.has(condition.childId)) {
-        this.updateErrors(condition, []);
+        this.removeError(condition, "id-not-exist");
         return;
       }
       const target = isInstanceOf
@@ -917,7 +987,7 @@ export class Catalogue extends Base {
         : this.findOptionById(condition.childId);
       if (target) {
         this.addOtherRef(condition, target as EditorBase);
-        this.updateErrors(condition, []);
+        this.removeError(condition, "id-not-exist");
         popObj(this.manager.unresolvedLinks!, condition.childId, condition as Condition & EditorBase);
         return;
       }
@@ -925,7 +995,12 @@ export class Catalogue extends Base {
         addObj(this.manager.unresolvedLinks!, condition.childId, condition as Condition & EditorBase);
       }
     }
-    this.updateErrors(condition, [{ source: condition, severity: "warning", msg: "Field does not exist" }]);
+    this.addError(condition, {
+      source: condition,
+      severity: "warning",
+      msg: "child id does not exist",
+      id: "id-not-exist",
+    });
     return;
   }
 
@@ -1047,3 +1122,5 @@ export function resolveChildIds(unresolvedChildIds: BSICondition[] = [], indexes
 function hasSharedChildId(obj: any): obj is BSICondition {
   return obj.shared !== false && obj.childId !== undefined;
 }
+
+const enableDuplicateIdError = false;

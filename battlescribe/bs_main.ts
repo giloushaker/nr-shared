@@ -275,7 +275,12 @@ export class Base implements BSModifierBase {
     }
     return true;
   }
-
+  isEmptyNode(): boolean {
+    for (const key of isNonEmptyIfHasOneOf) {
+      if ((this as any)[key] !== undefined) return false;
+    }
+    return true;
+  }
   *forcesIterator(): Iterable<Force> {
     return;
   }
@@ -628,7 +633,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
     return this.target.isEntry();
   }
   isIdUnique() {
-    return true;
+    return false;
   }
   isProfile(): this is Profile | InfoLink<Profile> {
     return this.target?.isProfile() || false;
@@ -645,12 +650,6 @@ export class Link<T extends Base = Group | Entry> extends Base {
       if (categoryLink.primary) return true;
     }
     return false;
-  }
-  isEmptyLink(): boolean {
-    for (const key of isNonEmptyIfHasOneOf) {
-      if ((this as any)[key] !== undefined) return false;
-    }
-    return true;
   }
   getId(): string {
     return this.targetId;
@@ -779,9 +778,6 @@ export class InfoLink<T extends Rule | InfoGroup | Profile = Rule | InfoGroup | 
   getTypeName() {
     return (this.target as Profile)?.typeName;
   }
-  isIdUnique() {
-    return true;
-  }
 }
 export class CategoryLink extends Link {
   declare targetId: string;
@@ -797,9 +793,6 @@ export class CategoryLink extends Link {
   }
   isEmpty(): boolean {
     return this.target.isEmpty();
-  }
-  isIdUnique() {
-    return false;
   }
 }
 
@@ -820,7 +813,7 @@ export class Category extends Base {
     return !Boolean(this.units.length);
   }
   isIdUnique() {
-    return true;
+    return !this.isEmptyNode();
   }
 }
 export class Force extends Base {

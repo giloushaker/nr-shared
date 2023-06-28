@@ -14,6 +14,7 @@ export class GameSystemFiles extends BSCatalogueManager {
   loadedCatalogues: Record<string, Catalogue> = {};
   github?: GithubIntegration;
   unresolvedLinks: Record<string, Array<Base>> = {};
+  index: Record<string, Base> = {};
   async loadData(data: BSIData, booksDate?: BooksDate): Promise<Catalogue> {
     const loaded = await loadData(this, data, booksDate, { deleteBadLinks: false });
     return loaded;
