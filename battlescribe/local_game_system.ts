@@ -34,13 +34,22 @@ export class GameSystemFiles extends BSCatalogueManager {
     }
     delete this.allLoaded;
   }
-  async loadAll() {
+  async loadAll(progress_cb?: (current: number, max: number, msg?: string) => void | Promise<void>) {
+    let max = Object.values(this.catalogueFiles).length + 1;
+    let current = 0;
     if (this.gameSystem) {
+      progress_cb && (await progress_cb(current, max, `Loading ${this.gameSystem.gameSystem.name}`));
       const loadedSys = await this.loadCatalogue({ targetId: this.gameSystem.gameSystem.id });
+
       loadedSys.processForEditor();
+      current++;
+
       for (const catalogue of Object.values(this.catalogueFiles)) {
+        progress_cb && (await progress_cb(current, max, `Loading ${catalogue.catalogue.name}`));
         const loaded = await this.loadCatalogue({ targetId: catalogue.catalogue.id });
         loaded.processForEditor();
+        current++;
+        progress_cb && (await progress_cb(current, max, `Loading ${catalogue.catalogue.name}`));
       }
     }
     this.allLoaded = true;

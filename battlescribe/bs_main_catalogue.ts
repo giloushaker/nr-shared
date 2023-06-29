@@ -12,6 +12,7 @@ import {
   Rule,
   UNCATEGORIZED_ID,
   basicQueryFields,
+  forEachObjectWhitelist2,
   goodJsonArrayKeys,
   goodKeys,
   goodKeysWiki,
@@ -152,13 +153,17 @@ export class Catalogue extends Base {
     this.imports.forEach((imported) => {
       addObj(imported as any, "links", this);
     });
-    this.forEachObjectWhitelist((cur, parent) => {
-      (cur as WikiBase).parent = parent as WikiBase;
-      if (cur.target) addObj(cur.target as any, "links", parent as WikiBase);
-      if (cur instanceof Rule) {
-        rulesObj[cur.id] = cur;
-      }
-    }, goodKeysWiki);
+    this.forEachObjectWhitelist(
+      this,
+      (cur, parent) => {
+        (cur as WikiBase).parent = parent as WikiBase;
+        if (cur.target) addObj(cur.target as any, "links", parent as WikiBase);
+        if (cur instanceof Rule) {
+          rulesObj[cur.id] = cur;
+        }
+      },
+      goodKeysWiki
+    );
 
     for (const force of this.forces || []) {
       (force as any).parent = this;
@@ -176,30 +181,31 @@ export class Catalogue extends Base {
       addObj(this.gameSystem as any, "links", this);
     }
 
-    this.forEachObjectWhitelist<EditorBase>((cur, parent) => {
-      cur.parent = parent;
-      cur.catalogue = this;
-      if (cur.target) {
-        addObj(cur.target as EditorBase, "links", cur);
-      }
-      if (cur.isProfile() && !cur.isLink()) {
-        const target = this.findOptionById(cur.typeId) as EditorBase;
-        if (target) {
-          addObj(target, "links", cur);
+    forEachObjectWhitelist2<EditorBase>(
+      this,
+      (cur, parent) => {
+        cur.parent = parent;
+        cur.catalogue = this;
+        if (cur.target) {
+          addObj(cur.target as EditorBase, "links", cur);
         }
-      }
-      if (cur instanceof Condition) {
-        this.updateCondition(cur as Condition & EditorBase);
-      }
-      const value = (cur as any).value;
-      if (value) {
-        const target = this.findOptionById(value) as EditorBase;
-        if (target) {
-          addObj(target, "other_links", cur);
+        if (cur.isProfile() && !cur.isLink()) {
+          const target = this.findOptionById(cur.typeId) as EditorBase;
+          if (target) {
+            addObj(target, "links", cur);
+          }
         }
-      }
-      this.refreshErrors(cur);
-    }, goodJsonArrayKeys);
+        const value = (cur as any).value;
+        if (value) {
+          const target = this.findOptionById(value) as EditorBase;
+          if (target) {
+            addObj(target, "other_links", cur);
+          }
+        }
+        this.refreshErrors(cur);
+      },
+      goodJsonArrayKeys
+    );
   }
   get url(): string {
     return "%{book}";
@@ -820,50 +826,73 @@ export class Catalogue extends Base {
   addToIndex(cur: Base) {
     if (cur.id) {
       cur.catalogue = this;
-      if (enableDuplicateIdError) {
-        if (this.manager.index[cur.id] && this.manager.index[cur.id] !== cur) {
-          if (cur.isIdUnique() || this.manager.index[cur.id].isIdUnique()) {
-            const existing = this.manager.index[cur.id];
-            const existingCatalogue = existing.getCatalogue();
-            const isCatalogueDifferent = this !== existingCatalogue;
-            if (existingCatalogue && isCatalogueDifferent) {
-              existingCatalogue.addError(existing as EditorBase, {
-                source: existing,
-                severity: "error",
-                msg: `Duplicate id ${cur.id} ${cur.getName()}`,
-                id: "duplicate-id-1",
-                other: cur,
-                extra: existingCatalogue.name,
-              });
-              existingCatalogue.addError(cur as EditorBase, {
-                source: cur,
-                severity: "error",
-                msg: `Duplicate id ${cur.id} ${existing.getName()}`,
-                id: "duplicate-id-2",
-                other: existing,
-                extra: this.name,
-              });
-            }
-            this.addError(existing as EditorBase, {
-              source: existing,
-              severity: "error",
-              msg: `Duplicate id ${cur.id}  ${cur.getName()}`,
-              id: "duplicate-id-1",
-              other: cur,
-              extra: isCatalogueDifferent ? existingCatalogue.name : undefined,
-            });
-            this.addError(cur as EditorBase, {
-              source: cur,
-              severity: "error",
-              msg: `Duplicate id ${cur.id} ${existing.getName()}`,
-              id: "duplicate-id-2",
-              other: existing,
-              extra: isCatalogueDifferent ? this.name : undefined,
-            });
-          }
+
+      // Cross catalogue duplicate id check
+
+      //   if (this.manager.index[cur.id] && this.manager.index[cur.id] !== cur) {
+      //     if (cur.isIdUnique() || this.manager.index[cur.id].isIdUnique()) {
+      //       const existing = this.manager.index[cur.id];
+      //       const existingCatalogue = existing.getCatalogue();
+      //       const isCatalogueDifferent = this !== existingCatalogue;
+      //       if (existingCatalogue && isCatalogueDifferent) {
+      //         existingCatalogue.addError(existing as EditorBase, {
+      //           source: existing,
+      //           severity: "error",
+      //           msg: `Duplicate id ${cur.id} ${cur.getName()}`,
+      //           id: "duplicate-id-1",
+      //           other: cur,
+      //           extra: existingCatalogue.name,
+      //         });
+      //         existingCatalogue.addError(cur as EditorBase, {
+      //           source: cur,
+      //           severity: "error",
+      //           msg: `Duplicate id ${cur.id} ${existing.getName()}`,
+      //           id: "duplicate-id-2",
+      //           other: existing,
+      //           extra: this.name,
+      //         });
+      //       }
+      //       this.addError(existing as EditorBase, {
+      //         source: existing,
+      //         severity: "error",
+      //         msg: `Duplicate id ${cur.id}  ${cur.getName()}`,
+      //         id: "duplicate-id-1",
+      //         other: cur,
+      //         extra: isCatalogueDifferent ? existingCatalogue.name : undefined,
+      //       });
+      //       this.addError(cur as EditorBase, {
+      //         source: cur,
+      //         severity: "error",
+      //         msg: `Duplicate id ${cur.id} ${existing.getName()}`,
+      //         id: "duplicate-id-2",
+      //         other: existing,
+      //         extra: isCatalogueDifferent ? this.name : undefined,
+      //       });
+      //     }
+      //   }
+      //   this.manager.index[cur.id] = cur;
+      //
+
+      if (this.index[cur.id] && this.index[cur.id] !== cur) {
+        const existing = this.index[cur.id];
+        if (cur.isIdUnique() || existing.isIdUnique() || cur.getName() !== existing.getName()) {
+          this.addError(existing as EditorBase, {
+            source: existing,
+            severity: "error",
+            msg: `Duplicate id ${cur.id} ${cur.getName()}`,
+            id: "duplicate-id-1",
+            other: cur,
+          });
+          this.addError(cur as EditorBase, {
+            source: cur,
+            severity: "error",
+            msg: `Duplicate id ${cur.id} ${existing.getName()}`,
+            id: "duplicate-id-2",
+            other: existing,
+          });
         }
-        this.manager.index[cur.id] = cur;
       }
+
       this.index[cur.id] = cur;
       if (this.unresolvedLinks && this.unresolvedLinks[cur.id]) {
         for (const lnk of this.unresolvedLinks[cur.id]) {
@@ -895,26 +924,31 @@ export class Catalogue extends Base {
     }
   }
   resolveAllLinks(imports: Catalogue[], deleteBadLinks = true) {
+    console.log(this.name);
     const unresolvedLinks: Array<Link> = [];
     const unresolvedPublications: Array<BSIInfoLink | BSIRule | BSIProfile> = [];
     const unresolvedChildIds: Array<BSICondition> = [];
     const parents: Array<Base> = [];
     const indexes = [];
     if (!this.index) {
-      this.index = {};
-      this.forEachObjectWhitelist((cur, parent) => {
-        this.addToIndex(cur);
-        if ((cur as BSIReference).publicationId) {
-          unresolvedPublications.push(cur as any);
-        }
-        if (cur.isLink()) {
-          unresolvedLinks.push(cur);
-          parents.push(parent);
-        }
-        if (hasSharedChildId(cur)) {
-          unresolvedChildIds.push(cur);
-        }
-      }, goodKeys);
+      this.index = noObserve() as Record<string, Base>;
+      forEachObjectWhitelist2(
+        this,
+        (cur, parent) => {
+          this.addToIndex(cur);
+          if ((cur as BSIReference).publicationId) {
+            unresolvedPublications.push(cur as any);
+          }
+          if (cur.isLink()) {
+            unresolvedLinks.push(cur);
+            parents.push(parent);
+          }
+          if (hasSharedChildId(cur)) {
+            unresolvedChildIds.push(cur);
+          }
+        },
+        goodKeys
+      );
     }
     indexes.push(this.index);
 
@@ -1123,4 +1157,12 @@ function hasSharedChildId(obj: any): obj is BSICondition {
   return obj.shared !== false && obj.childId !== undefined;
 }
 
-const enableDuplicateIdError = true;
+export class NoObserve {
+  get [Symbol.toStringTag](): string {
+    // Anything can go here really as long as it's not 'Object'
+    return "ObjectNoObserve";
+  }
+}
+export function noObserve(): object {
+  return new NoObserve();
+}

@@ -442,6 +442,9 @@ export class Base implements BSModifierBase {
       if (cur.entryLinks) stack.push(...cur.entryLinks);
     }
   }
+
+  // console.log("foreachobjectwhitelist", keys);
+
   forEachObjectWhitelist<T extends Base>(callbackfn: (value: T, parent: T) => unknown, whiteList = goodKeys) {
     const stack = [this as any];
     // const keys = {} as any;
@@ -1076,11 +1079,11 @@ export const goodJsonArrayKeys = new Set([
   "rules",
   "infoGroups",
   "associations",
-  "defaultAmount",
 ]);
 export const goodJsonKeys = new Set([
   ...goodJsonArrayKeys,
 
+  "defaultAmount",
   "id",
   "import",
   "importRootEntries",
@@ -1192,4 +1195,25 @@ export function entriesToJson(
     options?.formatted === true ? 2 : undefined
   );
   return stringed;
+}
+
+export function forEachObjectWhitelist2<T extends Base>(
+  current: Base,
+  callbackfn: (value: T, parent: T) => unknown,
+  whiteList = goodKeys
+) {
+  for (const key in current) {
+    if (whiteList.has(key)) {
+      const value = current[key];
+      if (Array.isArray(value)) {
+        if (value.length && isObject(value[0])) {
+          for (let i = 0; i < value.length; i++) {
+            const cur = value[i];
+            callbackfn(cur, current);
+            forEachObjectWhitelist2(cur, callbackfn, whiteList);
+          }
+        }
+      }
+    }
+  }
 }
