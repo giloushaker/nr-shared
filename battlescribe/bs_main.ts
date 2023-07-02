@@ -1217,3 +1217,20 @@ export function forEachObjectWhitelist2<T extends Base>(
     }
   }
 }
+
+export function convertRuleToProfile(rule: BSIRule): BSIProfile {
+  return {
+    characteristics: [
+      {
+        name: "Descrption",
+        typeId: "description",
+        $text: rule.description,
+      },
+    ],
+    id: rule.id,
+    name: rule.name,
+    hidden: rule.hidden,
+    typeId: "rules",
+    typeName: "Rules",
+  };
+}
