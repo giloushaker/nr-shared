@@ -924,7 +924,6 @@ export class Catalogue extends Base {
     }
   }
   resolveAllLinks(imports: Catalogue[], deleteBadLinks = true) {
-    console.log(this.name);
     const unresolvedLinks: Array<Link> = [];
     const unresolvedPublications: Array<BSIInfoLink | BSIRule | BSIProfile> = [];
     const unresolvedChildIds: Array<BSICondition> = [];
