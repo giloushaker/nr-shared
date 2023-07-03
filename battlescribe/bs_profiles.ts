@@ -70,8 +70,13 @@ export function hashProfile(profile: BSIProfile): string {
 }
 export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[]): Record<string, T> {
   const hashed: { [hash: string]: T } = {};
+  // const counts: { [hash: string]: number } = {};
   for (const profile of profiles) {
-    hashed[hashProfile(profile)] = profile;
+    // delete profile.dupeCount;
+    const hash = hashProfile(profile);
+    hashed[hash] = profile;
+    // addOne(counts, hash);
+    // profile.dupeCount = counts[hash];
   }
   const names: Record<string, number> = {};
   const totalNames: Record<string, number> = {};

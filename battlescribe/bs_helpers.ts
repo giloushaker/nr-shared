@@ -609,7 +609,7 @@ export function debouncePromise(func: (...args: any[]) => unknown, delay: number
 
     return new Promise((resolve) => {
       timeoutId = setTimeout(() => {
-        const result = func.apply(this, args);
+        const result = func(args);
         resolve(result);
       }, delay);
     });
