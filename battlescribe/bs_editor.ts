@@ -47,6 +47,7 @@ export const possibleChildren: ItemKeys[] = [
   "profiles",
   "rules",
   "infoGroups",
+  "sharedInfoGroups",
 
   // Children
   "categoryEntries",
@@ -111,7 +112,7 @@ export const systemCategories: CategoryEntry[] = [
     icon: "shared_rules.png",
   },
   {
-    type: "infoGroups",
+    type: "sharedInfoGroups",
     name: "Shared Info Groups",
     icon: "infoGroup.png",
   },
@@ -187,6 +188,7 @@ export type ItemKeys =
   | "profileTypes"
   | "sharedProfiles"
   | "sharedRules"
+  | "sharedInfoGroups"
 
   // Modifiable
   | "infoLinks"

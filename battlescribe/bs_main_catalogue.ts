@@ -805,7 +805,12 @@ export class Catalogue extends Base {
   refreshErrors(cur: EditorBase) {
     if (cur.isLink()) {
       if (!cur.target) {
-        this.addError(cur, { source: cur, severity: "error", msg: "Link has no target", id: "no-target" });
+        this.addError(cur, {
+          source: cur,
+          severity: "error",
+          msg: `${cur.name}(${cur.editorTypeName}) has no target`,
+          id: "no-target",
+        });
         if (!this.unresolvedLinks[cur.targetId]?.includes(toRaw(cur))) {
           addObj(this.unresolvedLinks, cur.targetId, toRaw(cur));
         }
@@ -895,7 +900,7 @@ export class Catalogue extends Base {
       this.index[cur.id] = cur;
       if (this.unresolvedLinks && this.unresolvedLinks[cur.id]) {
         for (const lnk of this.unresolvedLinks[cur.id]) {
-          if (!lnk.isLink()) {
+          if (lnk.isLink()) {
             this.updateLink(lnk as Link & EditorBase);
           } else {
             this.refreshErrors(lnk);
