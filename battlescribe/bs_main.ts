@@ -995,6 +995,10 @@ export class Condition extends Base {
   declare type: string;
   declare includeChildSelections: boolean;
   declare includeChildForces: boolean;
+  declare percentValue?: boolean;
+}
+export class Constraint extends Condition {
+  declare type: "min" | "max" | "exactly";
 }
 export class Modifier extends Base {}
 export class ModifierGroup extends Base {}

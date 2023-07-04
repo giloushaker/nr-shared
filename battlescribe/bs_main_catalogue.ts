@@ -5,6 +5,7 @@ import {
   Base,
   Category,
   Condition,
+  Constraint,
   Force,
   ILLEGAL_ID,
   Link,
@@ -254,6 +255,9 @@ export class Catalogue extends Base {
   }
   removeErrors(obj: EditorBase) {
     obj.errors?.forEach((o) => this.onRemoveError(o));
+    if (obj instanceof Constraint) {
+      obj.catalogue.updateConstraint(obj as Constraint & EditorBase, true);
+    }
     delete obj.errors;
   }
   removeError(obj: EditorBase, id: string, event = true) {
@@ -1006,9 +1010,27 @@ export class Catalogue extends Base {
     this.refreshErrors(link);
     return link.target !== undefined;
   }
-
+  updateConstraint(constraint: Constraint & EditorBase, deleted = false) {
+    const ids = new Set();
+    const duplicate = new Set();
+    for (const found of constraint.parent?.constraintsIterator() || ([] as Array<Constraint & EditorBase>)) {
+      if (deleted && constraint === found) continue;
+      if (ids.has(found.id)) duplicate.add(found.id);
+      else ids.add(found.id);
+    }
+    for (const found of (constraint.parent?.constraintsIterator() || []) as Array<Constraint & EditorBase>) {
+      if (deleted && constraint === found) continue;
+      if (duplicate.has(found.id)) {
+        found.catalogue.addError(found, { id: "duplicate-constraint-id", msg: "Duplicate constraints id" });
+      } else {
+        found.catalogue.removeError(found, "duplicate-constraint-id");
+      }
+    }
+  }
   updateCondition(condition: (BSICondition | BSIConstraint | Condition) & EditorBase, previousField?: string) {
-    if (["exactly", "min", "max"].includes(condition.type)) return;
+    if (condition instanceof Constraint) {
+      return this.updateConstraint(condition as BSIConstraint & EditorBase);
+    }
     const isInstanceOf = ["instanceOf", "notInstanceOf"].includes(condition.type);
     if (previousField && !basicQueryFields.has(previousField)) {
       const found = isInstanceOf ? this.findOptionByIdGlobal(previousField) : this.findOptionById(previousField);

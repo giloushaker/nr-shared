@@ -1,4 +1,4 @@
-import { Base, Condition, Link, Modifier, ModifierGroup, goodJsonKeys } from "./bs_main";
+import { Base, Condition, Constraint, Link, Modifier, ModifierGroup, goodJsonKeys } from "./bs_main";
 import { Catalogue, CatalogueLink, EditorBase } from "./bs_main_catalogue";
 import { conditionToString, fieldToText, getModifierOrConditionParent, modifierToString } from "./bs_modifiers";
 import {

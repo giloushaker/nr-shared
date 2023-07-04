@@ -14,6 +14,7 @@ import {
   Modifier,
   ModifierGroup,
   ProfileType,
+  Constraint,
 } from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
@@ -99,7 +100,7 @@ export const protoMap = {
 
   repeats: Condition.prototype,
   conditions: Condition.prototype,
-  constraints: Condition.prototype,
+  constraints: Constraint.prototype,
   modifiers: Modifier.prototype,
   modifierGroups: ModifierGroup.prototype,
 };
