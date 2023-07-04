@@ -1027,9 +1027,9 @@ export class Catalogue extends Base {
       }
     }
   }
-  updateCondition(condition: (BSICondition | BSIConstraint | Condition) & EditorBase, previousField?: string) {
+  updateCondition(condition: (Constraint | Condition) & EditorBase, previousField?: string) {
     if (condition instanceof Constraint) {
-      return this.updateConstraint(condition as BSIConstraint & EditorBase);
+      return this.updateConstraint(condition as Constraint & EditorBase);
     }
     const isInstanceOf = ["instanceOf", "notInstanceOf"].includes(condition.type);
     if (previousField && !basicQueryFields.has(previousField)) {
