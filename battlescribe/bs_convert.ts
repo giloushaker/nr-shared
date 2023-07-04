@@ -263,7 +263,7 @@ function renestChilds(obj: any) {
     if (stringArrayKeys.has(key)) {
       obj[key] = Array.isArray(value) ? value : [value];
     } else if (Array.isArray(value) && !skipKeys.has(key)) {
-      obj[key] = [{ [toSingle(key)]: value }];
+      obj[key] = [{ [toSingle(key)!]: value }];
     }
   }
 }

@@ -206,7 +206,7 @@ export interface BSIReference {
 export interface bookFileMetaData {
   name: string;
   short: string;
-  id: number;
+  id: number | string;
   bsid?: string;
   path: string;
   playable: boolean;
@@ -325,6 +325,7 @@ export interface BSIInfoLink<
   type: "profile" | "rule" | "infoGroup";
   modifiers?: BSIModifier[];
   modifierGroups?: BSIModifierGroup[];
+  characteristics?: BSICharacteristic[];
 }
 export interface BSIInfoGroup {
   id: string;

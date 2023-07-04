@@ -32,6 +32,9 @@ export function fix_xml_object(obj: any): void {
   }
 }
 
+export function to_kebab_case(str: string): string {
+  return str.trim().toLowerCase().replace(/\s/g, "-");
+}
 export function to_snake_case(str: string): string {
   return str.toLowerCase().replace(/\s/g, "_");
 }
@@ -606,7 +609,7 @@ export function debouncePromise(func: (...args: any[]) => unknown, delay: number
 
     return new Promise((resolve) => {
       timeoutId = setTimeout(() => {
-        const result = func.apply(this, args);
+        const result = func(args);
         resolve(result);
       }, delay);
     });

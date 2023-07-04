@@ -1204,16 +1204,33 @@ export function forEachObjectWhitelist2<T extends Base>(
 ) {
   for (const key in current) {
     if (whiteList.has(key)) {
-      const value = current[key];
+      const value = current[key as keyof typeof current];
       if (Array.isArray(value)) {
         if (value.length && isObject(value[0])) {
           for (let i = 0; i < value.length; i++) {
-            const cur = value[i];
-            callbackfn(cur, current);
+            const cur = value[i] as T;
+            callbackfn(cur, current as T);
             forEachObjectWhitelist2(cur, callbackfn, whiteList);
           }
         }
       }
     }
   }
+}
+
+export function convertRuleToProfile(rule: BSIRule): BSIProfile {
+  return {
+    characteristics: [
+      {
+        name: "Descrption",
+        typeId: "description",
+        $text: Array.isArray(rule.description) ? rule.description[0] : rule.description,
+      },
+    ],
+    id: rule.id,
+    name: rule.name,
+    hidden: rule.hidden,
+    typeId: "rules",
+    typeName: "Rules",
+  };
 }

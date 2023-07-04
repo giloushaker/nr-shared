@@ -37,6 +37,7 @@ export interface IErrorMessage {
   severity?: "error" | "warning" | "info" | "debug";
   source?: any;
   id?: string;
+  other?: any;
 }
 
 export interface WikiLink extends Link {
@@ -153,17 +154,14 @@ export class Catalogue extends Base {
     this.imports.forEach((imported) => {
       addObj(imported as any, "links", this);
     });
-    this.forEachObjectWhitelist(
-      this,
-      (cur, parent) => {
-        (cur as WikiBase).parent = parent as WikiBase;
-        if (cur.target) addObj(cur.target as any, "links", parent as WikiBase);
-        if (cur instanceof Rule) {
-          rulesObj[cur.id] = cur;
-        }
-      },
-      goodKeysWiki
-    );
+    function proc(cur: WikiBase, parent: WikiBase) {
+      (cur as WikiBase).parent = parent as WikiBase;
+      if (cur.target) addObj(cur.target as any, "links", parent as WikiBase);
+      if (cur instanceof Rule) {
+        rulesObj[cur.id] = cur;
+      }
+    }
+    forEachObjectWhitelist2(this, proc, goodKeysWiki);
 
     for (const force of this.forces || []) {
       (force as any).parent = this;
@@ -247,6 +245,7 @@ export class Catalogue extends Base {
         this.errors.splice(idx, 1);
       }
     }
+
     if (error.other && recurse) {
       const other = error.other as EditorBase;
       other.getCatalogue().removeError(other, "duplicate-id-1", false);
@@ -924,7 +923,6 @@ export class Catalogue extends Base {
     }
   }
   resolveAllLinks(imports: Catalogue[], deleteBadLinks = true) {
-    console.log(this.name);
     const unresolvedLinks: Array<Link> = [];
     const unresolvedPublications: Array<BSIInfoLink | BSIRule | BSIProfile> = [];
     const unresolvedChildIds: Array<BSICondition> = [];
