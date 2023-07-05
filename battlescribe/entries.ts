@@ -127,6 +127,9 @@ export const entries = {
   infoGroups: {
     allowedChildrens: ["profiles", "rules", "infoGroups", "infoLinks", "modifiers", "modifierGroups"],
   },
+  sharedInfoGroups: {
+    allowedChildrens: ["profiles", "rules", "infoGroups", "infoLinks", "modifiers", "modifierGroups"],
+  },
   infoLinks: {
     allowedChildrens: "type", //get from type
   },
