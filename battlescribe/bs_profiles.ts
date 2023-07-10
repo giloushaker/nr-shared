@@ -21,10 +21,7 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40): BSI
   const groupedByType = groupBy(uniques, (o) => o.typeId);
   for (const key of Object.keys(groupedByType)) {
     const value = groupedByType[key];
-    groupedByType[key] = value
-      .map((o) => [o.name, o] as [string, BSIGroupedProfile])
-      .sort()
-      .map(([, v]) => v);
+    groupedByType[key] = value.map((o) => [o.name, o] as [string, BSIGroupedProfile]).map(([, v]) => v);
   }
   const profilesByType = Object.values(groupedByType).filter((o) => o.length);
   for (const profiles of profilesByType) {
@@ -51,11 +48,7 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40): BSI
     }
   }
 
-  const result = sortBy(
-    profilesByType.filter((o) => o.length),
-    (pbt) => pbt[0].typeName
-  );
-  return result;
+  return profilesByType;
 }
 
 export function isProfileModified(profile: BSIProfile) {
