@@ -605,10 +605,10 @@ export function replaceAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[],
   return result;
 }
 export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {
-  forEachEntryRecursive(entry, (entry, key, _parent) => {
-    if (entry.id) {
-      if (entry instanceof Condition) return;
-      entry.id = catalogue.generateNonConflictingId();
+  forEachEntryRecursive(entry, (_entry, key, _parent) => {
+    if (_entry.id) {
+      if (_entry instanceof Constraint && !(entry instanceof Constraint)) return;
+      _entry.id = catalogue.generateNonConflictingId();
     }
   });
 }
