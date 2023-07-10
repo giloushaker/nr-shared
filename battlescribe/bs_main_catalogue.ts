@@ -1021,13 +1021,13 @@ export class Catalogue extends Base {
     for (const found of (constraint.parent?.constraintsIterator() || []) as Array<Constraint & EditorBase>) {
       if (deleted && constraint === found) continue;
       if (duplicate.has(found.id)) {
-        found.catalogue.addError(found, {
+        found.catalogue?.addError(found, {
           id: "duplicate-constraint-id",
           msg: "Duplicate constraints id",
           source: constraint,
         });
       } else {
-        found.catalogue.removeError(found, "duplicate-constraint-id");
+        found.catalogue?.removeError(found, "duplicate-constraint-id");
       }
     }
   }
