@@ -624,16 +624,16 @@ export class Link<T extends Base = Group | Entry> extends Base {
     return true;
   }
   isGroup() {
-    return this.target.isGroup();
+    return this.target?.isGroup();
   }
   isCategory() {
-    return this.target.isCategory();
+    return this.target?.isCategory();
   }
   isQuantifiable(): boolean {
-    return this.target.isQuantifiable();
+    return this.target?.isQuantifiable();
   }
   isEntry() {
-    return this.target.isEntry();
+    return this.target?.isEntry();
   }
   isIdUnique() {
     return false;

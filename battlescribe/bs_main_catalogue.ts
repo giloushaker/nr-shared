@@ -1,5 +1,14 @@
 import type { ItemTypeNames } from "./bs_editor";
-import { addObj, clone, generateBattlescribeId, groupBy, popObj, sortBy, textSearchRegex } from "./bs_helpers";
+import {
+  addObj,
+  addObjIfMissing,
+  clone,
+  generateBattlescribeId,
+  groupBy,
+  popObj,
+  sortBy,
+  textSearchRegex,
+} from "./bs_helpers";
 import {
   BSIExtraConstraint,
   Base,
@@ -806,20 +815,25 @@ export class Catalogue extends Base {
     const loaded = await sys.loadData({ [key]: this } as any);
     return loaded;
   }
-  refreshErrors(cur: EditorBase) {
+  refreshErrors(cur: EditorBase, deleted = false) {
     if (cur.isLink()) {
       if (!cur.target) {
         this.addError(cur, {
           source: cur,
           severity: "error",
-          msg: `${cur.name}(${cur.editorTypeName}) has no target`,
+          msg: `(${cur.editorTypeName}) ${cur.name} has no target`,
           id: "no-target",
         });
-        if (!this.unresolvedLinks[cur.targetId]?.includes(toRaw(cur))) {
+        if (!this.unresolvedLinks[cur.targetId]?.includes(toRaw(cur)) && !deleted) {
           addObj(this.unresolvedLinks, cur.targetId, toRaw(cur));
+        }
+        if (!this.manager.unresolvedLinks![cur.targetId]?.includes(toRaw(cur))) {
+          addObj(this.manager.unresolvedLinks!, cur.targetId, toRaw(cur));
         }
       } else {
         this.removeError(cur, "no-target");
+        popObj(this.unresolvedLinks!, cur.targetId, toRaw(cur));
+        popObj(this.manager.unresolvedLinks!, cur.targetId, toRaw(cur));
       }
     } else if (cur.isProfile()) {
       if (!(cur as Profile).typeId) {
@@ -835,52 +849,54 @@ export class Catalogue extends Base {
     if (cur.id) {
       cur.catalogue = this;
 
-      // Cross catalogue duplicate id check
+      {
+        /**   Cross catalogue duplicate id check
 
-      //   if (this.manager.index[cur.id] && this.manager.index[cur.id] !== cur) {
-      //     if (cur.isIdUnique() || this.manager.index[cur.id].isIdUnique()) {
-      //       const existing = this.manager.index[cur.id];
-      //       const existingCatalogue = existing.getCatalogue();
-      //       const isCatalogueDifferent = this !== existingCatalogue;
-      //       if (existingCatalogue && isCatalogueDifferent) {
-      //         existingCatalogue.addError(existing as EditorBase, {
-      //           source: existing,
-      //           severity: "error",
-      //           msg: `Duplicate id ${cur.id} ${cur.getName()}`,
-      //           id: "duplicate-id-1",
-      //           other: cur,
-      //           extra: existingCatalogue.name,
-      //         });
-      //         existingCatalogue.addError(cur as EditorBase, {
-      //           source: cur,
-      //           severity: "error",
-      //           msg: `Duplicate id ${cur.id} ${existing.getName()}`,
-      //           id: "duplicate-id-2",
-      //           other: existing,
-      //           extra: this.name,
-      //         });
-      //       }
-      //       this.addError(existing as EditorBase, {
-      //         source: existing,
-      //         severity: "error",
-      //         msg: `Duplicate id ${cur.id}  ${cur.getName()}`,
-      //         id: "duplicate-id-1",
-      //         other: cur,
-      //         extra: isCatalogueDifferent ? existingCatalogue.name : undefined,
-      //       });
-      //       this.addError(cur as EditorBase, {
-      //         source: cur,
-      //         severity: "error",
-      //         msg: `Duplicate id ${cur.id} ${existing.getName()}`,
-      //         id: "duplicate-id-2",
-      //         other: existing,
-      //         extra: isCatalogueDifferent ? this.name : undefined,
-      //       });
-      //     }
-      //   }
-      //   this.manager.index[cur.id] = cur;
-      //
-
+       if (this.manager.index[cur.id] && this.manager.index[cur.id] !== cur) {
+         if (cur.isIdUnique() || this.manager.index[cur.id].isIdUnique()) {
+           const existing = this.manager.index[cur.id];
+           const existingCatalogue = existing.getCatalogue();
+           const isCatalogueDifferent = this !== existingCatalogue;
+           if (existingCatalogue && isCatalogueDifferent) {
+             existingCatalogue.addError(existing as EditorBase, {
+               source: existing,
+               severity: "error",
+               msg: `Duplicate id ${cur.id} ${cur.getName()}`,
+               id: "duplicate-id-1",
+               other: cur,
+               extra: existingCatalogue.name,
+             });
+             existingCatalogue.addError(cur as EditorBase, {
+               source: cur,
+               severity: "error",
+               msg: `Duplicate id ${cur.id} ${existing.getName()}`,
+               id: "duplicate-id-2",
+               other: existing,
+               extra: this.name,
+             });
+           }
+           this.addError(existing as EditorBase, {
+             source: existing,
+             severity: "error",
+             msg: `Duplicate id ${cur.id}  ${cur.getName()}`,
+             id: "duplicate-id-1",
+             other: cur,
+             extra: isCatalogueDifferent ? existingCatalogue.name : undefined,
+           });
+           this.addError(cur as EditorBase, {
+             source: cur,
+             severity: "error",
+             msg: `Duplicate id ${cur.id} ${existing.getName()}`,
+             id: "duplicate-id-2",
+             other: existing,
+             extra: isCatalogueDifferent ? this.name : undefined,
+           });
+         }
+       }
+       this.manager.index[cur.id] = cur;
+    
+      */
+      }
       if (this.index[cur.id] && this.index[cur.id] !== cur) {
         const existing = this.index[cur.id];
         if (cur.isIdUnique() || existing.isIdUnique() || cur.getName() !== existing.getName()) {
@@ -903,7 +919,7 @@ export class Catalogue extends Base {
 
       this.index[cur.id] = cur;
       if (this.unresolvedLinks && this.unresolvedLinks[cur.id]) {
-        for (const lnk of this.unresolvedLinks[cur.id]) {
+        for (const lnk of [...this.unresolvedLinks[cur.id]]) {
           if (lnk.isLink()) {
             this.updateLink(lnk as Link & EditorBase);
           } else {
@@ -911,15 +927,19 @@ export class Catalogue extends Base {
           }
         }
       }
-      if (this.manager?.unresolvedLinks && this.manager.unresolvedLinks![cur.id]?.length) {
-        for (const lnk of this.manager.unresolvedLinks[cur.id]) {
-          lnk.catalogue.refreshErrors(lnk as EditorBase);
+      if (this.manager?.unresolvedLinks && this.manager.unresolvedLinks[cur.id]?.length) {
+        for (const lnk of [...this.manager.unresolvedLinks[cur.id]]) {
+          if (lnk.isLink()) {
+            lnk.catalogue?.updateLink(lnk as Link & EditorBase);
+          } else {
+            lnk.catalogue?.refreshErrors(lnk as EditorBase);
+          }
         }
       }
     }
   }
   removeFromIndex(cur: EditorBase) {
-    if (cur.id && this.index[cur.id] === cur) {
+    if (cur.id && this.index[cur.id] === toRaw(cur)) {
       delete this.index[cur.id];
     }
     this.removeErrors(cur);
@@ -928,7 +948,7 @@ export class Catalogue extends Base {
       ref.catalogue.refreshErrors(ref);
     }
     for (const ref of cur.other_links || []) {
-      ref.catalogue.refreshErrors(ref);
+      ref.catalogue.refreshErrors(ref, true);
     }
   }
   resolveAllLinks(imports: Catalogue[], deleteBadLinks = true) {
@@ -968,7 +988,7 @@ export class Catalogue extends Base {
     if (!deleteBadLinks) {
       this.unresolvedLinks = {};
       for (const lnk of unresolved) {
-        addObj(this.unresolvedLinks, lnk.targetId, lnk as Link & EditorBase);
+        addObj(this.unresolvedLinks, lnk.targetId, toRaw(lnk) as Link & EditorBase);
       }
     }
   }
@@ -981,6 +1001,10 @@ export class Catalogue extends Base {
     if (!to.links) to.links = [];
     to.links.push(from);
   }
+  hasOtherRef(from: EditorBase, to: EditorBase) {
+    return to.other_links && to.other_links.includes(from);
+  }
+
   removeOtherRef(from: EditorBase, to: EditorBase) {
     if (!to.other_links) to.other_links = [];
     const idx = to.other_links.indexOf(from);
@@ -1049,13 +1073,13 @@ export class Catalogue extends Base {
         ? this.findOptionByIdGlobal(condition.childId)
         : this.findOptionById(condition.childId);
       if (target) {
-        this.addOtherRef(condition, target as EditorBase);
+        if (!this.hasOtherRef(condition, target as EditorBase)) {
+          this.addOtherRef(condition, target as EditorBase);
+        }
         this.removeError(condition, "id-not-exist");
-        popObj(this.manager.unresolvedLinks!, condition.childId, condition as Condition & EditorBase);
+        // popObj(this.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
+        popObj(this.manager.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
         return;
-      }
-      if (!this.manager.unresolvedLinks![condition.childId]?.includes(condition)) {
-        addObj(this.manager.unresolvedLinks!, condition.childId, condition as Condition & EditorBase);
       }
     }
     this.addError(condition, {
@@ -1064,6 +1088,10 @@ export class Catalogue extends Base {
       msg: "child id does not exist",
       id: "id-not-exist",
     });
+    // if (!this.unresolvedLinks![condition.childId]?.includes(condition)) {
+    //   addObj(this.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
+    // }
+    addObjIfMissing(this.manager.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
     return;
   }
 

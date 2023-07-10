@@ -443,6 +443,14 @@ type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends read
 type ArrayPropertyType<O, KT extends keyof O> = NonNullable<O[KT]> extends unknown[]
   ? ArrayElement<NonNullable<O[KT]>>
   : never;
+export function addObjIfMissing<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
+  const found = obj[key] as unknown as T[];
+  if (found && !found.includes(val)) {
+    found.push(val);
+    return;
+  }
+  (obj[key] as unknown as T[]) = [val];
+}
 export function addObj<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
   const found = obj[key] as unknown as T[];
   if (found) {
@@ -454,9 +462,9 @@ export function addObj<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>
 export function popObj<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
   const found = obj[key] as unknown as T[];
   if (found) {
-    found.filter((o) => o !== val);
-    if (!found.length) {
-      delete obj[key];
+    const idx = found.indexOf(val);
+    if (idx >= 0) {
+      found.splice(idx, 1);
     }
     return;
   }
