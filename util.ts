@@ -541,3 +541,21 @@ export function shuffleArray<T>(array: T[]): T[] {
   }
   return shuffledArray;
 }
+
+export function prettifyTime(milliseconds: number): string {
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  const formattedDays = days > 0 ? `${days}d ` : "";
+  const formattedHours = hours % 24;
+  const formattedMinutes = minutes % 60;
+  const formattedSeconds = seconds % 60;
+
+  const timeString = `${formattedDays}${formattedHours}:${formattedMinutes
+    .toString()
+    .padStart(2, "0")}:${formattedSeconds.toString().padStart(2, "0")}`;
+
+  return timeString;
+}
