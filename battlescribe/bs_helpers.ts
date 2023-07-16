@@ -657,3 +657,9 @@ export function first<T>(arr: Iterable<T>): T | undefined {
     return item;
   }
 }
+export function has<T>(arr: Iterable<T>, _item: T): boolean {
+  for (const item of arr) {
+    if (_item === item) return true;
+  }
+  return false;
+}

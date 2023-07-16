@@ -10,7 +10,7 @@ import type {
 } from "./bs_types";
 import { Condition, Modifier, ModifierGroup, type Base, type InfoGroup, type Link } from "./bs_main";
 import type { Catalogue, EditorBase } from "./bs_main_catalogue";
-import { findSelfOrParentWhere } from "./bs_helpers";
+import { findSelfOrParentWhere, has } from "./bs_helpers";
 
 export function getModifierOrConditionParent(obj: EditorBase) {
   const parent = findSelfOrParentWhere(obj, (o) => {
@@ -138,6 +138,11 @@ export function conditionToString(
 }
 
 export function constraintToText(base: Base | Link, constraint: BSIConstraint, fieldToString = fieldToText) {
+  // check if the constraint is in the parent, its better to show id than a constraint that wouldn't work
+  if (!has(base.constraintsIterator(), constraint)) {
+    return constraint.id;
+  }
+
   const field = constraint.field === "selections" ? "" : ` ${fieldToString(base, constraint.field)}`;
   const scope = constraint.scope === "parent" ? "" : `(${fieldToString(base, constraint.scope)})`;
   const ofWhat = constraint.childId ? ` ${fieldToString(base, constraint.childId)}` : "";
