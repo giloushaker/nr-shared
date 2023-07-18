@@ -1,3 +1,5 @@
+import type { EditorBase } from "./bs_main_catalogue";
+
 const validScopes = new Set([
   "force",
   "roster",
@@ -23,11 +25,14 @@ export function isScopeValid(parent: EditorBase, scope: string) {
   while (stack.length) {
     const current = stack.pop()!;
     if (current.id === scope) return true;
-    if (current.links) {
-      for (const link of current.links) {
-        stack.push(link);
-      }
-    }
+
+    // check links
+    // if (current.links) {
+    //   for (const link of current.links) {
+    //     stack.push(link);
+    //   }
+    // }
+
     if (current.parent) [stack.push(current.parent)];
   }
   return false;
