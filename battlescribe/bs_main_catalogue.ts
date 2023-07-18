@@ -1060,7 +1060,7 @@ export class Catalogue extends Base {
   updateCondition(condition: (Constraint | Condition) & EditorBase, previousField?: string) {
     if (condition.scope) {
       if (!isScopeValid(getModifierOrConditionParent(condition), condition.scope)) {
-        this.addError(condition, { source: condition, id: "invalid-scope", msg: "Invalid scope" });
+        this.addError(condition, { source: condition, id: "invalid-scope", msg: `Invalid scope ${condition.scope}` });
       } else {
         this.removeError(condition, "invalid-scope");
       }
