@@ -7,6 +7,7 @@ import type { Base } from "./bs_main";
 export class BSCatalogueManager {
   catalogues = {} as Record<string, Record<string, Catalogue>>;
   unresolvedLinks?: Record<string, Array<Base>>;
+  settings?: Record<string, string | number | boolean | undefined>;
   // Must implement
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData> {

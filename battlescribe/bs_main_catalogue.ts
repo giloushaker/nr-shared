@@ -1,3 +1,4 @@
+import { isScopeValid } from "./bs_condition";
 import type { ItemTypeNames } from "./bs_editor";
 import {
   addObj,
@@ -27,6 +28,7 @@ import {
   goodKeys,
   goodKeysWiki,
 } from "./bs_main";
+import { getModifierOrConditionParent } from "./bs_modifiers";
 import type { BSCatalogueManager } from "./bs_system";
 import type {
   BSICatalogue,
@@ -493,7 +495,8 @@ export class Catalogue extends Base {
     for (const imported of [this, ...this.imports]) {
       for (const val of Object.values(imported.index) as EditorBase[]) {
         const name = val.getName?.call(val);
-        if (name && String(name).match(regx)) {
+        const id = val.id;
+        if ((name && String(name).match(regx)) || id === text) {
           if (val.isLink()) {
             if (val.target && val.isCategory() && !val.parent?.isForce()) {
               continue;
@@ -849,71 +852,70 @@ export class Catalogue extends Base {
     if (cur.id) {
       cur.catalogue = this;
 
-      {
-        /**   Cross catalogue duplicate id check
-
-       if (this.manager.index[cur.id] && this.manager.index[cur.id] !== cur) {
-         if (cur.isIdUnique() || this.manager.index[cur.id].isIdUnique()) {
-           const existing = this.manager.index[cur.id];
-           const existingCatalogue = existing.getCatalogue();
-           const isCatalogueDifferent = this !== existingCatalogue;
-           if (existingCatalogue && isCatalogueDifferent) {
-             existingCatalogue.addError(existing as EditorBase, {
-               source: existing,
-               severity: "error",
-               msg: `Duplicate id ${cur.id} ${cur.getName()}`,
-               id: "duplicate-id-1",
-               other: cur,
-               extra: existingCatalogue.name,
-             });
-             existingCatalogue.addError(cur as EditorBase, {
-               source: cur,
-               severity: "error",
-               msg: `Duplicate id ${cur.id} ${existing.getName()}`,
-               id: "duplicate-id-2",
-               other: existing,
-               extra: this.name,
-             });
-           }
-           this.addError(existing as EditorBase, {
-             source: existing,
-             severity: "error",
-             msg: `Duplicate id ${cur.id}  ${cur.getName()}`,
-             id: "duplicate-id-1",
-             other: cur,
-             extra: isCatalogueDifferent ? existingCatalogue.name : undefined,
-           });
-           this.addError(cur as EditorBase, {
-             source: cur,
-             severity: "error",
-             msg: `Duplicate id ${cur.id} ${existing.getName()}`,
-             id: "duplicate-id-2",
-             other: existing,
-             extra: isCatalogueDifferent ? this.name : undefined,
-           });
-         }
-       }
-       this.manager.index[cur.id] = cur;
-    
-      */
-      }
-      if (this.index[cur.id] && this.index[cur.id] !== cur) {
-        const existing = this.index[cur.id];
-        if (cur.isIdUnique() || existing.isIdUnique() || cur.getName() !== existing.getName()) {
-          this.addError(existing as EditorBase, {
-            source: existing,
-            severity: "error",
-            msg: `Duplicate id ${cur.id} ${cur.getName()}`,
-            id: "duplicate-id-1",
-            other: cur,
-          });
-          this.addError(cur as EditorBase, {
-            source: cur,
-            severity: "error",
-            msg: `Duplicate id ${cur.id} ${existing.getName()}`,
-            id: "duplicate-id-2",
-            other: existing,
-          });
+      if (this.manager?.settings?.globalDuplicateIdError) {
+        // /**   Cross catalogue duplicate id check
+        const index = (this.manager as any).index!;
+        if (index[cur.id] && index[cur.id] !== cur) {
+          if (cur.isIdUnique() || index[cur.id].isIdUnique()) {
+            const existing = index[cur.id];
+            const existingCatalogue = existing.getCatalogue();
+            const isCatalogueDifferent = this !== existingCatalogue;
+            if (existingCatalogue && isCatalogueDifferent) {
+              existingCatalogue.addError(existing as EditorBase, {
+                source: existing,
+                severity: "error",
+                msg: `Duplicate id ${cur.id} ${cur.getName()}`,
+                id: "duplicate-id-1",
+                other: cur,
+                extra: existingCatalogue.name,
+              });
+              existingCatalogue.addError(cur as EditorBase, {
+                source: cur,
+                severity: "error",
+                msg: `Duplicate id ${cur.id} ${existing.getName()}`,
+                id: "duplicate-id-2",
+                other: existing,
+                extra: this.name,
+              });
+            }
+            this.addError(existing as EditorBase, {
+              source: existing,
+              severity: "error",
+              msg: `Duplicate id ${cur.id}  ${cur.getName()}`,
+              id: "duplicate-id-1",
+              other: cur,
+              extra: isCatalogueDifferent ? existingCatalogue.name : undefined,
+            });
+            this.addError(cur as EditorBase, {
+              source: cur,
+              severity: "error",
+              msg: `Duplicate id ${cur.id} ${existing.getName()}`,
+              id: "duplicate-id-2",
+              other: existing,
+              extra: isCatalogueDifferent ? this.name : undefined,
+            });
+          }
+        }
+        index[cur.id] = cur;
+      } else {
+        if (this.index[cur.id] && this.index[cur.id] !== cur) {
+          const existing = this.index[cur.id];
+          if (cur.isIdUnique() || existing.isIdUnique() || cur.getName() !== existing.getName()) {
+            this.addError(existing as EditorBase, {
+              source: existing,
+              severity: "error",
+              msg: `Duplicate id ${cur.id} ${cur.getName()}`,
+              id: "duplicate-id-1",
+              other: cur,
+            });
+            this.addError(cur as EditorBase, {
+              source: cur,
+              severity: "error",
+              msg: `Duplicate id ${cur.id} ${existing.getName()}`,
+              id: "duplicate-id-2",
+              other: existing,
+            });
+          }
         }
       }
 
@@ -1056,6 +1058,13 @@ export class Catalogue extends Base {
     }
   }
   updateCondition(condition: (Constraint | Condition) & EditorBase, previousField?: string) {
+    if (condition.scope) {
+      if (!isScopeValid(getModifierOrConditionParent(condition), condition.scope)) {
+        this.addError(condition, { source: condition, id: "invalid-scope", msg: "Invalid scope" });
+      } else {
+        this.removeError(condition, "invalid-scope");
+      }
+    }
     if (condition instanceof Constraint) {
       return this.updateConstraint(condition as Constraint & EditorBase);
     }

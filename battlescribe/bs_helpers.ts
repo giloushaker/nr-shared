@@ -663,3 +663,7 @@ export function has<T>(arr: Iterable<T>, _item: T): boolean {
   }
   return false;
 }
+
+export function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
