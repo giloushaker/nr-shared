@@ -382,7 +382,9 @@ export function getNameExtra(obj: EditorBase, _refs = true): string {
   if (obj.comment && obj.comment[0]) {
     pieces.push("# " + obj.comment);
   }
-
+  if (obj.collective) {
+    pieces.push("(collective)");
+  }
   return pieces.join(" ");
 }
 
