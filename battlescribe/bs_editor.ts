@@ -607,10 +607,29 @@ export function replaceAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[],
   return result;
 }
 export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {
-  forEachEntryRecursive(entry, (_entry, key, _parent) => {
-    if (_entry.id) {
-      if (_entry instanceof Constraint && !(entry instanceof Constraint)) return;
-      _entry.id = catalogue.generateNonConflictingId();
+  const scrambled = {} as Record<string, string>;
+  forEachEntryRecursive(entry, (node, key, parentNode) => {
+    if (node.id) {
+      if (node instanceof Constraint && !(entry instanceof Constraint)) return;
+      const currentId = node.id;
+      const newId = catalogue.generateNonConflictingId();
+      node.id = newId;
+      scrambled[currentId] = newId;
+    }
+  });
+  forEachEntryRecursive(entry, (node, key, parentNode) => {
+    if (node instanceof Condition) {
+      if (node.scope in scrambled) {
+        node.scope = scrambled[node.scope];
+      }
+      if (node.childId in scrambled) {
+        node.childId = scrambled[node.childId];
+      }
+    }
+    if (node instanceof Modifier) {
+      if (node.field in scrambled) {
+        node.field = scrambled[node.field];
+      }
     }
   });
 }

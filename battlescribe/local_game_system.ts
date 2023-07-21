@@ -37,6 +37,7 @@ export class GameSystemFiles extends BSCatalogueManager {
   async loadAll(progress_cb?: (current: number, max: number, msg?: string) => void | Promise<void>) {
     let max = Object.values(this.catalogueFiles).length + 1;
     let current = 0;
+    console.log("Loading all catalogues in", this.gameSystem?.gameSystem?.name);
     if (this.gameSystem) {
       progress_cb && (await progress_cb(current, max, `Loading ${this.gameSystem.gameSystem.name}`));
       const loadedSys = await this.loadCatalogue({ targetId: this.gameSystem.gameSystem.id });

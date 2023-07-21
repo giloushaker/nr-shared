@@ -18,6 +18,7 @@ import type {
   BSIGameSystem,
   NRAssociation,
   AssociationConstraint,
+  BSIModifierType,
 } from "./bs_types";
 import type { EditorBase, Catalogue } from "./bs_main_catalogue";
 import { clone, isObject } from "./bs_helpers";
@@ -1000,8 +1001,12 @@ export class Condition extends Base {
 export class Constraint extends Condition {
   declare type: "min" | "max" | "exactly";
 }
-export class Modifier extends Base {}
-export class ModifierGroup extends Base {}
+export class Modifier extends Base implements BSIModifier {
+  declare type: BSIModifierType;
+  declare field: "category" | "name" | "hidden" | string; //costId
+  declare value: number | string | boolean;
+}
+export class ModifierGroup extends Base implements BSIModifierGroup {}
 
 export class Rule extends Base implements BSIRule {
   declare id: string;

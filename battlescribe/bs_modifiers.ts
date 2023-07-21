@@ -34,7 +34,7 @@ export function* getAllQueries(queries: SupportedQueries): Iterable<BSIQuery> {
   }
 }
 
-function getModifiedField(base: Base | Link | undefined, field: string) {
+export function getModifiedField(base: Base | Link | undefined, field: string) {
   if (!base) return;
   const catalogue = base.getCatalogue();
   if ((base as EditorBase).parent) {
