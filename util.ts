@@ -75,20 +75,16 @@ export function leanName(parsedName: string): string {
   return parsedName;
 }
 
-export function dateFormat(date: Date): string {
-  const year = date.getUTCFullYear().toString();
-  let month = (date.getUTCMonth() + 1).toString();
-  let day = date.getUTCDate().toString();
-
-  // add leading zeros if necessary
-  if (month.length === 1) {
-    month = "0" + month;
-  }
-  if (day.length === 1) {
-    day = "0" + day;
+export function dateFormat(date: Date | string): string {
+  if (typeof date === "string") {
+    date = new Date(date);
   }
 
-  return year + "-" + month + "-" + day;
+  const year = date.getFullYear().toString().padStart(4, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 export function dateTimeFormat(p: Date | string): string {
