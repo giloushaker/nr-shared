@@ -304,10 +304,10 @@ export function convertToXml(data: BSICatalogue | Catalogue | BSIGameSystem) {
     suppressEmptyNode: true,
   };
   if (json.gameSystem) {
-    json.gameSystem.xmlns = "http://www.battlescribe.net/schema/gameSystemSchema";
+    json.gameSystem._xmlns = "http://www.battlescribe.net/schema/gameSystemSchema";
   }
   if (json.catalogue) {
-    json.catalogue.xmlns = "http://www.battlescribe.net/schema/catalogueSchema";
+    json.catalogue._xmlns = "http://www.battlescribe.net/schema/catalogueSchema";
   }
   const builder = new XMLBuilder(options);
   const xml = builder.build(json);
