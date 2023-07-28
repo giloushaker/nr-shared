@@ -37,7 +37,9 @@ export class GameSystemFiles extends BSCatalogueManager {
   async loadAll(progress_cb?: (current: number, max: number, msg?: string) => void | Promise<void>) {
     let max = Object.values(this.catalogueFiles).length + 1;
     let current = 0;
-    console.log("Loading all catalogues in", this.gameSystem?.gameSystem?.name);
+    if (!this.allLoaded) {
+      console.log("Loading all catalogues in", this.gameSystem?.gameSystem?.name);
+    }
     if (this.gameSystem) {
       progress_cb && (await progress_cb(current, max, `Loading ${this.gameSystem.gameSystem.name}`));
       const loadedSys = await this.loadCatalogue({ targetId: this.gameSystem.gameSystem.id });
@@ -68,6 +70,9 @@ export class GameSystemFiles extends BSCatalogueManager {
       return Object.values(this.loadedCatalogues);
     }
     return [];
+  }
+  getId() {
+    return this.gameSystem?.gameSystem.id;
   }
   getCatalogueInfo(catalogueLink: BSICatalogueLink) {
     if (this.gameSystem?.gameSystem.id === catalogueLink.targetId) {

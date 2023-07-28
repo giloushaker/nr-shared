@@ -976,6 +976,21 @@ export class Profile extends Base implements BSIProfile {
     return true;
   }
 }
+export class Characteristic extends Base implements BSICharacteristic {
+  declare typeId: string;
+  declare $text: string | number;
+  originalValue?: string | number | boolean | undefined;
+  getLabel() {
+    if (this.catalogue) {
+      return this.catalogue.findOptionById(this.typeId)?.getName() ?? this.typeId;
+    }
+    return this.typeId;
+  }
+  getName() {
+    return `${this.getLabel()} = ${this.$text}`;
+  }
+}
+
 export class InfoGroup extends Base {
   declare characteristics: BSICharacteristic[];
   declare typeId: string;
@@ -1059,35 +1074,45 @@ export function* iterateModifierGroupsRecursive(
 }
 
 export const goodJsonArrayKeys = new Set([
-  "publications",
   "costTypes",
-  "profileTypes",
-  "profiles",
+  "costs",
+
   "categoryEntries",
+
   "forceEntries",
-  "selectionEntries",
-  "entryLinks",
+
   "sharedSelectionEntries",
+  "selectionEntries",
+
   "sharedSelectionEntryGroups",
+  "selectionEntryGroups",
+
+  "entryLinks",
+  "infoLinks",
+  "categoryLinks",
+  "catalogueLinks",
+
   "sharedProfiles",
-  "sharedInfoGroups",
+  "profiles",
+  "profileTypes",
   "characteristics",
+  "characteristicTypes",
+
+  "sharedInfoGroups",
+  "infoGroups",
+
+  "sharedRules",
+  "rules",
+
+  "publications",
+  "associations",
+
+  "modifierGroups",
   "modifiers",
   "constraints",
-  "categoryLinks",
-  "costs",
   "conditionGroups",
   "conditions",
   "repeats",
-  "selectionEntryGroups",
-  "infoLinks",
-  "characteristicTypes",
-  "catalogueLinks",
-  "modifierGroups",
-  "sharedRules",
-  "rules",
-  "infoGroups",
-  "associations",
 ]);
 export const goodJsonKeys = new Set([
   ...goodJsonArrayKeys,

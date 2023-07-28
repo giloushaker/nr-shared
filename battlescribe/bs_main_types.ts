@@ -15,6 +15,7 @@ import {
   ModifierGroup,
   ProfileType,
   Constraint,
+  Characteristic,
 } from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
@@ -90,6 +91,9 @@ export const protoMap = {
   sharedProfiles: Profile.prototype,
   profiles: Profile.prototype,
   profile: Profile.prototype,
+  characteristics: Characteristic.prototype,
+  characteristic: Characteristic.prototype,
+  characteristicTypes: Base.prototype,
 
   sharedInfoGroups: InfoGroup.prototype,
   infoGroups: InfoGroup.prototype,

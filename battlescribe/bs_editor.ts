@@ -410,6 +410,8 @@ export function getName(obj: any): string {
     case "costTypes":
     case "sharedProfiles":
     case "profiles":
+    case "characteristics":
+    case "characteristicTypes":
       return obj.getName();
     case "modifiers":
       return modifierToString(getModifierOrConditionParent(obj), obj);
@@ -437,6 +439,7 @@ export function getName(obj: any): string {
     case "infoLinks":
       return obj.target ? getName(obj.target) : obj.getName();
 
+      return obj.name;
     case "associations":
       return `${obj.label}`;
     default:
