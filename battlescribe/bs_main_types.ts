@@ -94,6 +94,7 @@ export const protoMap = {
   characteristics: Characteristic.prototype,
   characteristic: Characteristic.prototype,
   characteristicTypes: Base.prototype,
+  characteristicType: Base.prototype,
 
   sharedInfoGroups: InfoGroup.prototype,
   infoGroups: InfoGroup.prototype,

@@ -21,7 +21,7 @@ export class GameSystemFiles extends BSCatalogueManager {
   }
   findOptionById(id: string): Base | undefined {
     for (const catalogue of Object.values(this.loadedCatalogues)) {
-      if (catalogue.index[id]) return catalogue.index[id];
+      if (catalogue.index && catalogue.index[id]) return catalogue.index[id];
     }
   }
   unloadAll() {
