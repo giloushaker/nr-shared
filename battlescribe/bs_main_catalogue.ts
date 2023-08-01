@@ -444,8 +444,8 @@ export class Catalogue extends Base {
     if (found) return found;
     const found_import = this.imports.find((o) => id in o.index)?.index[id];
     if (found_import) return found_import;
-    if (this.book) {
-      this.manager.getLoadedCatalogue(id);
+    if (this.manager) {
+      return this.manager.getLoadedCatalogue(id) ?? (this.manager.getCatalogueInfo({ targetId: id }) as any);
     }
     return;
   }

@@ -354,6 +354,11 @@ export function getNameExtra(obj: EditorBase, _refs = true): string {
   const type = obj.parentKey;
   const pieces = [];
   switch (type) {
+    case "infoLinks":
+      if (["profiles", "sharedProfiles"].includes((obj.target as EditorBase)?.parentKey)) {
+        pieces.push((obj.target as unknown as BSIProfile).typeName);
+      }
+      break;
     case "sharedProfiles":
     case "profiles":
       pieces.push((obj as unknown as BSIProfile).typeName);
@@ -438,8 +443,6 @@ export function getName(obj: any): string {
 
     case "infoLinks":
       return obj.target ? getName(obj.target) : obj.getName();
-
-      return obj.name;
     case "associations":
       return `${obj.label}`;
     default:
