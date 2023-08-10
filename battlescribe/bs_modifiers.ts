@@ -50,6 +50,9 @@ export function getModifiedField(base: Base | Link | undefined, field: string) {
   return target;
 }
 export function fieldToText(base: Base | Link | undefined, field: string): string {
+  if (field === undefined) {
+    return "";
+  }
   if (base) {
     const catalogue = base.catalogue || (base as Catalogue);
     const target = getModifiedField(base, field);
