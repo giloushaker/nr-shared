@@ -46,7 +46,7 @@ export function getModifiedField(base: Base | Link | undefined, field: string) {
       }
     }
   }
-  const target = catalogue.findOptionById(field);
+  const target = catalogue?.findOptionById(field);
   return target;
 }
 export function fieldToText(base: Base | Link | undefined, field: string): string {
