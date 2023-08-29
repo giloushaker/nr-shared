@@ -197,7 +197,7 @@ export class Base implements BSModifierBase {
     return this.catalogue;
   }
   getGameSystem() {
-    return this.catalogue.getGameSystem();
+    return this.getCatalogue().getGameSystem();
   }
   // Prevent Vue Observers
   get [Symbol.toStringTag](): string {
@@ -390,6 +390,16 @@ export class Base implements BSModifierBase {
     if (this.infoGroups) yield* this.infoGroups;
   }
   *infoRulesIterator(): Iterable<Rule> {
+    if (this.isForce()) {
+      const gst = this.getGameSystem();
+      if (gst.rules) {
+        yield* gst.rules;
+      }
+      const cat = this.main_catalogue;
+      if (cat.rules) {
+        yield* cat.rules;
+      }
+    }
     if (this.rules) yield* this.rules;
   }
   *infoProfilesIterator(): Iterable<Profile> {

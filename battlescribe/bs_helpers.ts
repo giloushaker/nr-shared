@@ -675,3 +675,6 @@ export function has<T>(arr: Iterable<T>, _item: T): boolean {
 export function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+export function arrayIf(bool: boolean | undefined | string | number | null | object, obj: any) {
+  return bool ? [obj] : [];
+}
