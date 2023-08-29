@@ -459,6 +459,14 @@ export function addObj<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>
   }
   (obj[key] as unknown as T[]) = [val];
 }
+export function addObjUnique<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
+  const found = obj[key] as unknown as T[];
+  if (found && found.indexOf(val) === -1) {
+    found.push(val);
+    return;
+  }
+  (obj[key] as unknown as T[]) = [val];
+}
 export function popObj<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
   const found = obj[key] as unknown as T[];
   if (found) {

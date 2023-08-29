@@ -3,6 +3,7 @@ import type { ItemTypeNames } from "./bs_editor";
 import {
   addObj,
   addObjIfMissing,
+  addObjUnique,
   clone,
   generateBattlescribeId,
   groupBy,
@@ -142,7 +143,7 @@ export class Catalogue extends Base {
     if (this.initialized) return;
     this.initialized = true;
     this.generateImports(deleteBadLinks);
-    this.resolveAllLinks(this.imports, deleteBadLinks);
+    this.resolveAllLinks(deleteBadLinks);
     this.generateCostIndex();
   }
 
@@ -164,11 +165,11 @@ export class Catalogue extends Base {
     (system as any).rules = rulesObj;
 
     this.imports.forEach((imported) => {
-      addObj(imported as any, "links", this);
+      addObjUnique(imported as any, "links", this);
     });
     function proc(cur: WikiBase, parent: WikiBase) {
       (cur as WikiBase).parent = parent as WikiBase;
-      if (cur.target) addObj(cur.target as any, "links", parent as WikiBase);
+      if (cur.target) addObjUnique(cur.target as any, "links", parent as WikiBase);
       if (cur instanceof Rule) {
         rulesObj[cur.id] = cur;
       }
@@ -188,7 +189,7 @@ export class Catalogue extends Base {
     this.init(false);
 
     if (this.gameSystem) {
-      addObj(this.gameSystem as any, "links", this);
+      addObjUnique(this.gameSystem as any, "links", this);
     }
 
     forEachObjectWhitelist2<EditorBase>(
@@ -197,19 +198,19 @@ export class Catalogue extends Base {
         cur.parent = parent;
         cur.catalogue = this;
         if (cur.target) {
-          addObj(cur.target as EditorBase, "links", cur);
+          addObjUnique(cur.target as EditorBase, "links", cur);
         }
         if (cur.isProfile() && !cur.isLink()) {
           const target = this.findOptionById(cur.typeId) as EditorBase;
           if (target) {
-            addObj(target, "links", cur);
+            addObjUnique(target, "links", cur);
           }
         }
         const value = (cur as any).value;
         if (value) {
           const target = this.findOptionById(value) as EditorBase;
           if (target) {
-            addObj(target, "other_links", cur);
+            addObjUnique(target, "other_links", cur);
           }
         }
         this.refreshErrors(cur);
@@ -810,12 +811,14 @@ export class Catalogue extends Base {
 
     this.roster_constraints = Object.values(roster_constraints);
   }
-  async reload(manager: BSCatalogueManager) {
-    const sys = manager;
+  async reload(manager: BSCatalogueManager = this.manager) {
+    delete this.initialized;
     delete this.loaded;
     delete this.loaded_editor;
+    delete (this as Partial<typeof this>).index;
     const key = this.isGameSystem() ? "gameSystem" : "catalogue";
-    const loaded = await sys.loadData({ [key]: this } as any);
+    const loaded = await manager.loadData({ [key]: this } as any);
+    this.processForEditor();
     return loaded;
   }
   refreshErrors(cur: EditorBase, deleted = false) {
@@ -953,12 +956,19 @@ export class Catalogue extends Base {
       ref.catalogue.refreshErrors(ref, true);
     }
   }
-  resolveAllLinks(imports: Catalogue[], deleteBadLinks = true) {
+  getIndexes(): Record<string, Base>[] {
+    const indexes = [];
+    indexes.push(this.index);
+    for (const importedCatalogue of this.imports) {
+      indexes.push(importedCatalogue.index);
+    }
+    return indexes;
+  }
+  resolveAllLinks(deleteBadLinks = true) {
     const unresolvedLinks: Array<Link> = [];
     const unresolvedPublications: Array<BSIInfoLink | BSIRule | BSIProfile> = [];
     const unresolvedChildIds: Array<BSICondition> = [];
     const parents: Array<Base> = [];
-    const indexes = [];
     if (!this.index) {
       this.index = noObserve() as Record<string, Base>;
       forEachObjectWhitelist2(
@@ -979,11 +989,7 @@ export class Catalogue extends Base {
         goodKeys
       );
     }
-    indexes.push(this.index);
-
-    for (const importedCatalogue of imports) {
-      indexes.push(importedCatalogue.index);
-    }
+    const indexes = this.getIndexes();
     const unresolved = resolveLinks(unresolvedLinks, indexes, parents, deleteBadLinks);
     resolvePublications(unresolvedPublications, indexes);
     resolveChildIds(unresolvedChildIds, indexes);
@@ -991,6 +997,7 @@ export class Catalogue extends Base {
       this.unresolvedLinks = {};
       for (const lnk of unresolved) {
         addObj(this.unresolvedLinks, lnk.targetId, toRaw(lnk) as Link & EditorBase);
+        delete (lnk as Partial<typeof lnk>).target;
       }
     }
   }
@@ -1001,7 +1008,9 @@ export class Catalogue extends Base {
   }
   addRef(from: EditorBase, to: EditorBase) {
     if (!to.links) to.links = [];
-    to.links.push(from);
+    if (to.links.indexOf(from) === -1) {
+      to.links.push(from);
+    }
   }
   hasOtherRef(from: EditorBase, to: EditorBase) {
     return to.other_links && to.other_links.includes(from);
@@ -1020,12 +1029,10 @@ export class Catalogue extends Base {
     if (link.target) {
       this.removeRef(link, link.target as EditorBase);
     }
-    link.target = this.findOptionById(link.targetId)!;
+    link.target = resolveLink(link.targetId, this.getIndexes()) as EditorBase;
+
     if (link.target) {
       this.addRef(link, link.target as EditorBase);
-    }
-    if (link.target == null) {
-    } else {
       const targetType = (link.target as EditorBase).editorTypeName;
       if (targetType == "category") {
         delete link.type;
@@ -1111,6 +1118,13 @@ export class Catalogue extends Base {
   }
 }
 
+export function resolveLink(id: string, indexes: Record<string, Base>[]) {
+  for (const index of indexes) {
+    if (id in index) {
+      return index[id];
+    }
+  }
+}
 /**
  * Fills in the `.target` field with the value of the first matching key inside indexes
  * Example: indexes: [{A: 1}, {A: 2}] targetId `A` target would result in `1`
@@ -1142,13 +1156,7 @@ export function resolveLinks(
 
       // Find the target, stopping at first found
       const id = current.targetId;
-      let target;
-      for (const index of indexes) {
-        if (id in index) {
-          target = index[id];
-          break;
-        }
-      }
+      const target = resolveLink(id, indexes);
 
       if (target) {
         current.target = target;
