@@ -715,15 +715,15 @@ export class Catalogue extends Base {
     for (const force of this.forcesIteratorRecursive()) {
       force_or_category_ids.add(force.id);
       // Add constraints wich are on categoryLinks
-      for (const category of force.categories) {
-        if (category.constraints) {
-          localAddBoundCategoryConstraints(
-            this,
-            category,
-            category.constraints.filter((o) => o.scope === "roster")
-          );
-        }
-      }
+      // for (const category of force.categories) {
+      //   if (category.constraints) {
+      //     localAddBoundCategoryConstraints(
+      //       this,
+      //       category,
+      //       category.constraints.filter((o) => o.scope === "roster")
+      //     );
+      //   }
+      // }
     }
     for (const category of this.categories) {
       force_or_category_ids.add(category.id);
