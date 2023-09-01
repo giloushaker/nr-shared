@@ -1172,8 +1172,8 @@ export function resolveLinks(
 
   // Delete unresolved links
   if (unresolved.length && deleteBadLinks) {
-    console.warn(`${length - unresolved.length}/${length} links resolved in ${unresolved[0].catalogue.name}`);
-    console.log(`unresolved links: ${unresolved.map((o) => `${o.id} -> ${o.targetId}`)}`);
+    // console.warn(`${length - unresolved.length}/${length} links resolved in ${unresolved[0].catalogue.name}`);
+    // console.log(`unresolved links: ${unresolved.map((o) => `${o.id} -> ${o.targetId}`)}`);
     for (let i = 0; i < unresolved.length; i++) {
       const link = unresolved[i];
       const parent = parents[i];
