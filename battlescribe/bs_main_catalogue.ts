@@ -688,9 +688,9 @@ export class Catalogue extends Base {
             break;
           case "primary-category":
           case "primary-catalogue":
-            console.warn(
+            /*             console.warn(
               `unsupported scope:${constraint.scope} from category ${category.getName()} ${category.getId()}`
-            );
+            ); */
             break;
           default:
             if (force_or_category_ids.has(constraint.scope)) {
@@ -704,9 +704,9 @@ export class Catalogue extends Base {
               fromIndex.extra_constraints = from_id_extra_constraints;
               break;
             }
-            console.warn(
+            /*             console.warn(
               `unsupported scope:${constraint.scope} from category ${category.getName()} ${category.getId()}`
-            );
+            ); */
 
             break;
         }
@@ -757,7 +757,7 @@ export class Catalogue extends Base {
                 break;
               case "primary-category":
               case "primary-catalogue":
-                console.warn(`unsupported scope:${constraint.scope} from ${node.getName()} ${node.id}`);
+                // console.warn(`unsupported scope:${constraint.scope} from ${node.getName()} ${node.id}`);
                 break;
               default:
                 if (force_or_category_ids.has(constraint.scope)) {
@@ -771,7 +771,7 @@ export class Catalogue extends Base {
                   fromIndex.extra_constraints = from_id_extra_constraints;
                   break;
                 }
-                console.warn(`unsupported scope:${constraint.scope} from ${node.getName()}${node.id}`);
+                // console.warn(`unsupported scope:${constraint.scope} from ${node.getName()}${node.id}`);
                 break;
             }
           }
