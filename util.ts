@@ -46,14 +46,24 @@ export function stripHtml(originalString: string): string {
   if (originalString == null) {
     return "";
   }
+  let res = originalString;
 
-  let res = originalString.replace(/<br ?[/]?>/g, "\n");
-  res = res.replace(/(<([^>]+)>)/gi, "");
+  // Spaces and endline
+  res = res.replace(/\[n ]*/g, " ");
+
+  // Replace known special characters
   res = res.replace(/&bull;/g, "•");
-  res = res.replace(/[&][^;]*;/g, "");
-  res = res.replace(/\n */g, "\n");
-  res = res.replace(/\n\n*/g, "\n");
+  res = res.replace(/&nbsp;/g, " ");
   res = res.replace(/−/g, "-");
+
+  // Line Break tags
+  res = res.replace(/<br ?[/]?>/g, "\n");
+
+  // Remove other tags
+  res = res.replace(/(<([^>]+)>)/gi, "");
+
+  // Remove other coded characters
+  res = res.replace(/[&][^;]*;/g, "");
   return res;
 }
 
