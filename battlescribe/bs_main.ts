@@ -22,6 +22,8 @@ import type {
 } from "./bs_types";
 import type { EditorBase, Catalogue } from "./bs_main_catalogue";
 import { clone, isObject } from "./bs_helpers";
+import { splitExactlyConstraints } from "./exactly_constraints";
+import { splitExactlyConstraintsModifiers } from "./exactly_constraints";
 
 const isNonEmptyIfHasOneOf = [
   "modifiers",
@@ -1205,7 +1207,12 @@ export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>,
   const obj = fixRoot ? getDataObject(root) : root;
   const stringed = JSON.stringify(obj, (k, v) => {
     if (Array.isArray(v) && v.length === 0) return undefined;
-    if (v === copy || goodJsonKeys.has(k) || isFinite(Number(k))) return v;
+    if (v === copy || goodJsonKeys.has(k) || isFinite(Number(k))) {
+      if (isObject(v)) {
+        return splitExactlyConstraints(splitExactlyConstraintsModifiers(v));
+      }
+      return v;
+    }
     return undefined;
   });
   return stringed;

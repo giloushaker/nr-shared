@@ -616,7 +616,7 @@ export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {
   const scrambled = {} as Record<string, string>;
   forEachEntryRecursive(entry, (node, key, parentNode) => {
     if (node.id) {
-      if (node instanceof Constraint && !(entry instanceof Constraint)) return;
+      // if (node instanceof Constraint && !(entry instanceof Constraint)) return;
       const currentId = node.id;
       const newId = catalogue.generateNonConflictingId();
       node.id = newId;
