@@ -26,6 +26,7 @@ export function splitExactlyConstraintsModifiers<T>(
   }
 ): T {
   if (!obj.modifiers && !obj.modifierGroups) return obj;
+  if (!obj.constraintsIterator) return obj;
   // Find all exactly constraints wich we need to find modifiers for
   const constraints = {} as Record<string, BSIConstraint>;
   for (const constraint of obj.constraintsIterator()) {
