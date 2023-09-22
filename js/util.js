@@ -349,7 +349,7 @@ export async function setAppearanceFont(appearence, key, _defaultFamily = "sans-
     }
   } //
 
-  appearence[keyFontSize] = Math.max(Math.min(appearence[keyFontSize], 40), 12);
+  appearence[keyFontSize] = appearence[keyFontSize];
   document.documentElement.style.setProperty(`--${keyFont}`, value || _defaultFamily);
   document.documentElement.style.setProperty(`--${keyFontSize}`, (appearence[keyFontSize] || _defaultSize) + "px");
 }
