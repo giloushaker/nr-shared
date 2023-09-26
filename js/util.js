@@ -217,6 +217,8 @@ export async function updateCssVars(appearence, algo) {
     document.documentElement.style.setProperty(`--font-color`, appearence.fontColor);
   }
 
+  document.documentElement.style.setProperty(`--italic`, appearence.italic);
+
   if (appearence.colorGray) {
     document.documentElement.style.setProperty(`--color-gray`, appearence.colorGray);
   }
