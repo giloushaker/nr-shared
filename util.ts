@@ -151,6 +151,7 @@ export function insertRulePrefix(sys: any, rule: { id: string }, book: string | 
     "wdg",
     "ls",
     "np",
+    "er",
     "rulebook",
     "special",
     "custom",
