@@ -944,7 +944,7 @@ export class Catalogue extends Base {
     }
   }
   removeFromIndex(cur: EditorBase) {
-    if (cur.id && this.index[cur.id] === toRaw(cur)) {
+    if (cur.id && toRaw(this.index[cur.id]) === toRaw(cur)) {
       delete this.index[cur.id];
     }
     this.removeErrors(cur);
