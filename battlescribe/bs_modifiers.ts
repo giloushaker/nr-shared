@@ -10,7 +10,7 @@ import type {
 } from "./bs_types";
 import { Condition, Modifier, ModifierGroup, type Base, type InfoGroup, type Link } from "./bs_main";
 import type { Catalogue, EditorBase } from "./bs_main_catalogue";
-import { findSelfOrParentWhere, has } from "./bs_helpers";
+import { findSelfOrParentWhere, has, removePrefix } from "./bs_helpers";
 
 export function getModifierOrConditionParent(obj: EditorBase) {
   const parent = findSelfOrParentWhere(obj, (o) => {
@@ -54,6 +54,9 @@ export function fieldToText(base: Base | Link | undefined, field: string): strin
     return "";
   }
   if (base) {
+    if (field.startsWith("limit::")) {
+      return `limit::${fieldToText(base, removePrefix(field, "limit::"))}`;
+    }
     const catalogue = base.catalogue || (base as Catalogue);
     const target = getModifiedField(base, field);
     if (target) {
@@ -102,7 +105,7 @@ export function conditionToString(
   const value = condition.value === undefined ? 1 : condition.percentValue ? `${condition.value}%` : condition.value;
 
   const rawField = fieldToString(base, condition.field);
-  const field = ["selections", "forces"].includes(rawField) ? ` ${rawField}` : ` ${rawField}`;
+  const field = ["selections", "forces"].includes(rawField) ? ` ${rawField}` : ` ${fieldToString(base, rawField)}`;
 
   const what = fieldToString(base, condition.childId || "") + (includeId ? `(${condition.childId || "any"})` : "");
   const of = what && field ? `of ` : "";
