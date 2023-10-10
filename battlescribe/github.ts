@@ -1,14 +1,14 @@
 import type { Catalogue } from "~/assets/shared/battlescribe/bs_main_catalogue";
 import { filename } from "~/electron/node_helpers";
-import type { BattleScribeFile, BattleScribeRepoData } from "~/assets/shared/battlescribe/bs_import_data";
+import type { BattleScribeRepoData } from "~/assets/shared/battlescribe/bs_import_data";
 import { removeSuffix } from "~/assets/shared/battlescribe/bs_helpers";
-import { file } from "jszip";
 export interface GithubIntegration {
   githubUrl: string;
   githubRepo: string;
   githubOwner: string;
   githubName: string;
   repoData?: BattleScribeRepoData;
+  discovered?: boolean;
 }
 
 export function normalizeGithubRepoUrl(input: string): string | null {
@@ -26,6 +26,31 @@ export function normalizeGithubRepoUrl(input: string): string | null {
   }
   return `https://github.com/${user}/${repo}`;
 }
+export function parseGitHubUrl(githubUrl: string) {
+  // Regular expression to match GitHub URLs
+  const githubUrlRegex = /^(?:https?:\/\/)?(?:www\.)?github\.com\/([^/]+)\/([^/]+)(?:\/)?$/;
+
+  // Check if the input URL matches the GitHub URL format
+  const match = githubUrl.match(githubUrlRegex);
+
+  if (!match) {
+    throw new Error("Invalid GitHub URL format");
+  }
+
+  const [, repoOwner, repoName] = match;
+
+  return {
+    githubUrl: githubUrl,
+    githubRepo: `${repoOwner}/${repoName}`,
+    githubOwner: repoOwner,
+    githubName: repoName,
+  };
+}
+
+// Example usage:
+const githubUrl = "https://github.com/octocat/hello-world";
+const githubInfo = parseGitHubUrl(githubUrl);
+console.log(githubInfo);
 
 async function getFileContentFromRepo(githubUrl: string, filePath: string) {
   try {

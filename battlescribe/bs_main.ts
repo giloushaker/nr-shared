@@ -125,7 +125,7 @@ export class Base implements BSModifierBase {
   collective?: boolean;
   comment?: string[];
   publicationId!: string;
-
+  typeName?: string;
   // Maybe move this to catalogue
   profileTypes?: BSIProfileType[];
 
@@ -253,6 +253,9 @@ export class Base implements BSModifierBase {
   }
   getType(): string | undefined {
     return this.type;
+  }
+  getTypeName(): string | undefined {
+    return this.typeName;
   }
   getHidden(): boolean | undefined {
     return this.hidden;
@@ -997,6 +1000,9 @@ export class Characteristic extends Base implements BSICharacteristic {
       return this.catalogue.findOptionById(this.typeId)?.getName() ?? this.typeId;
     }
     return this.typeId;
+  }
+  getTypeName() {
+    return this.getLabel();
   }
   getName() {
     return `${this.getLabel()} = ${this.$text}`;

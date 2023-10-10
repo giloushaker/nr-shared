@@ -410,8 +410,10 @@ export function getName(obj: any): string {
     case "publications":
     case "profileTypes":
     case "catalogue":
+    case "gameSystem":
     case "rules":
     case "sharedRules":
+    case "costs":
     case "costTypes":
     case "sharedProfiles":
     case "profiles":
@@ -538,6 +540,12 @@ export interface EntryPathEntry {
   index: number;
   id?: string;
 }
+export interface EntryPathEntryExtended {
+  type: string;
+  display: string;
+  label: string;
+  index?: number;
+}
 
 export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
   if (!entry.parent && !entry.isCatalogue()) {
@@ -553,6 +561,37 @@ export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
     });
     entry = entry.parent;
   }
+  result.reverse();
+  return result as any;
+}
+export function getEntryPathInfo(entry: EditorBase): EntryPathEntryExtended[] {
+  if (!entry.parent && !entry.isCatalogue()) {
+    return [{ id: entry.id, key: entry.parentKey, index: 0 }];
+  }
+  const result = [];
+  do {
+    const parent = (entry.parent || entry.catalogue) as any;
+    if (parent) {
+      result.push({
+        name: entry.getName(),
+        type: entry.editorTypeName,
+        label: entry.getTypeName(),
+        display: getName(entry),
+        key: entry.parentKey,
+        index: parent[(entry as any).parentKey].indexOf(entry),
+        id: entry.id,
+      });
+    } else {
+      result.push({
+        name: entry.getName(),
+        display: getName(entry),
+        type: "catalogue",
+        key: "catalogue",
+        id: entry.id,
+      });
+    }
+    entry = entry.parent;
+  } while (entry);
   result.reverse();
   return result as any;
 }
