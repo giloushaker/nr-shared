@@ -156,7 +156,7 @@ const oldBuggedTypes = {
  * From https://github.com/BlueWinds/bsd-schema/blob/main/index.js
  */
 
-function normalize(x: any) {
+export function normalize(x: any) {
   for (let attr in x) {
     if (x[attr] === "") {
       delete x[attr];
