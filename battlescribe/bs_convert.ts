@@ -69,7 +69,7 @@ for (const [key, value] of Object.entries(entries)) {
   }
 }
 
-export function xmlToJson(data: string, arrayKeys: Set<string>) {
+export function xmlToJson(data: string) {
   const options: X2jOptionsOptional = {
     allowBooleanAttributes: true,
     ignoreAttributes: false,
@@ -215,7 +215,7 @@ export function allowed_children(obj: any, key: string): Set<string> {
   return result as Set<string>;
 }
 export function BSXmlToJson(data: string) {
-  const result = xmlToJson(data, goodJsonArrayKeys);
+  const result = xmlToJson(data);
   normalize(getDataObject(result));
   const type = result.catalogue ? "catalogue" : "gameSystem";
   if (!result.catalogue) {
