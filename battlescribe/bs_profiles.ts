@@ -118,3 +118,15 @@ export function hashProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles:
   const hashed = indexProfiles(profiles);
   return getProfilesFromIndex(hashed);
 }
+
+export function hashAndExcludeProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[], toExclude: T[]): T[] {
+  const hashedToExclude = indexProfiles(toExclude);
+  const hashed = indexProfiles(profiles);
+  const hashedFiltered = {} as typeof hashed;
+  for (const key in hashed) {
+    if (!(key in hashedToExclude)) {
+      hashedFiltered[key] = hashed[key];
+    }
+  }
+  return getProfilesFromIndex(hashedFiltered);
+}
