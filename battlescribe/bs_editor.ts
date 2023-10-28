@@ -381,8 +381,9 @@ export function getNameExtra(obj: EditorBase, _refs = true): string {
       break;
   }
   if (obj.links?.length || obj.other_links?.length) {
-    const s = obj.links?.length === 1 ? "" : "s";
-    pieces.push(`(${obj.links?.length || 0} ref${s})`);
+    const refcount = (obj.links?.length ?? 0) + (obj.other_links?.length ?? 0);
+    const s = refcount === 1 ? "" : "s";
+    pieces.push(`(${refcount || 0} ref${s})`);
   }
   if (obj.comment && obj.comment[0]) {
     pieces.push("# " + obj.comment);
@@ -551,7 +552,7 @@ export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
   if (!entry.parent && !entry.isCatalogue()) {
     return [{ id: entry.id, key: entry.parentKey, index: 0 }];
   }
-  const result = [];
+  const result = [] as EntryPathEntry[];
   while (entry.parent) {
     const parent = (entry.parent || entry.catalogue) as any;
     result.push({
@@ -562,13 +563,13 @@ export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
     entry = entry.parent;
   }
   result.reverse();
-  return result as any;
+  return result;
 }
 export function getEntryPathInfo(entry: EditorBase): EntryPathEntryExtended[] {
   if (!entry.parent && !entry.isCatalogue()) {
     return [{ id: entry.id, key: entry.parentKey, index: 0 }];
   }
-  const result = [];
+  const result = [] as EntryPathEntryExtended[];
   do {
     const parent = (entry.parent || entry.catalogue) as any;
     if (parent) {
