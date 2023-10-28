@@ -678,3 +678,9 @@ export function capitalize(str: string) {
 export function arrayIf(bool: boolean | undefined | string | number | null | object, obj: any) {
   return bool ? [obj] : [];
 }
+
+export function inBounds(n: number, min: number, max: number) {
+  if (n < min) return min;
+  if (n > max) return max;
+  return n;
+}
