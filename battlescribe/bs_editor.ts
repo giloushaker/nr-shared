@@ -12,7 +12,7 @@ import {
 } from "./bs_types";
 import { BSCatalogueManager } from "./bs_system";
 import { isObject } from "./bs_helpers";
-import { stringArrayKeys } from "./bs_convert";
+import { textNodeTags } from "./bs_convert";
 
 export interface CategoryEntry {
   name: string;
@@ -463,7 +463,7 @@ export function forEachEntryRecursive(
   while (stack.length) {
     const cur = stack.pop()!;
     for (const key of Object.keys(cur)) {
-      if (!goodJsonKeys.has(key) || stringArrayKeys.has(key)) continue;
+      if (!goodJsonKeys.has(key) || textNodeTags.has(key)) continue;
       const val = (cur as any)[key] as EditorBase[] | undefined;
       if (val && Array.isArray(val)) {
         for (const e of val) {
