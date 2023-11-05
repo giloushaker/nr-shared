@@ -49,7 +49,7 @@ export function stripHtml(originalString: string): string {
   let res = originalString;
 
   // Spaces and endline
-  res = res.replace(/\[n ]*/g, " ");
+  res = res.replace(/[\n\t ]+/g, " ");
 
   // Replace known special characters
   res = res.replace(/&bull;/g, "•");
@@ -63,7 +63,7 @@ export function stripHtml(originalString: string): string {
   res = res.replace(/(<([^>]+)>)/gi, "");
 
   // Remove other coded characters
-  res = res.replace(/[&][^;]*;/g, "");
+  res = res.replace(/[&][a-zA-Z]+;/g, "");
   return res;
 }
 
