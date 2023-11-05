@@ -12,7 +12,7 @@ import {
 } from "./bs_types";
 import { BSCatalogueManager } from "./bs_system";
 import { isObject } from "./bs_helpers";
-import { stringArrayKeys } from "./bs_convert";
+import { textNodeTags } from "./bs_convert";
 
 export interface CategoryEntry {
   name: string;
@@ -381,8 +381,9 @@ export function getNameExtra(obj: EditorBase, _refs = true): string {
       break;
   }
   if (obj.links?.length || obj.other_links?.length) {
-    const s = obj.links?.length === 1 ? "" : "s";
-    pieces.push(`(${obj.links?.length || 0} ref${s})`);
+    const refcount = (obj.links?.length ?? 0) + (obj.other_links?.length ?? 0);
+    const s = refcount === 1 ? "" : "s";
+    pieces.push(`(${refcount || 0} ref${s})`);
   }
   if (obj.comment && obj.comment[0]) {
     pieces.push("# " + obj.comment);
@@ -462,7 +463,7 @@ export function forEachEntryRecursive(
   while (stack.length) {
     const cur = stack.pop()!;
     for (const key of Object.keys(cur)) {
-      if (!goodJsonKeys.has(key) || stringArrayKeys.has(key)) continue;
+      if (!goodJsonKeys.has(key) || textNodeTags.has(key)) continue;
       const val = (cur as any)[key] as EditorBase[] | undefined;
       if (val && Array.isArray(val)) {
         for (const e of val) {
@@ -551,7 +552,7 @@ export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
   if (!entry.parent && !entry.isCatalogue()) {
     return [{ id: entry.id, key: entry.parentKey, index: 0 }];
   }
-  const result = [];
+  const result = [] as EntryPathEntry[];
   while (entry.parent) {
     const parent = (entry.parent || entry.catalogue) as any;
     result.push({
@@ -562,13 +563,13 @@ export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
     entry = entry.parent;
   }
   result.reverse();
-  return result as any;
+  return result;
 }
 export function getEntryPathInfo(entry: EditorBase): EntryPathEntryExtended[] {
   if (!entry.parent && !entry.isCatalogue()) {
     return [{ id: entry.id, key: entry.parentKey, index: 0 }];
   }
-  const result = [];
+  const result = [] as EntryPathEntryExtended[];
   do {
     const parent = (entry.parent || entry.catalogue) as any;
     if (parent) {

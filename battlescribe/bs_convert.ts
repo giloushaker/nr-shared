@@ -40,7 +40,7 @@ export const containerTags = {
 
   associations: "association",
 } as Record<string, string | undefined>;
-
+export const textNodeTags = new Set(["description", "readme", "comment"]);
 import { entries } from "./entries";
 
 const escapedHtml = /&(?:amp|lt|gt|quot|#39|apos);/g;
@@ -79,6 +79,8 @@ export function xmlToJson(data: string) {
     processEntities: false,
     parseTagValue: false,
     ignoreDeclaration: true,
+    alwaysCreateTextNode: true,
+
     isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
       return !isAttribute && tagName in containers;
     },
@@ -173,8 +175,11 @@ export function normalize(x: any) {
           x[attr]?.forEach(normalize);
         }
       }
+    } else if (textNodeTags.has(attr)) {
+      x[attr] = x[attr]["$text"] ?? "";
     }
   }
+  return x;
 }
 export function is_allowed(x: any, parentKey: string, k: string) {
   const lookedUp = allowed[k];
@@ -261,11 +266,10 @@ export function toSingle(key: string) {
 export function toPlural(key: string) {
   return containers[key];
 }
-export const stringArrayKeys = new Set(["readme", "comment", "description"]);
 const skipKeys = new Set(["?xml", "$text", "_"]);
 function renestChilds(obj: any) {
   for (const [key, value] of Object.entries(obj)) {
-    if (stringArrayKeys.has(key)) {
+    if (textNodeTags.has(key)) {
       obj[key] = Array.isArray(value) ? value : [value];
     } else if (Array.isArray(value) && !skipKeys.has(key)) {
       obj[key] = [{ [toSingle(key)!]: value }];
@@ -282,7 +286,7 @@ function putAttributesIn$(first: any) {
     if (typeof current === "object") {
       for (const [key, value] of Object.entries(current)) {
         if (Array.isArray(value)) continue;
-        if (skipKeys.has(key) || stringArrayKeys.has(key)) continue;
+        if (skipKeys.has(key) || textNodeTags.has(key)) continue;
         if (isObject(value)) continue;
         current[`_${key}`] = value;
         delete current[key];
