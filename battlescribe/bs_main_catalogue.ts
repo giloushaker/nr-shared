@@ -1,4 +1,4 @@
-import { isScopeValid } from "./bs_condition";
+import { isScopeValid, validScopes } from "./bs_condition";
 import type { ItemTypeNames } from "./bs_editor";
 import {
   addObj,
@@ -1066,7 +1066,8 @@ export class Catalogue extends Base {
   }
   updateCondition(condition: (Constraint | Condition) & EditorBase, previousField?: string) {
     if (condition.scope) {
-      if (!isScopeValid(getModifierOrConditionParent(condition), condition.scope)) {
+      const parent = getModifierOrConditionParent(condition);
+      if (parent && !isScopeValid(parent, condition.scope)) {
         this.addError(condition, { source: condition, id: "invalid-scope", msg: `Invalid scope ${condition.scope}` });
       } else {
         this.removeError(condition, "invalid-scope");
@@ -1096,6 +1097,20 @@ export class Catalogue extends Base {
         // popObj(this.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
         popObj(this.manager.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
         return;
+      }
+      if (condition.scope && !validScopes.has(condition.scope)) {
+        const scope = this.findOptionById(condition.scope);
+        if (scope) {
+          this.addOtherRef(condition, scope as EditorBase);
+          this.removeError(condition, "scope-not-exist");
+        } else {
+          this.addError(condition, {
+            source: condition,
+            severity: "error",
+            msg: "scope id does not exist",
+            id: "scope-not-exist",
+          });
+        }
       }
     }
     this.addError(condition, {
