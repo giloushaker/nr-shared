@@ -126,6 +126,7 @@ export class Base implements BSModifierBase {
   comment?: string[];
   publicationId!: string;
   typeName?: string;
+  typeId?: string;
   // Maybe move this to catalogue
   profileTypes?: BSIProfileType[];
 
