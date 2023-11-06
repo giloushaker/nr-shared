@@ -197,6 +197,12 @@ export class Catalogue extends Base {
       (cur, parent) => {
         cur.parent = parent;
         cur.catalogue = this;
+        if (!cur.links) {
+          cur.links = [];
+        }
+        if (!cur.other_links) {
+          cur.other_links = [];
+        }
         if (cur.target) {
           addObjUnique(cur.target as EditorBase, "links", cur);
         }
@@ -1077,7 +1083,7 @@ export class Catalogue extends Base {
       if (condition.scope && !validScopes.has(condition.scope)) {
         const scope = this.findOptionById(condition.scope);
         if (scope) {
-          this.addOtherRef(condition, scope as EditorBase);
+          scope.getCatalogue().addOtherRef(condition, scope as EditorBase);
         }
       }
     }

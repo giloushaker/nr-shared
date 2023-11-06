@@ -11,7 +11,7 @@ export const validScopes = new Set([
   "roster",
   "primary-catalogue",
 ]);
-
+export const validChildIds = new Set(["any", "unit", "model", "upgrade"]);
 export function isScopeValid(parent: EditorBase, scope: string) {
   if (validScopes.has(scope)) return true;
   const catalogue = parent.catalogue;

@@ -13,6 +13,7 @@ import {
 import { BSCatalogueManager } from "./bs_system";
 import { isObject } from "./bs_helpers";
 import { textNodeTags } from "./bs_convert";
+import { validChildIds, validScopes } from "./bs_condition";
 
 export interface CategoryEntry {
   name: string;
@@ -502,6 +503,22 @@ export async function onRemoveEntry(removed: EditorBase, manager?: BSCatalogueMa
       const found = entry.catalogue.findOptionById(entry.typeId);
       if (found) {
         entry.catalogue.removeRef(entry, found as EditorBase);
+      }
+    }
+    if (entry instanceof Condition) {
+      const scope = entry.scope;
+      const childId = entry.childId;
+      if (!validScopes.has(scope)) {
+        const found = entry.catalogue.findOptionById(entry.scope);
+        if (found) {
+          entry.catalogue.removeOtherRef(entry, found as EditorBase);
+        }
+      }
+      if (!validChildIds.has(childId)) {
+        const found = entry.catalogue.findOptionById(entry.childId);
+        if (found) {
+          entry.catalogue.removeOtherRef(entry, found as EditorBase);
+        }
       }
     }
     delete (entry as any).parent;
