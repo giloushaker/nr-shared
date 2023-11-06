@@ -1023,7 +1023,9 @@ export class Catalogue extends Base {
   }
   addOtherRef(from: EditorBase, to: EditorBase) {
     if (!to.other_links) to.other_links = [];
-    to.other_links.push(from);
+    if (to.other_links.indexOf(from) === -1) {
+      to.other_links.push(from);
+    }
   }
   updateLink(link: Link & EditorBase) {
     if (link.target) {
