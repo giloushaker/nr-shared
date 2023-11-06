@@ -46,10 +46,11 @@ export function stripHtml(originalString: string): string {
   if (originalString == null) {
     return "";
   }
+
   let res = originalString;
 
   // Spaces and endline
-  res = res.replace(/[\n\t ]+/g, " ");
+  res = res.replace(/[\t ]+/g, " ");
 
   // Replace known special characters
   res = res.replace(/&bull;/g, "•");
@@ -57,7 +58,7 @@ export function stripHtml(originalString: string): string {
   res = res.replace(/−/g, "-");
 
   // Line Break tags
-  res = res.replace(/<br ?[/]?>/g, "\n");
+  res = res.replace(/<br *[/]?>/g, "\n");
 
   // Remove other tags
   res = res.replace(/(<([^>]+)>)/gi, "");
