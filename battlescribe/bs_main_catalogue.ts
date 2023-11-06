@@ -1072,6 +1072,12 @@ export class Catalogue extends Base {
       } else {
         this.removeError(condition, "invalid-scope");
       }
+      if (condition.scope && !validScopes.has(condition.scope)) {
+        const scope = this.findOptionById(condition.scope);
+        if (scope) {
+          this.addOtherRef(condition, scope as EditorBase);
+        }
+      }
     }
     if (condition instanceof Constraint) {
       return this.updateConstraint(condition as Constraint & EditorBase);
@@ -1097,20 +1103,6 @@ export class Catalogue extends Base {
         // popObj(this.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
         popObj(this.manager.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
         return;
-      }
-      if (condition.scope && !validScopes.has(condition.scope)) {
-        const scope = this.findOptionById(condition.scope);
-        if (scope) {
-          this.addOtherRef(condition, scope as EditorBase);
-          this.removeError(condition, "scope-not-exist");
-        } else {
-          this.addError(condition, {
-            source: condition,
-            severity: "error",
-            msg: "scope id does not exist",
-            id: "scope-not-exist",
-          });
-        }
       }
     }
     this.addError(condition, {
