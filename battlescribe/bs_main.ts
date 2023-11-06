@@ -95,6 +95,20 @@ export function getDataObject(data: BSIData): BSIGameSystem | BSICatalogue {
   if (data.catalogue) return data.catalogue;
   throw Error("getDataObject data argument is not a valid system or catalogue");
 }
+export function replaceDataObject(
+  data: BSIData,
+  newObject: BSIGameSystem | BSICatalogue
+): BSIGameSystem | BSICatalogue {
+  if (data.gameSystem) {
+    data.gameSystem = newObject as BSIGameSystem;
+    return;
+  }
+  if (data.catalogue) {
+    data.catalogue = newObject as BSICatalogue;
+    return;
+  }
+  throw Error("replaceDataObject data argument is not a valid system or catalogue");
+}
 export function getDataDbId(data: BSIData | Catalogue): string {
   if ((data as Catalogue).isCatalogue && (data as Catalogue).isCatalogue()) {
     if (data.id && data.gameSystemId) {
