@@ -1,6 +1,6 @@
 import type { EditorBase } from "./bs_main_catalogue";
 
-const validScopes = new Set([
+export const validScopes = new Set([
   "force",
   "roster",
   "self",
