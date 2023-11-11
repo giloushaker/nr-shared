@@ -243,6 +243,7 @@ export interface SavedRoster {
 export interface SavedForce {
   id: string;
   name: string;
+  customName?: string;
   entryId: string;
   catalogueId: string;
   catalogueRevision: string;
@@ -253,6 +254,7 @@ export interface SavedForce {
 export interface SavedSelection {
   id: string;
   name: string;
+  customName?: string;
   entryId: string;
   number: number;
   type: string;
