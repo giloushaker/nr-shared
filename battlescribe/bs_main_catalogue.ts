@@ -1,4 +1,4 @@
-import { isScopeValid } from "./bs_condition";
+import { isScopeValid, validScopes } from "./bs_condition";
 import type { ItemTypeNames } from "./bs_editor";
 import {
   addObj,
@@ -197,6 +197,12 @@ export class Catalogue extends Base {
       (cur, parent) => {
         cur.parent = parent;
         cur.catalogue = this;
+        if (!cur.links) {
+          cur.links = [];
+        }
+        if (!cur.other_links) {
+          cur.other_links = [];
+        }
         if (cur.target) {
           addObjUnique(cur.target as EditorBase, "links", cur);
         }
@@ -1023,7 +1029,9 @@ export class Catalogue extends Base {
   }
   addOtherRef(from: EditorBase, to: EditorBase) {
     if (!to.other_links) to.other_links = [];
-    to.other_links.push(from);
+    if (to.other_links.indexOf(from) === -1) {
+      to.other_links.push(from);
+    }
   }
   updateLink(link: Link & EditorBase) {
     if (link.target) {
@@ -1066,10 +1074,17 @@ export class Catalogue extends Base {
   }
   updateCondition(condition: (Constraint | Condition) & EditorBase, previousField?: string) {
     if (condition.scope) {
-      if (!isScopeValid(getModifierOrConditionParent(condition), condition.scope)) {
+      const parent = getModifierOrConditionParent(condition);
+      if (parent && !isScopeValid(parent, condition.scope)) {
         this.addError(condition, { source: condition, id: "invalid-scope", msg: `Invalid scope ${condition.scope}` });
       } else {
         this.removeError(condition, "invalid-scope");
+      }
+      if (condition.scope && !validScopes.has(condition.scope)) {
+        const scope = this.findOptionById(condition.scope);
+        if (scope) {
+          scope.getCatalogue().addOtherRef(condition, scope as EditorBase);
+        }
       }
     }
     if (condition instanceof Constraint) {

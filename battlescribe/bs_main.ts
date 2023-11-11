@@ -95,6 +95,7 @@ export function getDataObject(data: BSIData): BSIGameSystem | BSICatalogue {
   if (data.catalogue) return data.catalogue;
   throw Error("getDataObject data argument is not a valid system or catalogue");
 }
+
 export function getDataDbId(data: BSIData | Catalogue): string {
   if ((data as Catalogue).isCatalogue && (data as Catalogue).isCatalogue()) {
     if (data.id && data.gameSystemId) {
@@ -126,6 +127,7 @@ export class Base implements BSModifierBase {
   comment?: string[];
   publicationId!: string;
   typeName?: string;
+  typeId?: string;
   // Maybe move this to catalogue
   profileTypes?: BSIProfileType[];
 

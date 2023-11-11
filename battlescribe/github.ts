@@ -34,7 +34,7 @@ export function parseGitHubUrl(githubUrl: string) {
   const match = githubUrl.match(githubUrlRegex);
 
   if (!match) {
-    throw new Error("Invalid GitHub URL format");
+    throw new Error("Invalid GitHub URL format: " + githubUrl);
   }
 
   const [, repoOwner, repoName] = match;
