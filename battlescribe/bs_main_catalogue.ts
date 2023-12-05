@@ -570,8 +570,8 @@ export class Catalogue extends Base {
   generateForces(categories: Record<string, Category>): Force[] {
     const result = [];
     for (const force of this.forcesIterator()) {
-      const copied = clone(force);
-      copied.main_catalogue = this;
+      const copiedForce = clone(force);
+      copiedForce.main_catalogue = this;
       const forceCategories = [];
       if (categories[UNCATEGORIZED_ID]?.units?.length) {
         forceCategories.push(categories[UNCATEGORIZED_ID]);
@@ -592,6 +592,18 @@ export class Catalogue extends Base {
           forceCategories.push(copied);
         }
       }
+      for (const categoryEntry of force.categoryEntries || []) {
+        if (categoryEntry.id in categories) {
+          const category = categories[categoryEntry.id]
+          const copied = clone(category);
+          copied.main_catalogue = this;
+          for (const child of copied.childs) {
+            hasUnits.add(child.id);
+          }
+          forceCategories.push(copied);
+        }
+      }
+      
       const missingUnits = this.units.filter((o) => !hasUnits.has(o.id));
       if (missingUnits.length) {
         const illegal_clone = clone(categories[ILLEGAL_ID]);
@@ -600,14 +612,14 @@ export class Catalogue extends Base {
         forceCategories.push(illegal_clone);
       }
 
-      copied.childs = forceCategories;
-      copied.categories = forceCategories;
-      this.index[copied.id] = copied;
-      if (copied.forceEntries) {
-        copied.generateForces(categories);
+      copiedForce.childs = forceCategories;
+      copiedForce.categories = forceCategories;
+      this.index[copiedForce.id] = copiedForce;
+      if (copiedForce.forceEntries) {
+        copiedForce.generateForces(categories);
       }
 
-      result.push(copied);
+      result.push(copiedForce);
     }
     this.forces = result;
     this.childs = result;
@@ -615,6 +627,7 @@ export class Catalogue extends Base {
   }
   generateCategories(units: Record<string, Base[]>): Record<string, Category> {
     const result = {} as Record<string, Category>;
+    const set = new Set<string>();
     for (const category of this.iterateCategoryEntries()) {
       const copied = clone(category);
       copied.main_catalogue = this;
@@ -623,7 +636,22 @@ export class Catalogue extends Base {
       copied.childs = foundUnits;
       this.index[category.id] = category;
       result[copied.id] = copied;
+      set.add(copied.id)
     }
+     for(const key in units){
+      if (!set.has(key)){
+        const category = this.findOptionById(key) as Category
+        if (category){
+          const copied = clone(category);
+          copied.main_catalogue = this;
+          const foundUnits = units[copied.id] || [];
+          copied.units = foundUnits;
+          copied.childs = foundUnits;
+          this.index[category.id] = category;
+          result[copied.id] = copied;
+        }
+      }
+     }
     const uncategorizedUnits = units[UNCATEGORIZED_ID] || [];
     const uncategorized = {
       name: "Uncategorized",

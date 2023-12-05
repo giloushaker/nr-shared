@@ -131,6 +131,7 @@ export class Base implements BSModifierBase {
   publicationId!: string;
   typeName?: string;
   typeId?: string;
+  categoryEntryId?: string; // Legacy categories
   // Maybe move this to catalogue
   profileTypes?: BSIProfileType[];
 
@@ -261,6 +262,9 @@ export class Base implements BSModifierBase {
   }
   getTypeName(): string | undefined {
     return this.typeName;
+  }
+  getCategoryEntryId() : string | undefined {
+    return this.categoryEntryId;
   }
   getHidden(): boolean | undefined {
     return this.hidden;
@@ -546,7 +550,7 @@ export class Base implements BSModifierBase {
     for (const categoryLink of this.categoryLinks || []) {
       if (categoryLink.primary) return categoryLink.targetId;
     }
-    return UNCATEGORIZED_ID;
+    return this.getCategoryEntryId() ?? UNCATEGORIZED_ID;
   }
   getPrimaryCategoryLink(): CategoryLink | undefined {
     for (const categoryLink of this.categoryLinks || []) {
@@ -692,6 +696,9 @@ export class Link<T extends Base = Group | Entry> extends Base {
       (this as any as Group).defaultSelectionEntryId || (this.target as any as Group)?.getDefaultSelectionEntryId()
     );
   }
+  getCategoryEntryId() : string | undefined {
+    return this.categoryEntryId ?? this.target?.categoryEntryId;
+  }
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore: TS2611
   get associationConstraints(): AssociationConstraint[] | undefined {
@@ -773,7 +780,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
     for (const categoryLink of this.target.categoryLinks || []) {
       if (categoryLink.primary) return categoryLink.targetId;
     }
-    return UNCATEGORIZED_ID;
+    return this.getCategoryEntryId() ?? UNCATEGORIZED_ID;
   }
   getPrimaryCategoryLink(): CategoryLink | undefined {
     for (const categoryLink of this.categoryLinks || []) {
