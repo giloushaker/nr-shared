@@ -215,6 +215,7 @@ export function shouldPatch(obj: any, conditions: PatchCondition[]): boolean {
       case "if":
       default: {
         if (obj[condition.field] !== condition.value) return false;
+      
         break;
       }
     }
@@ -227,10 +228,20 @@ export function patchJson(json: any, patches: PatchIndex): number {
     for (const field of Object.keys(patches)) {
       const fieldMatchPatches = patches[field];
       const currentValue = obj[field];
-      const match = fieldMatchPatches[currentValue];
-      if (!match) continue;
+      let match = fieldMatchPatches[currentValue]
+      if (!match) {
+        if (currentValue !== undefined && fieldMatchPatches["$any"]) {
+          match = fieldMatchPatches["$any"];
+        } else {
+          continue;
+        }
+      }
       if (!match.$patchConditions || shouldPatch(obj, match.$patchConditions)) {
-        Object.assign(obj, match);
+        if (match.$move) {
+            obj[match.$move] = currentValue
+        } else {
+          Object.assign(obj, match);
+        }
         changes++;
         delete obj.$patchConditions;
         if (match.$patchPush) {
