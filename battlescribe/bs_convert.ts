@@ -82,6 +82,7 @@ export function xmlToJson(data: string) {
     alwaysCreateTextNode: true,
 
     isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
+      
       return !isAttribute && tagName in containers;
     },
     attributeValueProcessor: (name, val) => unescape(val),
@@ -163,6 +164,7 @@ export function normalize(x: any) {
     if (x[attr] === "") {
       delete x[attr];
     } else if (containerTags[attr] && x[attr]) {
+
       if (attr in oldBuggedTypes) {
         const normal = x[attr][containerTags[attr] as string];
         const old = x[attr][oldBuggedTypes[attr]];
@@ -170,7 +172,12 @@ export function normalize(x: any) {
         x[attr]?.forEach(normalize);
       } else {
         const val = x[attr][containerTags[attr] as string];
-        if (val) {
+
+      // Remove empty arrays that become an incorrect element
+        if (!Array.isArray(val)){
+          delete x[attr]
+        }
+        else {
           x[attr] = val;
           x[attr]?.forEach(normalize);
         }

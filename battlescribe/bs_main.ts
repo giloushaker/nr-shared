@@ -90,9 +90,12 @@ const arrayKeys = [
 const arrayKeysWithoutId = ["conditions", "conditionGroups", "modifiers", "modifierGroups", "repeats"];
 export const goodKeys = new Set([...arrayKeys, ...arrayKeysWithoutId]);
 export const goodKeysWiki = new Set(arrayKeys);
-export function getDataObject(data: BSIData): BSIGameSystem | BSICatalogue {
-  if (data.gameSystem) return data.gameSystem;
-  if (data.catalogue) return data.catalogue;
+export function getDataObject(data: BSIData | Catalogue) : BSIGameSystem | BSICatalogue {
+  if ((data as Catalogue).isCatalogue && (data as Catalogue).isCatalogue()) {
+    return data as BSICatalogue;
+  }
+  if ((data as BSIData).gameSystem) return (data as BSIData).gameSystem!;
+  if ((data as BSIData).catalogue) return (data as BSIData).catalogue!;
   throw Error("getDataObject data argument is not a valid system or catalogue");
 }
 
