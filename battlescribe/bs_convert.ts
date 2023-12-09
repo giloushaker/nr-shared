@@ -174,13 +174,13 @@ export function normalize(x: any) {
         const val = x[attr][containerTags[attr] as string];
 
       // Remove empty arrays that become an incorrect element
-        if (!Array.isArray(val)){
-          delete x[attr]
-        }
-        else {
+        if (Array.isArray(val)){
           x[attr] = val;
           x[attr]?.forEach(normalize);
         }
+        else if (isObject(x[attr])) {
+          delete x[attr]
+        } 
       }
     } else if (textNodeTags.has(attr)) {
       x[attr] = x[attr]["$text"] ?? "";
