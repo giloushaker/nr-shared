@@ -215,7 +215,7 @@ export function shouldPatch(obj: any, conditions: PatchCondition[]): boolean {
       case "if":
       default: {
         if (obj[condition.field] !== condition.value) return false;
-      
+
         break;
       }
     }
@@ -228,7 +228,7 @@ export function patchJson(json: any, patches: PatchIndex): number {
     for (const field of Object.keys(patches)) {
       const fieldMatchPatches = patches[field];
       const currentValue = obj[field];
-      let match = fieldMatchPatches[currentValue]
+      let match = fieldMatchPatches[currentValue];
       if (!match) {
         if (currentValue !== undefined && fieldMatchPatches["$any"]) {
           match = fieldMatchPatches["$any"];
@@ -238,7 +238,7 @@ export function patchJson(json: any, patches: PatchIndex): number {
       }
       if (!match.$patchConditions || shouldPatch(obj, match.$patchConditions)) {
         if (match.$move) {
-            obj[match.$move] = currentValue
+          obj[match.$move] = currentValue;
         } else {
           Object.assign(obj, match);
         }
@@ -295,6 +295,9 @@ export function sortByDescending<T>(array: T[], getKey: (item: T) => Sortable): 
 }
 export function findMax<T>(array: T[], getKey: (item: T) => any): T {
   if (!array.length) return undefined as any;
+  if (array.length == 1) {
+    return array[0];
+  }
   let last = array[0];
   let lastVal = getKey(last).toString();
   for (const o of array) {
