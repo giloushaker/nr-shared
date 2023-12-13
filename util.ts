@@ -568,3 +568,19 @@ export function prettifyTime(milliseconds: number): string {
 
   return timeString;
 }
+
+export function shortenString(input: string): string {
+  const words = input.split(/\s+/);
+
+  // If the input string has only one word
+  if (words.length === 1) {
+    // Return the first two characters of that word, in lowercase
+    return input.substring(0, 2).toLowerCase();
+  }
+
+  // If the input string has more than one word
+  return words
+    .map((word) => word[0])
+    .join("")
+    .toLowerCase(); // Convert the final string to lowercase
+}
