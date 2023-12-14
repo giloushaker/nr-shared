@@ -1,8 +1,8 @@
 export interface AppearanceTheme {
   background: string;
   backgroundTexture: string;
-  backgroundSize: string;
-  bga: string | number;
+
+  bga: number;
   hue: number;
 
   title: string;
@@ -20,6 +20,7 @@ export interface AppearanceTheme {
   invertImages: boolean;
   invertImagesBrightness: string;
 
+  italic?: "italic" | "normal";
   font: string;
   fontSize: number;
   fontHeader: string;
@@ -36,7 +37,11 @@ export interface AppearanceTheme {
   colorGreen: string;
   colorLightblue: string;
   costColor: string;
-  titleBarColor: string;
 
   dark?: boolean;
+  fitBackground: boolean;
+
+  titleBarColor: string;
+  hoverColor: string;
+  hoverTransparency: number;
 }
