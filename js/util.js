@@ -330,8 +330,6 @@ export async function setAppearanceFont(appearence, key, _defaultFamily = "sans-
           break;
         }
       }
-
-      console.log(foundSheet.rules);
       _fontDynamicImportCache[value] = fileref;
     } else {
       value = _fontDynamicImportCache[value];
