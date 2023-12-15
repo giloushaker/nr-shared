@@ -17,7 +17,7 @@ function hexToRgb(hex: string): RGB | null {
     : null;
 }
 
-export async function updateCssVars(appearence: AppearanceTheme /* , algo: AlgoSettings */) {
+export function updateCssVars(appearence: AppearanceTheme /* , algo: AlgoSettings */) {
   if (appearence.background) {
     const bgRgb = hexToRgb(appearence.background);
     if (bgRgb != null) {
@@ -185,7 +185,7 @@ export async function updateCssVars(appearence: AppearanceTheme /* , algo: AlgoS
   }
 }
 
-export async function setAppearanceFont(
+export function setAppearanceFont(
   appearence: AppearanceTheme,
   key: string,
   _defaultFamily = "sans-serif",
