@@ -39,11 +39,13 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40): BSI
       profile.small = [] as BSICharacteristic[];
       for (const characteristic of profile.characteristics) {
         const maxCharacteristicLength = maxes[characteristic.typeId];
-        if (maxCharacteristicLength > bigStringLength) {
+        profile.small.push(characteristic);
+
+        /*         if (maxCharacteristicLength > bigStringLength) {
           profile.big.push(characteristic);
         } else {
           profile.small.push(characteristic);
-        }
+        } */
       }
     }
   }
