@@ -584,3 +584,12 @@ export function shortenString(input: string): string {
     .join("")
     .toLowerCase(); // Convert the final string to lowercase
 }
+
+export function getMimeTypeFromBase64(base64String: string) {
+  // Regular expression to extract MIME type from the base64 string
+  const regex = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/;
+  const match = base64String.match(regex);
+
+  // Return the extracted MIME type or null if not found
+  return match ? match[1] : null;
+}
