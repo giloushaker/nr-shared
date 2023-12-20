@@ -62,9 +62,6 @@ function setBackground(id: string, colors: string[], backgroundAlpha: number): v
 export function updateCssVars(appearence: AppearanceTheme) {
   if (appearence.background) {
     setBackground("bg", appearence.background.colors, appearence.background.alpha);
-  }
-
-  if (appearence.background) {
     setBackground("popups_background", appearence.background.colors, 100);
   }
 
@@ -139,6 +136,7 @@ export function updateCssVars(appearence: AppearanceTheme) {
 
   if (appearence.hoverColor) {
     setBackground("hover-color", appearence.hoverColor.colors, appearence.hoverColor.alpha);
+    setBackground("popups-hover", appearence.hoverColor.colors, 100);
   }
 
   if (appearence.fontColor) {
