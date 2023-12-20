@@ -4,20 +4,14 @@ export interface AppearanceBackground {
 }
 
 export interface AppearanceTheme {
-  background: string;
+  background: AppearanceBackground;
   backgroundTexture: string;
-
-  bga: number;
-  hue: number;
 
   title: AppearanceBackground;
   forcesBackground: AppearanceBackground;
+  unitsBackground: AppearanceBackground;
 
-  unitsBackground: {
-    colors: string[];
-    alpha: number;
-  };
-
+  hue: number;
   highlight: string;
 
   dropdownStyle: number;

@@ -49,7 +49,7 @@ function setBackground(id: string, colors: string[], backgroundAlpha: number): v
   if (colors.length == 1) {
     // If colors is a string, set only the `--${id}` variable to that color with alpha
     const rgbaColor = convertToRgba(colors[0], backgroundAlpha / 100);
-    document.documentElement.style.setProperty(`--${id}`, rgbaColor);
+    document.documentElement.style.setProperty(`--${id}`, `linear-gradient(${rgbaColor}, ${rgbaColor})`);
   } else if (Array.isArray(colors)) {
     // If colors is an array, construct a linear gradient from the colors with alpha
     const gradient = `linear-gradient(to right, ${colors
@@ -59,14 +59,13 @@ function setBackground(id: string, colors: string[], backgroundAlpha: number): v
   }
 }
 
-export function updateCssVars(appearence: AppearanceTheme /* , algo: AlgoSettings */) {
+export function updateCssVars(appearence: AppearanceTheme) {
   if (appearence.background) {
-    const bgRgb = hexToRgb(appearence.background);
-    if (bgRgb != null) {
-      for (const field in bgRgb) {
-        document.documentElement.style.setProperty(`--bg-${field}`, (bgRgb as any)[field]);
-      }
-    }
+    setBackground("bg", appearence.background.colors, appearence.background.alpha);
+  }
+
+  if (appearence.background) {
+    setBackground("popups_background", appearence.background.colors, 100);
   }
 
   if (appearence.title) {
@@ -122,7 +121,7 @@ export function updateCssVars(appearence: AppearanceTheme /* , algo: AlgoSetting
 
   if (appearence.fitBackground) {
     document.documentElement.style.setProperty(`--backgroundRepeat`, "no-repeat");
-    document.documentElement.style.setProperty(`--backgroundSize`, "auto 100%");
+    document.documentElement.style.setProperty(`--backgroundSize`, "cover");
     document.documentElement.style.setProperty(`--backgroundPosition`, "center");
   } else {
     document.documentElement.style.setProperty(`--backgroundRepeat`, "repeat");
@@ -166,14 +165,6 @@ export function updateCssVars(appearence: AppearanceTheme /* , algo: AlgoSetting
 
   if (appearence.colorLightblue) {
     document.documentElement.style.setProperty(`--color-lightblue`, appearence.colorLightblue);
-  }
-
-  if (appearence.bga) {
-    let fontColor = appearence.bga;
-    if (fontColor > 1) {
-      fontColor /= 100;
-    }
-    document.documentElement.style.setProperty(`--bg-a`, `${fontColor}`);
   }
 
   if (appearence.invertImagesBrightness) {
@@ -230,66 +221,3 @@ export function setAppearanceFont(
   document.documentElement.style.setProperty(`--${keyFont}`, value || _defaultFamily);
   document.documentElement.style.setProperty(`--${keyFontSize}`, (appearence[keyFontSize] || _defaultSize) + "px");
 }
-
-/* 
-  const _fontDynamicImportCache: any = {};
-  const isFontFaceUrl = Boolean(value.match(/^.+(\:\/\/).+(\.).+(ff)$/));
-  const isImportUrl = !isFontFaceUrl && Boolean(value.match(/^.+(\:\/\/).+$/));
-  if (isFontFaceUrl || isImportUrl) value = encodeURI(value);
-  if (isImportUrl) {
-    if (!_fontDynamicImportCache[value]) {
-      _fontDynamicImportCache[value] = "lock";
-
-      console.log(`Importing css: ${encodeURI(value)}`);
-      var head = document.getElementsByTagName("head")[0];
-      var fileref = document.createElement("link");
-      fileref.setAttribute("rel", "stylesheet");
-      fileref.setAttribute("type", "text/css");
-      fileref.setAttribute("href", value);
-      fileref.setAttribute("media", "none");
-
-      let promiseResolve: Function;
-
-      var promise = new Promise(function (resolve) {
-        promiseResolve = resolve;
-      });
-
-      fileref.onload = () => {
-        fileref.setAttribute("media", "all");
-        console.log("loaded css");
-        promiseResolve();
-      };
-
-      head.append(fileref);
-      await promise;
-
-            let foundSheet = null;
-      for (let i = 0; i < document.styleSheets.length; i++) {
-        const sheet = document.styleSheets[i];
-        if (sheet.href === value) {
-          foundSheet = sheet;
-          break;
-        }
-      } 
-      _fontDynamicImportCache[value] = fileref;
-    } else {
-      value = _fontDynamicImportCache[value];
-    }
-  } */
-
-// if (isFontFaceUrl) {
-//   if (!_fontDynamicImportCache[value]) {
-//     console.log(`Importing font: ${value}`);
-//     const fontName = `${keyFont}:${value}`;
-//     const myFont = new FontFace(fontName, `url(${value})`);
-//     await myFont.load();
-
-//     document.fonts.add(myFont);
-//     _fontDynamicImportCache[value] = fontName;
-//     value = fontName;
-//   } else {
-//     value = _fontDynamicImportCache[value];
-//   }
-// } //
-
-//  appearence [keyFontSize] = appearence[keyFontSize];
