@@ -1,3 +1,8 @@
+export interface AppearanceBackground {
+  colors: string[];
+  alpha: number;
+}
+
 export interface AppearanceTheme {
   background: string;
   backgroundTexture: string;
@@ -5,15 +10,8 @@ export interface AppearanceTheme {
   bga: number;
   hue: number;
 
-  title: {
-    colors: string[];
-    alpha: number;
-  };
-
-  forcesBackground: {
-    colors: string[];
-    alpha: number;
-  };
+  title: AppearanceBackground;
+  forcesBackground: AppearanceBackground;
 
   unitsBackground: {
     colors: string[];
@@ -55,6 +53,5 @@ export interface AppearanceTheme {
   fitBackground: boolean;
 
   titleBarColor: string;
-  hoverColor: string;
-  hoverTransparency: number;
+  hoverColor: AppearanceBackground;
 }

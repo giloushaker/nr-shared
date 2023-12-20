@@ -139,16 +139,7 @@ export function updateCssVars(appearence: AppearanceTheme /* , algo: AlgoSetting
   }
 
   if (appearence.hoverColor) {
-    const bgRgb = hexToRgb(appearence.hoverColor);
-    if (bgRgb != null) {
-      for (const field in bgRgb) {
-        document.documentElement.style.setProperty(`--hover-color-${field}`, (bgRgb as any)[field]);
-      }
-    }
-  }
-
-  if (appearence.hoverTransparency != null) {
-    document.documentElement.style.setProperty(`--hover-transparency`, `${appearence.hoverTransparency / 100}`);
+    setBackground("hover-color", appearence.hoverColor.colors, appearence.hoverColor.alpha);
   }
 
   if (appearence.fontColor) {
