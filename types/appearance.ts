@@ -5,8 +5,21 @@ export interface AppearanceTheme {
   bga: number;
   hue: number;
 
-  title: string;
-  forcesBackground: string;
+  title: {
+    colors: string[];
+    alpha: number;
+  };
+
+  forcesBackground: {
+    colors: string[];
+    alpha: number;
+  };
+
+  unitsBackground: {
+    colors: string[];
+    alpha: number;
+  };
+
   highlight: string;
 
   dropdownStyle: number;

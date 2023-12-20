@@ -6,6 +6,10 @@ export interface RGB {
   b: number;
 }
 
+function first(arr: string | string[]) {
+  return Array.isArray(arr) ? arr[0] : arr;
+}
+
 function hexToRgb(hex: string): RGB | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
@@ -15,6 +19,44 @@ function hexToRgb(hex: string): RGB | null {
         b: parseInt(result[3], 16),
       }
     : null;
+}
+
+function setRGB(id: string, color: string) {
+  const titleRgb = hexToRgb(color);
+  if (titleRgb != null) {
+    for (const field in titleRgb) {
+      document.documentElement.style.setProperty(`${id}-${field}`, (titleRgb as any)[field]);
+    }
+  }
+}
+
+function setBackground(id: string, colors: string[], backgroundAlpha: number): void {
+  const convertToRgba = (color: string, alpha: number): string => {
+    if (color.startsWith("#")) {
+      // Convert hex to rgba
+      const r = parseInt(color.slice(1, 3), 16);
+      const g = parseInt(color.slice(3, 5), 16);
+      const b = parseInt(color.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    return color; // Return the original color if it's not in hex format
+  };
+
+  if (!colors) {
+    return;
+  }
+
+  if (colors.length == 1) {
+    // If colors is a string, set only the `--${id}` variable to that color with alpha
+    const rgbaColor = convertToRgba(colors[0], backgroundAlpha / 100);
+    document.documentElement.style.setProperty(`--${id}`, rgbaColor);
+  } else if (Array.isArray(colors)) {
+    // If colors is an array, construct a linear gradient from the colors with alpha
+    const gradient = `linear-gradient(to right, ${colors
+      .map((color) => convertToRgba(color, backgroundAlpha / 100))
+      .join(", ")})`;
+    document.documentElement.style.setProperty(`--${id}`, gradient);
+  }
 }
 
 export function updateCssVars(appearence: AppearanceTheme /* , algo: AlgoSettings */) {
@@ -28,19 +70,18 @@ export function updateCssVars(appearence: AppearanceTheme /* , algo: AlgoSetting
   }
 
   if (appearence.title) {
-    const titleRgb = hexToRgb(appearence.title);
-    if (titleRgb != null) {
-      for (const field in titleRgb) {
-        document.documentElement.style.setProperty(`--title-${field}`, (titleRgb as any)[field]);
-      }
-    }
+    setBackground("title", appearence.title.colors, appearence.title.alpha);
   }
 
   if (appearence.forcesBackground) {
-    document.documentElement.style.setProperty(`--forces_background`, appearence.forcesBackground);
+    setBackground("forces_background", appearence.forcesBackground.colors, appearence.forcesBackground.alpha);
   } else if (appearence.title) {
-    document.documentElement.style.setProperty(`--forces_background`, appearence.title);
+    setBackground("forces_background", appearence.title.colors, appearence.title.alpha);
     appearence.forcesBackground = appearence.title;
+  }
+
+  if (appearence.unitsBackground) {
+    setBackground("units_background", appearence.unitsBackground.colors, appearence.unitsBackground.alpha);
   }
 
   if (appearence.highlight) {
