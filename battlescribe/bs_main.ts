@@ -1205,6 +1205,13 @@ export const goodJsonKeys = new Set([
   // "type",
   // "conditions",
   // "conditionGroups",
+
+
+  //Legacy
+  "costTypeId",
+  "profileTypeId",
+  "characteristicTypeId",
+  "value"
 ]);
 export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>, fixRoot = false): string {
   const root: any = {

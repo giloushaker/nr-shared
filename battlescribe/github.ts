@@ -4,9 +4,9 @@ import type { BattleScribeRepoData } from "~/assets/shared/battlescribe/bs_impor
 import { removeSuffix } from "~/assets/shared/battlescribe/bs_helpers";
 export interface GithubIntegration {
   githubUrl: string;
-  githubRepo: string;
-  githubOwner: string;
-  githubName: string;
+  githubRepo?: string;
+  githubOwner?: string;
+  githubName?: string;
   repoData?: BattleScribeRepoData;
   discovered?: boolean;
 }
