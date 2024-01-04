@@ -90,7 +90,7 @@ const arrayKeys = [
 const arrayKeysWithoutId = ["conditions", "conditionGroups", "modifiers", "modifierGroups", "repeats"];
 export const goodKeys = new Set([...arrayKeys, ...arrayKeysWithoutId]);
 export const goodKeysWiki = new Set(arrayKeys);
-export function getDataObject(data: BSIData | Catalogue) : BSIGameSystem | BSICatalogue {
+export function getDataObject(data: BSIData | Catalogue): BSIGameSystem | BSICatalogue {
   if ((data as Catalogue).isCatalogue && (data as Catalogue).isCatalogue()) {
     return data as BSICatalogue;
   }
@@ -184,6 +184,7 @@ export class Base implements BSModifierBase {
   // NR Only
   associations?: NRAssociation[];
   associationConstraints?: AssociationConstraint[];
+  noAlphabeticalSort?: boolean;
 
   constructor(json: any) {
     return Object.setPrototypeOf(json, Object.getPrototypeOf(this));
@@ -263,7 +264,7 @@ export class Base implements BSModifierBase {
   getTypeName(): string | undefined {
     return this.typeName;
   }
-  getCategoryEntryId() : string | undefined {
+  getCategoryEntryId(): string | undefined {
     return this.categoryEntryId;
   }
   getHidden(): boolean | undefined {
@@ -696,7 +697,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
       (this as any as Group).defaultSelectionEntryId || (this.target as any as Group)?.getDefaultSelectionEntryId()
     );
   }
-  getCategoryEntryId() : string | undefined {
+  getCategoryEntryId(): string | undefined {
     return this.categoryEntryId ?? this.target?.categoryEntryId;
   }
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -1200,18 +1201,18 @@ export const goodJsonKeys = new Set([
   "min",
   "max",
   "of",
+  "noAlphabeticalSort",
   // "includeChildSelections",
   // "scope",
   // "type",
   // "conditions",
   // "conditionGroups",
 
-
   //Legacy
   "costTypeId",
   "profileTypeId",
   "characteristicTypeId",
-  "value"
+  "value",
 ]);
 export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>, fixRoot = false): string {
   const root: any = {
