@@ -76,7 +76,8 @@ export type BSIModifierType =
   | "set"
   | "decrement"
   | "increment"
-  | "append";
+  | "append" 
+  | "prepend"
 
 export interface BSIModifier {
   conditions?: BSICondition[];
