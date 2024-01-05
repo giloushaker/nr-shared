@@ -51,6 +51,7 @@ export interface IErrorMessage {
   source?: any;
   id?: string;
   other?: any;
+  extra?: string;
 }
 
 export interface WikiLink extends Link {

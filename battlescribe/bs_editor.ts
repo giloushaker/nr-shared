@@ -569,11 +569,11 @@ export interface EntryPathEntry {
   index: number;
   id?: string;
 }
-export interface EntryPathEntryExtended {
+export interface EntryPathEntryExtended extends EntryPathEntry {
   type: string;
   display: string;
-  label: string;
-  index?: number;
+  label?: string;
+  name?: string;
 }
 
 export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
@@ -593,7 +593,7 @@ export function getEntryPath(entry: EditorBase): EntryPathEntry[] {
   result.reverse();
   return result;
 }
-export function getEntryPathInfo(entry: EditorBase): EntryPathEntryExtended[] {
+export function getEntryPathInfo(entry: EditorBase): EntryPathEntry[] {
   if (!entry.parent && !entry.isCatalogue()) {
     return [{ id: entry.id, key: entry.parentKey, index: 0 }];
   }
@@ -617,9 +617,10 @@ export function getEntryPathInfo(entry: EditorBase): EntryPathEntryExtended[] {
         type: "catalogue",
         key: "catalogue",
         id: entry.id,
+        index: 0
       });
     }
-    entry = entry.parent;
+    entry = entry.parent as typeof entry;
   } while (entry);
   result.reverse();
   return result as any;
