@@ -45,6 +45,9 @@ import type {
   BSIRule,
 } from "./bs_types";
 
+if (typeof $toRaw === "undefined") {
+  globalThis.$toRaw = function (o){ return o}
+}
 export interface IErrorMessage {
   msg: string;
   severity?: "error" | "warning" | "info" | "debug";
@@ -865,16 +868,16 @@ export class Catalogue extends Base {
           msg: `(${cur.editorTypeName}) ${cur.name} has no target`,
           id: "no-target",
         });
-        if (!this.unresolvedLinks[cur.targetId]?.includes(toRaw(cur)) && !deleted) {
-          addObj(this.unresolvedLinks, cur.targetId, toRaw(cur));
+        if (!this.unresolvedLinks[cur.targetId]?.includes($toRaw(cur)) && !deleted) {
+          addObj(this.unresolvedLinks, cur.targetId, $toRaw(cur));
         }
-        if (!this.manager.unresolvedLinks![cur.targetId]?.includes(toRaw(cur))) {
-          addObj(this.manager.unresolvedLinks!, cur.targetId, toRaw(cur));
+        if (!this.manager.unresolvedLinks![cur.targetId]?.includes($toRaw(cur))) {
+          addObj(this.manager.unresolvedLinks!, cur.targetId, $toRaw(cur));
         }
       } else {
         this.removeError(cur, "no-target");
-        popObj(this.unresolvedLinks!, cur.targetId, toRaw(cur));
-        popObj(this.manager.unresolvedLinks!, cur.targetId, toRaw(cur));
+        popObj(this.unresolvedLinks!, cur.targetId, $toRaw(cur));
+        popObj(this.manager.unresolvedLinks!, cur.targetId, $toRaw(cur));
       }
     } else if (cur.isProfile()) {
       if (!(cur as Profile).typeId) {
@@ -979,7 +982,7 @@ export class Catalogue extends Base {
     }
   }
   removeFromIndex(cur: EditorBase) {
-    if (cur.id && toRaw(this.index[cur.id]) === toRaw(cur)) {
+    if (cur.id && $toRaw(this.index[cur.id]) === $toRaw(cur)) {
       delete this.index[cur.id];
     }
     this.removeErrors(cur);
@@ -1031,7 +1034,7 @@ export class Catalogue extends Base {
     if (!deleteBadLinks) {
       this.unresolvedLinks = {};
       for (const lnk of unresolved) {
-        addObj(this.unresolvedLinks, lnk.targetId, toRaw(lnk) as Link & EditorBase);
+        addObj(this.unresolvedLinks, lnk.targetId, $toRaw(lnk) as Link & EditorBase);
         delete (lnk as Partial<typeof lnk>).target;
       }
     }
@@ -1137,8 +1140,8 @@ export class Catalogue extends Base {
           this.addOtherRef(condition, target as EditorBase);
         }
         this.removeError(condition, "id-not-exist");
-        // popObj(this.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
-        popObj(this.manager.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
+        // popObj(this.unresolvedLinks!, condition.childId, $toRaw(condition) as Condition & EditorBase);
+        popObj(this.manager.unresolvedLinks!, condition.childId, $toRaw(condition) as Condition & EditorBase);
         return;
       }
     }
@@ -1149,9 +1152,9 @@ export class Catalogue extends Base {
       id: "id-not-exist",
     });
     // if (!this.unresolvedLinks![condition.childId]?.includes(condition)) {
-    //   addObj(this.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
+    //   addObj(this.unresolvedLinks!, condition.childId, $toRaw(condition) as Condition & EditorBase);
     // }
-    addObjIfMissing(this.manager.unresolvedLinks!, condition.childId, toRaw(condition) as Condition & EditorBase);
+    addObjIfMissing(this.manager.unresolvedLinks!, condition.childId, $toRaw(condition) as Condition & EditorBase);
     return;
   }
 
