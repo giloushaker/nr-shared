@@ -356,8 +356,8 @@ export function betweenIf(value1: any, between: string, value2: any): string {
 export function textIf(condition: any, value1: any): string {
   return condition ? value1 : "";
 }
-export function cleanName(name: string): string {
-  return stripNumber(name).trim();
+export function cleanName(name: string | number | boolean): string {
+  return stripNumber(`${name}`).trim();
 }
 export function replaceKey(obj: Record<string, any>, key: string, to: string) {
   if (key in obj) {
