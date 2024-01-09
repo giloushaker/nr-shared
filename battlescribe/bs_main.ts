@@ -987,6 +987,7 @@ export interface BSIExtraConstraint extends BSIConstraint, BSINamed {
 
 export class ProfileType extends Base implements BSIProfileType {
   declare characteristicTypes: BSICharacteristicType[];
+  declare sortIndex?: number;
 }
 // const debugKeys = new Set();
 export class Profile extends Base implements BSIProfile {

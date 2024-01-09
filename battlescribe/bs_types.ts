@@ -3,7 +3,7 @@ export interface BSINamed {
 }
 export interface BSIOption {
   id: string;
-  comment?: string[];
+  comment?: string;
 }
 export interface BSIHidden {
   hidden: boolean;
