@@ -300,6 +300,7 @@ export interface BSICharacteristicType {
 
 export interface BSIProfileType extends BSINamed, BSIOption {
   characteristicTypes: BSICharacteristicType[];
+  sortIndex?: number
 }
 
 export interface BSIRule {

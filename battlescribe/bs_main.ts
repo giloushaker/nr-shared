@@ -127,7 +127,7 @@ export class Base implements BSModifierBase {
   shared?: boolean;
   import?: boolean;
   collective?: boolean;
-  comment?: string[];
+  comment?: string;
   publicationId!: string;
   typeName?: string;
   typeId?: string;
