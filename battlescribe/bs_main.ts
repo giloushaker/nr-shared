@@ -1202,6 +1202,7 @@ export const goodJsonKeys = new Set([
   "max",
   "of",
   "noAlphabeticalSort",
+  "sortIndex",
   // "includeChildSelections",
   // "scope",
   // "type",
