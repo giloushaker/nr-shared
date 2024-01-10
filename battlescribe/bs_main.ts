@@ -260,7 +260,7 @@ export class Base implements BSModifierBase {
     return this.id;
   }
   getType(): string | undefined {
-    return this.type;
+    return this.subType ?? this.type;
   }
   getTypeName(): string | undefined {
     return this.typeName;
@@ -685,7 +685,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
     return this.targetId;
   }
   getType(): string | undefined {
-    return this.target?.type;
+    return this.target?.getType();
   }
   getPage(): string | undefined {
     return this.page || this.target?.page;
