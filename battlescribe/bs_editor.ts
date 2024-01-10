@@ -389,7 +389,7 @@ export function getNameExtra(obj: EditorBase, _refs = true): string {
   if (obj.comment && obj.comment[0]) {
     pieces.push("# " + obj.comment);
   }
-  if (obj.collective) {
+  if (obj.isCollective()) {
     pieces.push("(collective)");
   }
   return pieces.join(" ");
