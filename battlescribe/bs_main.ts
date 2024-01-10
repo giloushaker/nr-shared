@@ -124,6 +124,7 @@ export class Base implements BSModifierBase {
   // Data
   id!: string;
   type?: string;
+  subType?: "mount" | "crew";
   shared?: boolean;
   import?: boolean;
   collective?: boolean;
@@ -1036,7 +1037,7 @@ export class InfoGroup extends Base {
   }
 }
 
-export const basicQueryFields = new Set(["any", "model", "unit", "upgrade", "mount", "crew"]);
+export const basicQueryFields = new Set(["any", "model", "unit", "upgrade"]);
 export class Condition extends Base {
   declare childId: string;
   declare scope: string;
@@ -1204,6 +1205,7 @@ export const goodJsonKeys = new Set([
   "of",
   "noAlphabeticalSort",
   "sortIndex",
+  "subType",
   // "includeChildSelections",
   // "scope",
   // "type",

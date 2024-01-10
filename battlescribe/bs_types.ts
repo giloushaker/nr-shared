@@ -37,7 +37,7 @@ export interface BSIValued {
 
 export interface BSIQuery {
   scope: string | "parent" | "force" | "roster" | "primary-catalogue" | "primary-category";
-  childId?: string | "any" | "model" | "unit" | "upgrade" | "mount" | "crew";
+  childId?: string | "any" | "model" | "unit" | "upgrade";
   field: string | "selections" | "forces";
   includeChildSelections?: boolean;
   includeChildForces?: boolean;
