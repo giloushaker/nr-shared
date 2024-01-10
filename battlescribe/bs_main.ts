@@ -712,7 +712,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
     return this.target?.associations;
   }
   isCollective(): boolean | undefined {
-    return super.isCollective() || this.target.isCollective();
+    return super.isCollective() || this.target?.isCollective();
   }
   *extraConstraintsIterator(): Iterable<BSIExtraConstraint> {
     yield* this.target.extraConstraintsIterator();
