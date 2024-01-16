@@ -76,6 +76,8 @@ export type BSIModifierType =
   | "set"
   | "decrement"
   | "increment"
+  | "multiply" 
+  | "divide"
   | "append" 
   | "prepend"
 
