@@ -351,27 +351,29 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
   }
 }
 
-export function getNameExtra(obj: EditorBase, _refs = true): string {
+export function getNameExtra(obj: EditorBase, _refs = true, _type = true): string {
   const type = obj.parentKey;
   const pieces = [];
   switch (type) {
     case "infoLinks":
-      if (["profiles", "sharedProfiles"].includes((obj.target as EditorBase)?.parentKey)) {
+      if (["profiles", "sharedProfiles"].includes((obj.target as EditorBase)?.parentKey) && _type) {
         pieces.push((obj.target as unknown as BSIProfile).typeName);
       }
       break;
     case "sharedProfiles":
     case "profiles":
-      pieces.push((obj as unknown as BSIProfile).typeName);
+      if (_type){
+        pieces.push((obj as unknown as BSIProfile).typeName);
+      }
       break;
     case "selectionEntries":
     case "sharedSelectionEntries":
-      if (obj.isEntry() && obj.getType() !== "upgrade") {
+      if (obj.isEntry() && obj.getType() !== "upgrade" && _type) {
         pieces.push(obj.getType());
       }
       break;
     case "entryLinks":
-      if (obj.target && obj.isEntry() && obj.getType() !== "upgrade") {
+      if (obj.target && obj.isEntry() && obj.getType() !== "upgrade" && _type) {
         pieces.push(obj.getType());
       }
       break;
