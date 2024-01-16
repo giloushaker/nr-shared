@@ -185,7 +185,7 @@ export class Base implements BSModifierBase {
   // NR Only
   associations?: NRAssociation[];
   associationConstraints?: AssociationConstraint[];
-  noAlphabeticalSort?: boolean;
+  flatten?: boolean;
 
   constructor(json: any) {
     return Object.setPrototypeOf(json, Object.getPrototypeOf(this));
@@ -1203,7 +1203,7 @@ export const goodJsonKeys = new Set([
   "min",
   "max",
   "of",
-  "noAlphabeticalSort",
+  "flatten",
   "sortIndex",
   "subType",
   // "includeChildSelections",
