@@ -1037,7 +1037,7 @@ export class InfoGroup extends Base {
   }
 }
 
-export const basicQueryFields = new Set(["any", "model", "unit", "upgrade"]);
+export const basicQueryFields = new Set(["any", "model", "unit", "upgrade", "mount", "crew"]);
 export class Condition extends Base {
   declare childId: string;
   declare scope: string;
