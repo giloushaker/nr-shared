@@ -264,35 +264,24 @@ export function patchJson(json: any, patches: PatchIndex): number {
   return changes;
 }
 
-export function keyCmp([a]: any, [b]: [string, any]) {
-  return a.localeCompare(b, undefined, { numeric: true });
-}
-export function keyCmpInversed([a]: [string, any], [b]: [string, any]) {
-  return b.localeCompare(a, undefined, { numeric: true });
-}
 export interface Sortable {
   toString: () => string;
 }
-
-export function sortBy<T>(array: T[], getKey: (item: T) => Sortable): T[] {
-  return array
-    .map((o) => [(getKey(o) ?? "").toString(), o] as [string, T])
-    .sort(keyCmp)
-    .map(([, v]) => v);
-}
 export function sortByAscending<T>(array: T[], getKey: (item: T) => Sortable): T[] {
-  return array
-    .map((o) => [(getKey(o) ?? "").toString(), o] as [string, T])
-    .sort(keyCmp)
-    .map(([, v]) => v);
+  return [...array].sort((a,b) => (getKey(a) ?? "").toString().localeCompare((getKey(b) ?? "").toString(), undefined, { numeric: true }))
+}
+export function sortByDescending<T>(array: T[], getKey: (item: T) => Sortable): T[] {
+  return [...array].sort((a,b) => (getKey(b) ?? "").toString().localeCompare((getKey(a) ?? "").toString(), undefined, { numeric: true }))
+}
+export const sortBy = sortByAscending
+
+export function sortByAscendingInplace<T>(array: T[], getKey: (item: T) => Sortable): T[] {
+  return array.sort((a,b) => (getKey(a) ?? "").toString().localeCompare((getKey(b) ?? "").toString(), undefined, { numeric: true }))
+}
+export function sortByDescendingInplace<T>(array: T[], getKey: (item: T) => Sortable): T[] {
+  return array.sort((a,b) => (getKey(b) ?? "").toString().localeCompare((getKey(a) ?? "").toString(), undefined, { numeric: true }))
 }
 
-export function sortByDescending<T>(array: T[], getKey: (item: T) => Sortable): T[] {
-  return array
-    .map((o) => [(getKey(o) ?? "").toString(), o] as [string, T])
-    .sort(keyCmpInversed)
-    .map(([, v]) => v);
-}
 export function findMax<T>(array: T[], getKey: (item: T) => any): T {
   if (!array.length) return undefined as any;
   if (array.length == 1) {

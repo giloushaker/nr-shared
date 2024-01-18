@@ -545,7 +545,7 @@ export async function onAddEntry(
 
         entry.catalogue = catalogue;
         catalogue.addToIndex(entry);
-        if (entry.isLink()) {
+        if (entry instanceof Link) {
           catalogue.updateLink(entry);
         }
         if (entry instanceof Profile && entry.typeId) {
