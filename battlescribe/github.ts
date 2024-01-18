@@ -47,11 +47,6 @@ export function parseGitHubUrl(githubUrl: string) {
   };
 }
 
-// Example usage:
-const githubUrl = "https://github.com/octocat/hello-world";
-const githubInfo = parseGitHubUrl(githubUrl);
-console.log(githubInfo);
-
 async function getFileContentFromRepo(githubUrl: string, filePath: string) {
   try {
     const urlParts = githubUrl.split("/");

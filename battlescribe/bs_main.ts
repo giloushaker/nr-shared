@@ -133,27 +133,26 @@ export class Base implements BSModifierBase {
   typeName?: string;
   typeId?: string;
   categoryEntryId?: string; // Legacy categories
-  // Maybe move this to catalogue
-  profileTypes?: BSIProfileType[];
-
+  
   // Data - Modifiable
   name!: string;
   hidden!: boolean;
   value?: number | string | boolean;
   page?: string;
   defaultAmount?: number;
-
+  
   profiles?: Profile[];
   rules?: Rule[];
   infoLinks?: InfoLink[];
   infoGroups?: InfoGroup[];
   publications?: BSIPublication[];
   costs?: BSICost[];
-
+  
   // Childs
   selectionEntries?: Entry[];
   selectionEntryGroups?: Group[];
   entryLinks?: Link[];
+  profileTypes?: BSIProfileType[];
   categoryEntries?: Category[];
   categoryLinks?: CategoryLink[];
   forceEntries?: Force[];
@@ -186,6 +185,7 @@ export class Base implements BSModifierBase {
   associations?: NRAssociation[];
   associationConstraints?: AssociationConstraint[];
   flatten?: boolean;
+  sortIndex?: number;
 
   constructor(json: any) {
     return Object.setPrototypeOf(json, Object.getPrototypeOf(this));

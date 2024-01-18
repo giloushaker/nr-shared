@@ -1030,7 +1030,6 @@ export class Catalogue extends Base {
     const indexes = this.getIndexes();
     const unresolved = resolveLinks(unresolvedLinks, indexes, parents, deleteBadLinks);
     resolvePublications(unresolvedPublications, indexes);
-    resolveChildIds(unresolvedChildIds, indexes);
     if (!deleteBadLinks) {
       this.unresolvedLinks = {};
       for (const lnk of unresolved) {
@@ -1259,18 +1258,6 @@ export function resolvePublications(
       }
     }
     nextUnresolved.push(current);
-  }
-}
-export function resolveChildIds(unresolvedChildIds: BSICondition[] = [], indexes: Record<string, Base>[]) {
-  for (const current of unresolvedChildIds) {
-    // Find the target, stopping at first found
-    const id = current.childId!;
-    for (const index of indexes) {
-      if (id in index) {
-        current.childId = index[id].getId();
-        break;
-      }
-    }
   }
 }
 
