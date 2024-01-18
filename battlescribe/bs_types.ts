@@ -37,7 +37,7 @@ export interface BSIValued {
 
 export interface BSIQuery {
   scope: string | "parent" | "force" | "roster" | "primary-catalogue" | "primary-category";
-  childId?: string | "any" | "model" | "unit" | "upgrade";
+  childId?: string | "any" | "model" | "unit" | "upgrade" | "mount" | "crew";
   field: string | "selections" | "forces";
   includeChildSelections?: boolean;
   includeChildForces?: boolean;
@@ -76,10 +76,10 @@ export type BSIModifierType =
   | "set"
   | "decrement"
   | "increment"
-  | "multiply" 
+  | "multiply"
   | "divide"
-  | "append" 
-  | "prepend"
+  | "append"
+  | "prepend";
 
 export interface BSIModifier {
   conditions?: BSICondition[];
@@ -302,7 +302,7 @@ export interface BSICharacteristicType {
 
 export interface BSIProfileType extends BSINamed, BSIOption {
   characteristicTypes: BSICharacteristicType[];
-  sortIndex?: number
+  sortIndex?: number;
 }
 
 export interface BSIRule {
