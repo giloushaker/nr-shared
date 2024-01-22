@@ -204,6 +204,7 @@ export interface BSIDataCatalogue extends Partial<bookFileMetaData> {
 }
 export interface BSIReference {
   publicationId?: string;
+  publication?: BSIPublication;
   page?: string;
 }
 export interface bookFileMetaData {

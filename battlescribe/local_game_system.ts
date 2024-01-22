@@ -27,12 +27,10 @@ export class GameSystemFiles extends BSCatalogueManager {
   }
   unloadAll() {
     super.unloadAll();
-    this.loadedCatalogues = {};
-    for (const file of this.getAllCatalogueFiles()) {
-      const obj = getDataObject(file) as any as Catalogue;
-      delete obj.loaded;
-      delete obj.loaded_editor;
+    for (const obj of Object.values(this.loadedCatalogues)) {
+      obj.reset();
     }
+    this.loadedCatalogues = {};
     delete this.allLoaded;
   }
   async loadAll(progress_cb?: (current: number, max: number, msg?: string) => void | Promise<void>) {

@@ -142,7 +142,18 @@ export class Catalogue extends Base {
   fullFilePath?: string;
 
   errors?: IErrorMessage[];
-
+  reset(){
+    delete this.initialized;
+    delete this.loaded;
+    delete this.loaded_editor;
+    delete this.loaded_wiki;
+    for (const imported of this.imports || []) {
+      delete imported.initialized;
+      delete imported.loaded;
+      delete imported.loaded_editor;
+      delete imported.loaded_wiki;
+    }
+  }
   init(deleteBadLinks = true) {
     if (this.initialized) return;
     this.initialized = true;
@@ -160,6 +171,7 @@ export class Catalogue extends Base {
     this.categories = Object.values(categories);
     this.generateForces(categories);
     this.generateExtraConstraints();
+    console.log("processed", this.name)
   }
   processForWiki(system: Record<string, any>) {
     if (this.loaded_wiki) return;
@@ -1007,26 +1019,27 @@ export class Catalogue extends Base {
     const unresolvedPublications: Array<BSIInfoLink | BSIRule | BSIProfile> = [];
     const unresolvedChildIds: Array<BSICondition> = [];
     const parents: Array<Base> = [];
-    if (!this.index) {
-      this.index = noObserve() as Record<string, Base>;
-      forEachObjectWhitelist2(
-        this,
-        (cur, parent) => {
-          this.addToIndex(cur);
-          if ((cur as BSIReference).publicationId) {
-            unresolvedPublications.push(cur as any);
-          }
-          if (cur.isLink()) {
-            unresolvedLinks.push(cur);
-            parents.push(parent);
-          }
-          if (hasSharedChildId(cur)) {
-            unresolvedChildIds.push(cur);
-          }
-        },
-        goodKeys
-      );
-    }
+    this.index = noObserve() as Record<string, Base>;
+    forEachObjectWhitelist2(
+      this,
+      (cur, parent) => {
+        this.addToIndex(cur);
+        if ((cur as BSIReference).publicationId) {
+          delete (cur as Partial<BSIReference>).publication;
+          unresolvedPublications.push(cur as any);
+        }
+        if (cur.isLink()) {
+          delete (cur as Partial<Link>).target;
+          unresolvedLinks.push(cur);
+          parents.push(parent);
+        }
+        if (hasSharedChildId(cur)) {
+          unresolvedChildIds.push(cur);
+        }
+      },
+      goodKeys
+    );
+    
     const indexes = this.getIndexes();
     const unresolved = resolveLinks(unresolvedLinks, indexes, parents, deleteBadLinks);
     resolvePublications(unresolvedPublications, indexes);
