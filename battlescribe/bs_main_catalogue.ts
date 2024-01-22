@@ -1081,19 +1081,30 @@ export class Catalogue extends Base {
     if (link.target) {
       this.removeRef(link, link.target as EditorBase);
     }
-    link.target = resolveLink(link.targetId, this.getIndexes()) as EditorBase;
-
-    if (link.target) {
-      this.addRef(link, link.target as EditorBase);
-      const targetType = (link.target as EditorBase).editorTypeName;
-      if (targetType == "category") {
-        delete link.type;
-      } else {
-        link.type = targetType;
+    const target = resolveLink(link.targetId, this.getIndexes()) as EditorBase;
+    if (target.isLink()){
+      console.warn(`Failed to resolve link (target is a link): ${link.getName()}(${link.id})`)
+      link.catalogue.addError(link, {
+        id: "bad-link-target",
+        msg: "Link target Cannot be a Link",
+        source: link,
+      });
+      return; 
+    } else {
+      link.catalogue.removeError(link, "bad-link-target")
+      link.target =  target;
+      if (link.target) {
+        this.addRef(link, link.target as EditorBase);
+        const targetType = (link.target as EditorBase).editorTypeName;
+        if (targetType == "category") {
+          delete link.type;
+        } else {
+          link.type = targetType;
+        }
       }
+      this.refreshErrors(link);
+      return link.target !== undefined;
     }
-    this.refreshErrors(link);
-    return link.target !== undefined;
   }
   updateConstraint(constraint: Constraint & EditorBase, deleted = false) {
     const ids = new Set();
@@ -1216,10 +1227,13 @@ export function resolveLinks(
       // Find the target, stopping at first found
       const id = current.targetId;
       const target = resolveLink(id, indexes);
-
       if (target) {
-        current.target = target;
-        resolved.push(current);
+        if (target.isLink()){
+          console.warn(`Failed to resolve link (target is a link): ${current.getName()}(${current.id})`)
+        } else {
+          current.target = target;
+          resolved.push(current);
+        }
         continue;
       }
 
