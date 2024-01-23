@@ -79,7 +79,8 @@ export type BSIModifierType =
   | "multiply"
   | "divide"
   | "append"
-  | "prepend";
+  | "prepend"
+  | "replace";
 
 export interface BSIModifier {
   conditions?: BSICondition[];
@@ -89,6 +90,7 @@ export interface BSIModifier {
   type: BSIModifierType;
   field: "category" | "name" | "hidden" | string; //costId
   value: number | string | boolean;
+  arg?:  number | string | boolean;
   last_value?: number;
 }
 export interface BSIModifierGroup {
