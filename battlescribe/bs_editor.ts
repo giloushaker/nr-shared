@@ -11,7 +11,7 @@ import {
   BSIRepeat,
 } from "./bs_types";
 import { BSCatalogueManager } from "./bs_system";
-import { isObject } from "./bs_helpers";
+import { isObject, type MaybeArray } from "./bs_helpers";
 import { textNodeTags } from "./bs_convert";
 import { validChildIds, validScopes } from "./bs_condition";
 
@@ -683,32 +683,36 @@ export function replaceAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[],
   if (!result) throw new Error("replaceAtEntryPath failed");
   return result;
 }
-export function scrambleIds(catalogue: Catalogue, entry: EditorBase) {
+export function scrambleIds(catalogue: Catalogue, entry_or_entries: MaybeArray<EditorBase>) {
   const scrambled = {} as Record<string, string>;
+  const arr = Array.isArray(entry_or_entries) ? entry_or_entries : [entry_or_entries]
+  for (const entry of arr)
   forEachEntryRecursive(entry, (node, key, parentNode) => {
     if (node.id) {
       // if (node instanceof Constraint && !(entry instanceof Constraint)) return;
       const currentId = node.id;
-      const newId = catalogue.generateNonConflictingId();
+      const newId = catalogue.generateNonConflictingId(currentId);
       node.id = newId;
       scrambled[currentId] = newId;
     }
   });
-  forEachEntryRecursive(entry, (node, key, parentNode) => {
-    if (node instanceof Condition) {
-      if (node.scope in scrambled) {
-        node.scope = scrambled[node.scope];
+  for (const entry of arr)  {
+    forEachEntryRecursive(entry, (node, key, parentNode) => {
+      if (node instanceof Condition) {
+        if (node.scope in scrambled) {
+          node.scope = scrambled[node.scope];
+        }
+        if (node.childId in scrambled) {
+          node.childId = scrambled[node.childId];
+        }
       }
-      if (node.childId in scrambled) {
-        node.childId = scrambled[node.childId];
+      if (node instanceof Modifier) {
+        if (node.field in scrambled) {
+          node.field = scrambled[node.field];
+        }
       }
-    }
-    if (node instanceof Modifier) {
-      if (node.field in scrambled) {
-        node.field = scrambled[node.field];
-      }
-    }
-  });
+    });
+  }
 }
 
 export function fixKey(parent: EditorBase | Catalogue, key: keyof Base, catalogueKey?: string) {

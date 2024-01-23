@@ -531,7 +531,8 @@ export class Catalogue extends Base {
     }
     return result;
   }
-  generateNonConflictingId(): string {
+  generateNonConflictingId(preferredId?: string): string {
+    if (preferredId && this.findOptionByIdGlobal(preferredId) === undefined) return preferredId;
     while (true) {
       const id = generateBattlescribeId();
       if (this.findOptionById(id) === undefined) return id;

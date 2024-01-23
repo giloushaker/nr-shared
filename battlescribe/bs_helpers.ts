@@ -1,7 +1,8 @@
 import JSZip, { OutputType } from "jszip";
 import { getRandomInt } from "../util";
-import type { BSIProfile, BSICharacteristic } from "./bs_types";
 export type Modify<T, R> = Omit<T, keyof R> & R;
+export type MaybeArray<T> = T | Array<T>;
+
 export function stripNumber(str: string): string {
   return str.replace(/[0-9]+ *[.-] *(.*)/, "$1");
 }
