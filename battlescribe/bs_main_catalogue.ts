@@ -1069,7 +1069,7 @@ export class Catalogue extends Base {
       this.removeRef(link, link.target as EditorBase);
     }
     const target = resolveLink(link.targetId, this.getIndexes()) as EditorBase;
-    if (target.isLink()){
+    if (target?.isLink()){
       console.warn(`Failed to resolve link (target is a link): ${link.getName()}(${link.id})`)
       link.catalogue.addError(link, {
         id: "bad-link-target",

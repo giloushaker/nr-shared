@@ -493,7 +493,7 @@ export function removeEntry(entry: EditorBase) {
  * Removes an entry and fixes up the index
  * Returns all the removed data for undoing
  */
-export async function onRemoveEntry(removed: EditorBase, manager?: BSCatalogueManager) {
+export function onRemoveEntry(removed: EditorBase, manager?: BSCatalogueManager) {
   const catalogue = removed.catalogue;
   forEachEntryRecursive(removed, (entry, key, parent) => {
     catalogue.removeFromIndex(entry);
@@ -527,11 +527,11 @@ export async function onRemoveEntry(removed: EditorBase, manager?: BSCatalogueMa
     delete (entry as any).catalogue;
   });
   if (manager && removed instanceof CatalogueLink) {
-    await catalogue.reload(manager);
+    catalogue.reload(manager);
   }
 }
 
-export async function onAddEntry(
+export function onAddEntry(
   entries: EditorBase[] | EditorBase,
   catalogue: Catalogue,
   parent: EditorBase | Catalogue,
@@ -563,7 +563,7 @@ export async function onAddEntry(
   }
   if (reload && parent) {
     const catalogue = parent.catalogue || parent;
-    await catalogue.reload(manager);
+    catalogue.reload(manager);
   }
 }
 export interface EntryPathEntry {
