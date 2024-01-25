@@ -90,7 +90,7 @@ export interface BSIModifier {
   type: BSIModifierType;
   field: "category" | "name" | "hidden" | string; //costId
   value: number | string | boolean;
-  arg?:  number | string | boolean;
+  arg?: number | string | boolean;
   last_value?: number;
 }
 export interface BSIModifierGroup {
@@ -365,21 +365,15 @@ export interface AssociationConstraint {
   childId: string;
   field: "associations";
 }
-export interface NRAssociation {
-  label: string;
-  labelMembers: string;
-  ids?: string[];
-  id?: string;
-
-  scope: string;
-
+export interface NRAssociation extends BSIOption, BSINamed, BSICondition {
   min?: number;
   max?: number;
-  includeChildSelections?: boolean;
-  of: string;
 
-  type?: "and" | "or";
+  // Used to link to Association Constraints
+  ids?: string[];
+
+  //type?: "and" | "or";
   // constraints?: AssociationConstraint[];
-  conditions?: BSICondition[];
-  conditionGroups?: BSIConditionGroup[];
+  //conditions?: BSICondition[];
+  //conditionGroups?: BSIConditionGroup[];
 }
