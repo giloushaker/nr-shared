@@ -450,7 +450,7 @@ export function getName(obj: any): string {
     case "infoLinks":
       return obj.target ? getName(obj.target) : obj.getName();
     case "associations":
-      return `${obj.label}`;
+      return obj.name;
     default:
       console.log(type, obj);
       return type;

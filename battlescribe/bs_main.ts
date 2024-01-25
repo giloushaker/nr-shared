@@ -1106,7 +1106,7 @@ export function* iterateModifierGroupsRecursive(
   }
 }
 
-export const goodJsonArrayKeys = new Set([
+export const BaseChilds = [
   "costTypes",
   "costs",
 
@@ -1146,7 +1146,9 @@ export const goodJsonArrayKeys = new Set([
   "conditionGroups",
   "conditions",
   "repeats",
-]);
+] as const;
+export type BaseChildsT = typeof BaseChilds[number]
+export const goodJsonArrayKeys = new Set(BaseChilds);
 export const goodJsonKeys = new Set([
   ...goodJsonArrayKeys,
 
