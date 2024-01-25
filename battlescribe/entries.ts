@@ -101,7 +101,7 @@ export const entries = {
     ],
   },
   associations: {
-    allowedChildrens: ["constraints", "modifiers", "modifierGroups"],
+    allowedChildrens: [],
   },
   sharedRules: {
     allowedChildrens: ["modifiers", "modifierGroups"],
