@@ -365,15 +365,15 @@ export interface AssociationConstraint {
   childId: string;
   field: "associations";
 }
-export interface NRAssociation extends BSIOption, BSINamed, BSICondition {
+export interface NRAssociation {
+  name: string;
+  id?: string;
+
+  ids?: string[];
   min?: number;
   max?: number;
 
-  // Used to link to Association Constraints
-  ids?: string[];
-
-  //type?: "and" | "or";
-  // constraints?: AssociationConstraint[];
-  //conditions?: BSICondition[];
-  //conditionGroups?: BSIConditionGroup[];
+  scope: string;
+  includeChildSelections?: boolean;
+  childId: string;
 }
