@@ -362,7 +362,7 @@ export function getNameExtra(obj: EditorBase, _refs = true, _type = true): strin
       break;
     case "sharedProfiles":
     case "profiles":
-      if (_type){
+      if (_type) {
         pieces.push((obj as unknown as BSIProfile).typeName);
       }
       break;
@@ -619,7 +619,7 @@ export function getEntryPathInfo(entry: EditorBase): EntryPathEntry[] {
         type: "catalogue",
         key: "catalogue",
         id: entry.id,
-        index: 0
+        index: 0,
       });
     }
     entry = entry.parent as typeof entry;
@@ -685,18 +685,18 @@ export function replaceAtEntryPath(catalogue: Catalogue, path: EntryPathEntry[],
 }
 export function scrambleIds(catalogue: Catalogue, entry_or_entries: MaybeArray<EditorBase>) {
   const scrambled = {} as Record<string, string>;
-  const arr = Array.isArray(entry_or_entries) ? entry_or_entries : [entry_or_entries]
+  const arr = Array.isArray(entry_or_entries) ? entry_or_entries : [entry_or_entries];
   for (const entry of arr)
-  forEachEntryRecursive(entry, (node, key, parentNode) => {
-    if (node.id) {
-      // if (node instanceof Constraint && !(entry instanceof Constraint)) return;
-      const currentId = node.id;
-      const newId = catalogue.generateNonConflictingId(currentId);
-      node.id = newId;
-      scrambled[currentId] = newId;
-    }
-  });
-  for (const entry of arr)  {
+    forEachEntryRecursive(entry, (node, key, parentNode) => {
+      if (node.id) {
+        // if (node instanceof Constraint && !(entry instanceof Constraint)) return;
+        const currentId = node.id;
+        const newId = catalogue.generateNonConflictingId(currentId);
+        node.id = newId;
+        scrambled[currentId] = newId;
+      }
+    });
+  for (const entry of arr) {
     forEachEntryRecursive(entry, (node, key, parentNode) => {
       if (node instanceof Condition) {
         if (node.scope in scrambled) {
