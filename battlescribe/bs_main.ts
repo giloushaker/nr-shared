@@ -708,9 +708,10 @@ export class Link<T extends Base = Group | Entry> extends Base {
   }
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore: TS2611
-  get associations(): NRAssociation[] | undefined {
-    return this.target?.associations;
+  getAssociations(): NRAssociation[] | undefined {
+    return this.associations || this.target.associations;
   }
+
   isCollective(): boolean | undefined {
     return super.isCollective() || this.target?.isCollective();
   }

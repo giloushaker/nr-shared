@@ -283,8 +283,8 @@ export class Catalogue extends Base {
 
     if (error.other && recurse) {
       const other = error.other as EditorBase;
-      other.getCatalogue().removeError(other, "duplicate-id-1", false);
-      other.getCatalogue().removeError(other, "duplicate-id-2", false);
+      other.getCatalogue()?.removeError(other, "duplicate-id-1", false);
+      other.getCatalogue()?.removeError(other, "duplicate-id-2", false);
     }
   }
   removeErrors(obj: EditorBase) {
