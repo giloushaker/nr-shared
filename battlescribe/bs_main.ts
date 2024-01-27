@@ -133,21 +133,21 @@ export class Base implements BSModifierBase {
   typeName?: string;
   typeId?: string;
   categoryEntryId?: string; // Legacy categories
-  
+
   // Data - Modifiable
   name!: string;
   hidden!: boolean;
   value?: number | string | boolean;
   page?: string;
   defaultAmount?: number;
-  
+
   profiles?: Profile[];
   rules?: Rule[];
   infoLinks?: InfoLink[];
   infoGroups?: InfoGroup[];
   publications?: BSIPublication[];
   costs?: BSICost[];
-  
+
   // Childs
   selectionEntries?: Entry[];
   selectionEntryGroups?: Group[];
@@ -185,6 +185,7 @@ export class Base implements BSModifierBase {
   associations?: NRAssociation[];
   associationConstraints?: AssociationConstraint[];
   flatten?: boolean;
+  collapsible?: boolean;
   sortIndex?: number;
 
   constructor(json: any) {
@@ -1148,7 +1149,7 @@ export const BaseChilds = [
   "conditions",
   "repeats",
 ] as const;
-export type BaseChildsT = typeof BaseChilds[number]
+export type BaseChildsT = (typeof BaseChilds)[number];
 export const goodJsonArrayKeys = new Set(BaseChilds);
 export const goodJsonKeys = new Set([
   ...goodJsonArrayKeys,
@@ -1207,6 +1208,7 @@ export const goodJsonKeys = new Set([
   "max",
   "of",
   "flatten",
+  "collapsible",
   "sortIndex",
   "subType",
   // "includeChildSelections",
