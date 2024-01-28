@@ -126,6 +126,13 @@ export interface BSIForce extends BSINamed, BSIOption, BSIReference, BSIHidden {
   categoryLinks?: BSICategoryLink[];
   forceEntries?: BSIForce[];
 }
+
+export interface BSIInfo {
+  infoLinks?: BSIInfoLink[];
+  infoGroups?: BSIInfoGroup[];
+  profiles?: BSIProfile[];
+  rules?: BSIRule[];
+}
 export interface BSISelectionEntryGroup
   extends BSINamed,
     BSIOption,
@@ -139,19 +146,26 @@ export interface BSISelectionEntryGroup
   categoryLinks?: BSICategoryLink[];
   import?: boolean;
 }
+export interface BSIEntryLink extends BSILink, BSIConstrainable, BSIModifiable, BSIReference {
+type: "selectionEntry" | "selectionEntryGroup"
+}
 export interface BSISelectionEntry
   extends BSINamed,
     BSIOption,
     BSIReference,
     BSIModifiable,
     BSIConstrainable,
-    BSIHidden {
+    BSIHidden, 
+    BSIInfo {
   type: string;
+  subType?: string;
   selectionEntries?: BSISelectionEntry[];
   selectionEntryGroups?: BSISelectionEntryGroup[];
-  entryLinks?: BSILink[];
+  entryLinks?: BSIEntryLink[];
   categoryLinks?: BSICategoryLink[];
   import?: boolean;
+  costs: BSICost[];
+
 }
 export interface BSIData extends Partial<bookFileMetaData> {
   gameSystem?: BSIGameSystem;
@@ -285,6 +299,7 @@ export interface SupportedQueries {
 }
 
 export interface BSIProfile {
+  comment?: string;
   characteristics: BSICharacteristic[];
   id: string;
   name: string;
@@ -330,7 +345,7 @@ export interface BSIInfoLink<
   publication?: BSIPublication;
   page?: string;
   targetId: string;
-  target: T;
+  target?: T;
   type: "profile" | "rule" | "infoGroup";
   modifiers?: BSIModifier[];
   modifierGroups?: BSIModifierGroup[];
