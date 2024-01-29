@@ -116,8 +116,8 @@ export interface SupportedQueries {
   modifiers?: BSIModifier[];
 }
 export interface BSIModifiable {
-  modifers?: BSIModifier[];
-  modiferGroups?: BSIModifierGroup[];
+  modifiers?: BSIModifier[];
+  modifierGroups?: BSIModifierGroup[];
 }
 export interface BSIConstrainable {
   constraints?: BSIConstraint[];
