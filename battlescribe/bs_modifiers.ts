@@ -54,8 +54,8 @@ export function fieldToText(base: Base | Link | undefined, field: string): strin
     return "";
   }
   if (base) {
-    if (field.startsWith("limit::")) {
-      return `limit::${fieldToText(base, removePrefix(field, "limit::"))}`;
+    if (`${field}`.startsWith("limit::")) {
+      return `limit::${fieldToText(base, removePrefix(`${field}`, "limit::"))}`;
     }
     const catalogue = base.catalogue || (base as Catalogue);
     const target = getModifiedField(base, field);
