@@ -49,6 +49,7 @@ export interface BSIQuery {
 export interface BSIRepeat extends BSIQuery, BSIValued {
   repeats: number;
   roundUp?: boolean;
+  id: string;
 }
 
 export interface BSICondition extends BSIQuery, BSIValued {
@@ -66,7 +67,7 @@ export interface BSIConstraint extends BSIQuery, BSIValued, BSIOption {
   shared?: boolean;
 }
 
-export interface BSICategory extends BSINamed, BSIOption {}
+export interface BSICategory extends BSINamed, BSIOption { }
 
 export type BSIModifierType =
   | "add"
@@ -135,11 +136,12 @@ export interface BSIInfo {
 }
 export interface BSISelectionEntryGroup
   extends BSINamed,
-    BSIOption,
-    BSIReference,
-    BSIModifiable,
-    BSIConstrainable,
-    BSIHidden {
+  BSIOption,
+  BSIReference,
+  BSIModifiable,
+  BSIConstrainable,
+  BSIHidden {
+  defaultSelectionEntryId?: string;
   selectionEntries?: BSISelectionEntry[];
   selectionEntryGroups?: BSISelectionEntryGroup[];
   entryLinks?: BSILink[];
@@ -147,16 +149,18 @@ export interface BSISelectionEntryGroup
   import?: boolean;
 }
 export interface BSIEntryLink extends BSILink, BSIConstrainable, BSIModifiable, BSIReference {
-type: "selectionEntry" | "selectionEntryGroup"
+  type: "selectionEntry" | "selectionEntryGroup"
+  costs: BSICost[];
+
 }
 export interface BSISelectionEntry
   extends BSINamed,
-    BSIOption,
-    BSIReference,
-    BSIModifiable,
-    BSIConstrainable,
-    BSIHidden, 
-    BSIInfo {
+  BSIOption,
+  BSIReference,
+  BSIModifiable,
+  BSIConstrainable,
+  BSIHidden,
+  BSIInfo {
   type: string;
   subType?: string;
   selectionEntries?: BSISelectionEntry[];
