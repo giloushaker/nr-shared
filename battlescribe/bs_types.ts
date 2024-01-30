@@ -147,10 +147,12 @@ export interface BSISelectionEntryGroup
   entryLinks?: BSILink[];
   categoryLinks?: BSICategoryLink[];
   import?: boolean;
+  collective?: boolean;
 }
 export interface BSIEntryLink extends BSILink, BSIConstrainable, BSIModifiable, BSIReference {
   type: "selectionEntry" | "selectionEntryGroup"
   costs: BSICost[];
+  collective?: boolean;
 
 }
 export interface BSISelectionEntry
@@ -169,6 +171,7 @@ export interface BSISelectionEntry
   categoryLinks?: BSICategoryLink[];
   import?: boolean;
   costs: BSICost[];
+  collective?: boolean;
 
 }
 export interface BSIData extends Partial<bookFileMetaData> {
