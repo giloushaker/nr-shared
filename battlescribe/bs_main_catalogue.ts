@@ -46,7 +46,9 @@ import type {
 } from "./bs_types";
 
 if (typeof $toRaw === "undefined") {
-  globalThis.$toRaw = function (o){ return o}
+  globalThis.$toRaw = function (o) {
+    return o;
+  };
 }
 export interface IErrorMessage {
   msg: string;
@@ -142,7 +144,7 @@ export class Catalogue extends Base {
   fullFilePath?: string;
 
   errors?: IErrorMessage[];
-  reset(){
+  reset() {
     delete this.initialized;
     delete this.loaded;
     delete this.loaded_editor;
@@ -171,7 +173,7 @@ export class Catalogue extends Base {
     this.categories = Object.values(categories);
     this.generateForces(categories);
     this.generateExtraConstraints();
-    console.log("processed", this.name)
+    // console.log("processed", this.name)
   }
   processForWiki(system: Record<string, any>) {
     if (this.loaded_wiki) return;
@@ -611,7 +613,7 @@ export class Catalogue extends Base {
       }
       for (const categoryEntry of force.categoryEntries || []) {
         if (categoryEntry.id in categories) {
-          const category = categories[categoryEntry.id]
+          const category = categories[categoryEntry.id];
           const copied = clone(category);
           copied.main_catalogue = this;
           for (const child of copied.childs) {
@@ -620,7 +622,7 @@ export class Catalogue extends Base {
           forceCategories.push(copied);
         }
       }
-      
+
       const missingUnits = this.units.filter((o) => !hasUnits.has(o.id));
       if (missingUnits.length) {
         const illegal_clone = clone(categories[ILLEGAL_ID]);
@@ -653,12 +655,12 @@ export class Catalogue extends Base {
       copied.childs = foundUnits;
       this.index[category.id] = category;
       result[copied.id] = copied;
-      set.add(copied.id)
+      set.add(copied.id);
     }
-     for(const key in units){
-      if (!set.has(key)){
-        const category = this.findOptionById(key) as Category
-        if (category){
+    for (const key in units) {
+      if (!set.has(key)) {
+        const category = this.findOptionById(key) as Category;
+        if (category) {
           const copied = clone(category);
           copied.main_catalogue = this;
           const foundUnits = units[copied.id] || [];
@@ -668,7 +670,7 @@ export class Catalogue extends Base {
           result[copied.id] = copied;
         }
       }
-     }
+    }
     const uncategorizedUnits = units[UNCATEGORIZED_ID] || [];
     const uncategorized = {
       name: "Uncategorized",
@@ -1040,7 +1042,7 @@ export class Catalogue extends Base {
       },
       goodKeys
     );
-    
+
     const indexes = this.getIndexes();
     const unresolved = resolveLinks(unresolvedLinks, indexes, parents, deleteBadLinks);
     resolvePublications(unresolvedPublications, indexes);
@@ -1083,17 +1085,17 @@ export class Catalogue extends Base {
       this.removeRef(link, link.target as EditorBase);
     }
     const target = resolveLink(link.targetId, this.getIndexes()) as EditorBase;
-    if (target?.isLink()){
-      console.warn(`Failed to resolve link (target is a link): ${link.getName()}(${link.id})`)
+    if (target?.isLink()) {
+      console.warn(`Failed to resolve link (target is a link): ${link.getName()}(${link.id})`);
       link.catalogue.addError(link, {
         id: "bad-link-target",
         msg: "Link target Cannot be a Link",
         source: link,
       });
-      return; 
+      return;
     } else {
-      link.catalogue.removeError(link, "bad-link-target")
-      link.target =  target;
+      link.catalogue.removeError(link, "bad-link-target");
+      link.target = target;
       if (link.target) {
         this.addRef(link, link.target as EditorBase);
         const targetType = (link.target as EditorBase).editorTypeName;
@@ -1229,8 +1231,8 @@ export function resolveLinks(
       const id = current.targetId;
       const target = resolveLink(id, indexes);
       if (target) {
-        if (target.isLink()){
-          console.warn(`Failed to resolve link (target is a link): ${current.getName()}(${current.id})`)
+        if (target.isLink()) {
+          console.warn(`Failed to resolve link (target is a link): ${current.getName()}(${current.id})`);
         } else {
           current.target = target;
           resolved.push(current);
