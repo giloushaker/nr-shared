@@ -976,7 +976,7 @@ export class Catalogue extends Base {
       this.index[cur.id] = cur;
       if (this.unresolvedLinks && this.unresolvedLinks[cur.id]) {
         for (const lnk of [...this.unresolvedLinks[cur.id]]) {
-          if (lnk.isLink()) {
+          if (lnk.isLink() && lnk.catalogue) {
             this.updateLink(lnk as Link & EditorBase);
           } else {
             this.refreshErrors(lnk);
