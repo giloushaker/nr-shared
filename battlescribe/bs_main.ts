@@ -519,7 +519,7 @@ export class Base implements BSModifierBase {
         if (isObject(value)) {
           if (Array.isArray(value)) {
             if (value.length && isObject(value[0])) {
-              for (let i = value.length; i--; ) {
+              for (let i = value.length; i--;) {
                 const cur = value[i];
                 callbackfn(cur, current);
                 stack.push(cur);
@@ -560,17 +560,13 @@ export class Base implements BSModifierBase {
       if (categoryLink.primary) return categoryLink;
     }
   }
-
-  // Modifiers a constraints query to have the same effect when checked from a roster/force.
-  // packs modifiers & modifiers groups inside it
-  getBoundConstraint(constraint: BSIConstraint): BSIExtraConstraint {
+  // Packs all of a constraint's modifiers with itself
+  getPackedConstraint(constraint: BSIConstraint): BSIExtraConstraint {
     const result = Object.assign({}, constraint) as BSIExtraConstraint;
     result.name = this.getName();
     result.parent = this;
     const useTarget = constraint.shared || this instanceof CategoryLink;
     result.childId = this.isLink() && useTarget ? this.targetId : this.id;
-    result.scope = "self";
-
     result.modifiers = [];
     for (const modifier of this.modifiersIterator()) {
       if (modifier.field === constraint.id || modifier.field === "hidden") result.modifiers.push(modifier);
@@ -586,6 +582,13 @@ export class Base implements BSModifierBase {
         }
       }
     }
+    return result;
+  }
+  // Modifiers a constraints query to have the same effect when checked from a roster/force.
+  // packs modifiers & modifiers groups inside it
+  getBoundConstraint(constraint: BSIConstraint): BSIExtraConstraint {
+    const result = this.getPackedConstraint(constraint);
+    result.scope = "self"
     return result;
   }
   // checks if extra constraints are null before adding them to prevent duplicates
@@ -1056,7 +1059,7 @@ export class Modifier extends Base implements BSIModifier {
   declare field: "category" | "name" | "hidden" | string; //costId
   declare value: number | string | boolean;
 }
-export class ModifierGroup extends Base implements BSIModifierGroup {}
+export class ModifierGroup extends Base implements BSIModifierGroup { }
 
 export class Rule extends Base implements BSIRule {
   declare id: string;
