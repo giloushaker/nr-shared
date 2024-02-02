@@ -170,7 +170,7 @@ export interface BSISelectionEntry
   entryLinks?: BSIEntryLink[];
   categoryLinks?: BSICategoryLink[];
   import?: boolean;
-  costs: BSICost[];
+  costs?: BSICost[];
   collective?: boolean;
 
 }
