@@ -68,7 +68,23 @@ for (const [key, value] of Object.entries(entries)) {
     allowed[key] = new Set(value.allowedChildrens);
   }
 }
+function parseValue(str: string): any {
+  switch (str) {
+    case "true":
+      return true;
+    case "false":
+      return false;
+    default:
+      if (isNaN(str as any)) {
+        return str;
+      }
 
+      const float = parseFloat(str);
+      if (isFinite(float) && str.includes("+") == false) return float;
+
+      return str;
+  }
+}
 export function xmlToJson(data: string) {
   const options: X2jOptionsOptional = {
     allowBooleanAttributes: true,
@@ -82,10 +98,11 @@ export function xmlToJson(data: string) {
     alwaysCreateTextNode: true,
 
     isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
-      
       return !isAttribute && tagName in containers;
     },
-    attributeValueProcessor: (name, val) => unescape(val),
+    attributeValueProcessor: (name, val) => {
+      return parseValue(unescape(val))
+    },
     tagValueProcessor: (name, val) => unescape(val),
   };
   return new XMLParser(options).parse(data);
@@ -173,14 +190,14 @@ export function normalize(x: any) {
       } else {
         const val = x[attr][containerTags[attr] as string];
 
-      // Remove empty arrays that become an incorrect element
-        if (Array.isArray(val)){
+        // Remove empty arrays that become an incorrect element
+        if (Array.isArray(val)) {
           x[attr] = val;
           x[attr]?.forEach(normalize);
         }
         else if (isObject(x[attr])) {
           delete x[attr]
-        } 
+        }
       }
     } else if (textNodeTags.has(attr)) {
       x[attr] = x[attr]["$text"] ?? "";
