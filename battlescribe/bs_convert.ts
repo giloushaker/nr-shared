@@ -91,7 +91,6 @@ export function xmlToJson(data: string) {
     ignoreAttributes: false,
     attributeNamePrefix: "",
     textNodeName: "$text",
-    parseAttributeValue: true,
     processEntities: false,
     parseTagValue: false,
     ignoreDeclaration: true,
