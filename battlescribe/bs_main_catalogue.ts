@@ -172,7 +172,7 @@ export class Catalogue extends Base {
     const units = this.generateUnits();
     const categories = this.generateCategories(units);
     this.categories = Object.values(categories);
-    this.generateForces(categories);
+    this.generateForces(categories, this.forcesIterator());
     this.generateExtraConstraints();
     // console.log("processed", this.name)
   }
@@ -587,9 +587,10 @@ export class Catalogue extends Base {
     this.importsWithEntries = Object.values(importsWithEntries);
     return this.imports;
   }
-  generateForces(categories: Record<string, Category>): Force[] {
+  generateForces(categories: Record<string, Category>, forces: Iterable<Force>, parent?: Force | Catalogue): Force[] {
+    if (!parent) parent = this;
     const result = [];
-    for (const force of this.forcesIterator()) {
+    for (const force of forces) {
       const copiedForce = clone(force);
       copiedForce.main_catalogue = this;
       const forceCategories = [];
@@ -612,6 +613,7 @@ export class Catalogue extends Base {
           forceCategories.push(copied);
         }
       }
+      // For older verion of BS Data
       for (const categoryEntry of force.categoryEntries || []) {
         if (categoryEntry.id in categories) {
           const category = categories[categoryEntry.id];
@@ -638,11 +640,11 @@ export class Catalogue extends Base {
       if (copiedForce.forceEntries) {
         copiedForce.generateForces(categories);
       }
-
+      this.generateForces(categories, copiedForce.forcesIterator(), copiedForce)
       result.push(copiedForce);
     }
-    this.forces = result;
-    this.childs = result;
+    parent.forces = result;
+    parent.childs = result;
     return result;
   }
   generateCategories(units: Record<string, Base[]>): Record<string, Category> {
