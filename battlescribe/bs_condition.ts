@@ -25,14 +25,6 @@ export function isScopeValid(parent: EditorBase, scope: string) {
   while (stack.length) {
     const current = stack.pop()!;
     if (current.id === scope) return true;
-
-    // check links
-    // if (current.links) {
-    //   for (const link of current.links) {
-    //     stack.push(link);
-    //   }
-    // }
-
     if (current.parent) [stack.push(current.parent)];
   }
   return false;

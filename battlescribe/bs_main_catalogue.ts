@@ -70,8 +70,8 @@ export interface WikiBase extends Base {
 }
 export interface EditorBase extends Base {
   parent?: EditorBase;
-  links?: EditorBase[];
-  other_links?: EditorBase[];
+  refs?: EditorBase[];
+  other_refs?: EditorBase[];
   catalogue: Catalogue;
 
   parentKey: string & keyof EditorBase;
@@ -184,11 +184,11 @@ export class Catalogue extends Base {
     (system as any).rules = rulesObj;
 
     this.imports.forEach((imported) => {
-      addObjUnique(imported as any, "links", this);
+      addObjUnique(imported as any, "refs", this);
     });
     function proc(cur: WikiBase, parent: WikiBase) {
       (cur as WikiBase).parent = parent as WikiBase;
-      if (cur.target) addObjUnique(cur.target as any, "links", parent as WikiBase);
+      if (cur.target) addObjUnique(cur.target as any, "refs", parent as WikiBase);
       if (cur instanceof Rule) {
         rulesObj[cur.id] = cur;
       }
@@ -208,7 +208,7 @@ export class Catalogue extends Base {
     this.init(false);
 
     if (this.gameSystem) {
-      addObjUnique(this.gameSystem as any, "links", this);
+      addObjUnique(this.gameSystem as any, "refs", this);
     }
 
     forEachObjectWhitelist2<EditorBase>(
@@ -216,26 +216,26 @@ export class Catalogue extends Base {
       (cur, parent) => {
         cur.parent = parent;
         cur.catalogue = this;
-        if (!cur.links) {
-          cur.links = [];
+        if (!cur.refs) {
+          cur.refs = [];
         }
-        if (!cur.other_links) {
-          cur.other_links = [];
+        if (!cur.other_refs) {
+          cur.other_refs = [];
         }
         if (cur.target) {
-          addObjUnique(cur.target as EditorBase, "links", cur);
+          addObjUnique(cur.target as EditorBase, "refs", cur);
         }
         if (cur.isProfile() && !cur.isLink()) {
           const target = this.findOptionById(cur.typeId) as EditorBase;
           if (target) {
-            addObjUnique(target, "links", cur);
+            addObjUnique(target, "refs", cur);
           }
         }
         const value = (cur as any).value;
         if (value) {
           const target = this.findOptionById(value) as EditorBase;
           if (target) {
-            addObjUnique(target, "other_links", cur);
+            addObjUnique(target, "other_refs", cur);
           }
         }
         this.refreshErrors(cur);
@@ -1002,11 +1002,11 @@ export class Catalogue extends Base {
       delete this.index[cur.id];
     }
     this.removeErrors(cur);
-    for (const ref of cur.links || []) {
+    for (const ref of cur.refs || []) {
       delete ref.target;
       ref.catalogue.refreshErrors(ref);
     }
-    for (const ref of cur.other_links || []) {
+    for (const ref of cur.other_refs || []) {
       ref.catalogue.refreshErrors(ref, true);
     }
   }
@@ -1056,29 +1056,29 @@ export class Catalogue extends Base {
     }
   }
   removeRef(from: EditorBase, to: EditorBase) {
-    if (!to.links) to.links = [];
-    const idx = to.links.indexOf(from);
-    if (idx >= 0) to.links.splice(idx, 1);
+    if (!to.refs) to.refs = [];
+    const idx = to.refs.indexOf(from);
+    if (idx >= 0) to.refs.splice(idx, 1);
   }
   addRef(from: EditorBase, to: EditorBase) {
-    if (!to.links) to.links = [];
-    if (to.links.indexOf(from) === -1) {
-      to.links.push(from);
+    if (!to.refs) to.refs = [];
+    if (to.refs.indexOf(from) === -1) {
+      to.refs.push(from);
     }
   }
   hasOtherRef(from: EditorBase, to: EditorBase) {
-    return to.other_links && to.other_links.includes(from);
+    return to.other_refs && to.other_refs.includes(from);
   }
 
   removeOtherRef(from: EditorBase, to: EditorBase) {
-    if (!to.other_links) to.other_links = [];
-    const idx = to.other_links.indexOf(from);
-    if (idx >= 0) to.other_links.splice(idx, 1);
+    if (!to.other_refs) to.other_refs = [];
+    const idx = to.other_refs.indexOf(from);
+    if (idx >= 0) to.other_refs.splice(idx, 1);
   }
   addOtherRef(from: EditorBase, to: EditorBase) {
-    if (!to.other_links) to.other_links = [];
-    if (to.other_links.indexOf(from) === -1) {
-      to.other_links.push(from);
+    if (!to.other_refs) to.other_refs = [];
+    if (to.other_refs.indexOf(from) === -1) {
+      to.other_refs.push(from);
     }
   }
   updateLink(link: Link & EditorBase) {
@@ -1249,8 +1249,6 @@ export function resolveLinks(
 
   // Delete unresolved links
   if (unresolved.length && deleteBadLinks) {
-    // console.warn(`${length - unresolved.length}/${length} links resolved in ${unresolved[0].catalogue.name}`);
-    // console.log(`unresolved links: ${unresolved.map((o) => `${o.id} -> ${o.targetId}`)}`);
     for (let i = 0; i < unresolved.length; i++) {
       const link = unresolved[i];
       const parent = parents[i];

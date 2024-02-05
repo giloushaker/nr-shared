@@ -383,7 +383,7 @@ export function getNameExtra(obj: EditorBase, _refs = true, _type = true): strin
     default:
       break;
   }
-  const refcount = (obj.links?.length ?? 0) + (obj.other_links?.length ?? 0);
+  const refcount = (obj.refs?.length ?? 0) + (obj.other_refs?.length ?? 0);
   if (refcount && _refs) {
     const s = refcount === 1 ? "" : "s";
     pieces.push(`(${refcount || 0} ref${s})`);
