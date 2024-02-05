@@ -2,7 +2,6 @@ import JSZip, { OutputType } from "jszip";
 import { getRandomInt } from "../util";
 export type Modify<T, R> = Omit<T, keyof R> & R;
 export type MaybeArray<T> = T | Array<T>;
-
 export function stripNumber(str: string): string {
   return str.replace(/[0-9]+ *[.-] *(.*)/, "$1");
 }
@@ -269,18 +268,18 @@ export interface Sortable {
   toString: () => string;
 }
 export function sortByAscending<T>(array: T[], getKey: (item: T) => Sortable): T[] {
-  return [...array].sort((a,b) => (getKey(a) ?? "").toString().localeCompare((getKey(b) ?? "").toString(), undefined, { numeric: true }))
+  return [...array].sort((a, b) => (getKey(a) ?? "").toString().localeCompare((getKey(b) ?? "").toString(), undefined, { numeric: true }))
 }
 export function sortByDescending<T>(array: T[], getKey: (item: T) => Sortable): T[] {
-  return [...array].sort((a,b) => (getKey(b) ?? "").toString().localeCompare((getKey(a) ?? "").toString(), undefined, { numeric: true }))
+  return [...array].sort((a, b) => (getKey(b) ?? "").toString().localeCompare((getKey(a) ?? "").toString(), undefined, { numeric: true }))
 }
 export const sortBy = sortByAscending
 
 export function sortByAscendingInplace<T>(array: T[], getKey: (item: T) => Sortable): T[] {
-  return array.sort((a,b) => (getKey(a) ?? "").toString().localeCompare((getKey(b) ?? "").toString(), undefined, { numeric: true }))
+  return array.sort((a, b) => (getKey(a) ?? "").toString().localeCompare((getKey(b) ?? "").toString(), undefined, { numeric: true }))
 }
 export function sortByDescendingInplace<T>(array: T[], getKey: (item: T) => Sortable): T[] {
-  return array.sort((a,b) => (getKey(b) ?? "").toString().localeCompare((getKey(a) ?? "").toString(), undefined, { numeric: true }))
+  return array.sort((a, b) => (getKey(b) ?? "").toString().localeCompare((getKey(a) ?? "").toString(), undefined, { numeric: true }))
 }
 
 export function findMax<T>(array: T[], getKey: (item: T) => any): T {
@@ -617,7 +616,7 @@ export function escapeXml(str: any): string {
 export async function zipCompress<T extends OutputType>(nameInZip: string, content: string, type: T) {
   var zip = new JSZip();
   zip.file(nameInZip, content);
-  const result = await zip.generateAsync({ type: type, compression: "DEFLATE" });
+  const result = await zip.generateAsync<T>({ type: type, compression: "DEFLATE" });
   return result;
 }
 

@@ -1,9 +1,12 @@
-export interface BSINamed {
-  name: string;
+export interface BSICommentable {
+  comment?: string
 }
-export interface BSIOption {
+export interface BSIOption extends BSICommentable {
   id: string;
-  comment?: string;
+}
+export interface BSINamed extends BSICommentable {
+  name: string;
+  id: string;
 }
 export interface BSIHidden {
   hidden: boolean;
@@ -19,13 +22,12 @@ export interface BSICategoryLink extends BSILink {
 export interface BSICostType extends BSIOption, BSIHidden, BSINamed {
   defaultCostLimit: number;
 }
-export interface BSISelectionCategory {
-  name: string;
-  id: string;
+export interface BSISelectionCategory extends BSINamed {
   primary?: boolean;
   entryId: string;
 }
-export interface BSICost extends BSINamed {
+export interface BSICost {
+  name: string;
   value: number;
   typeId: string;
 }
@@ -49,25 +51,31 @@ export interface BSIQuery {
 export interface BSIRepeat extends BSIQuery, BSIValued {
   repeats: number;
   roundUp?: boolean;
-  id: string;
+}
+export interface BSICosts {
+  costs?: BSICost[]
 }
 
 export interface BSICondition extends BSIQuery, BSIValued {
   type: "instanceOf" | "notInstanceOf" | "atLeast" | "greaterThan" | "atMost" | "lessThan" | "equalTo" | "notEqualTo";
 }
-export interface BSIConditionGroup {
-  type?: "and" | "or" | "exactly";
+
+export interface BSIConditional {
   conditions?: BSICondition[];
   conditionGroups?: BSIConditionGroup[];
 }
+export interface BSIConditionGroup extends BSIConditional, BSICommentable {
+  type?: "and" | "or" | "exactly";
+}
 
-export interface BSIConstraint extends BSIQuery, BSIValued, BSIOption {
+export interface BSIConstraint extends BSIQuery, BSIValued, BSICommentable {
+  id: string;
   isLimit?: boolean;
   type: "min" | "max" | "exactly";
   shared?: boolean;
 }
 
-export interface BSICategory extends BSINamed, BSIOption { }
+export interface BSICategory extends BSINamed { }
 
 export type BSIModifierType =
   | "add"
@@ -83,22 +91,18 @@ export type BSIModifierType =
   | "prepend"
   | "replace";
 
-export interface BSIModifier {
-  conditions?: BSICondition[];
-  conditionGroups?: BSIConditionGroup[];
+export interface BSIModifier extends BSIConditional, BSICommentable {
   repeats?: BSIRepeat[];
-
   type: BSIModifierType;
   field: "category" | "name" | "hidden" | string; //costId
   value: number | string | boolean;
   arg?: number | string | boolean;
-  last_value?: number;
 }
-export interface BSIModifierGroup {
+export interface BSIModifiable {
   modifiers?: BSIModifier[];
   modifierGroups?: BSIModifierGroup[];
-  conditions?: BSICondition[];
-  conditionGroups?: BSIConditionGroup[];
+}
+export interface BSIModifierGroup extends BSIConditional, BSIModifiable, BSICommentable {
   repeats?: BSIRepeat[];
 }
 
@@ -115,15 +119,12 @@ export interface SupportedQueries {
   repeats?: BSIRepeat[];
   modifiers?: BSIModifier[];
 }
-export interface BSIModifiable {
-  modifiers?: BSIModifier[];
-  modifierGroups?: BSIModifierGroup[];
-}
+
 export interface BSIConstrainable {
   constraints?: BSIConstraint[];
 }
 
-export interface BSIForce extends BSINamed, BSIOption, BSIReference, BSIHidden {
+export interface BSIForce extends BSINamed, BSIReference, BSIHidden {
   categoryLinks?: BSICategoryLink[];
   forceEntries?: BSIForce[];
 }
@@ -136,7 +137,6 @@ export interface BSIInfo {
 }
 export interface BSISelectionEntryGroup
   extends BSINamed,
-  BSIOption,
   BSIReference,
   BSIModifiable,
   BSIConstrainable,
@@ -157,7 +157,6 @@ export interface BSIEntryLink extends BSILink, BSIConstrainable, BSIModifiable, 
 }
 export interface BSISelectionEntry
   extends BSINamed,
-  BSIOption,
   BSIReference,
   BSIModifiable,
   BSIConstrainable,
@@ -305,92 +304,55 @@ export interface SupportedQueries {
   modifiers?: BSIModifier[];
 }
 
-export interface BSIProfile {
-  comment?: string;
+export interface BSIProfile extends BSINamed, BSIHidden, BSICommentable, BSIReference, BSIModifiable {
   characteristics: BSICharacteristic[];
-  id: string;
-  name: string;
-  hidden: boolean;
   typeId: string;
   typeName: string;
-  publicationId?: string;
-  publication?: BSIPublication;
-  page?: string;
-  modifiers?: BSIModifier[];
-  modifierGroups?: BSIModifierGroup[];
 }
 
-export interface BSICharacteristicType {
+export interface BSICharacteristicType extends BSINamed {
   name: string;
   id: string;
 }
 
-export interface BSIProfileType extends BSINamed, BSIOption {
+export interface BSIProfileType extends BSINamed {
   characteristicTypes: BSICharacteristicType[];
   sortIndex?: number;
 }
 
-export interface BSIRule {
-  id: string;
-  name: string;
+export interface BSIRule extends BSINamed, BSIHidden, BSIModifiable, BSICommentable, BSIReference {
+
   description: string | string[];
-  hidden: boolean;
-  publicationId?: string;
-  publication?: BSIPublication;
-  page?: string;
-  modifiers?: BSIModifier[];
-  modifierGroups?: BSIModifierGroup[];
 }
 
 export interface BSIInfoLink<
   T extends BSIInfoGroup | BSIRule | BSIProfile | BSIInfoGroup = BSIInfoGroup | BSIRule | BSIProfile | BSIInfoGroup
-> {
-  id: string;
-  name: string;
-  hidden: boolean;
-  publicationId?: string;
-  publication?: BSIPublication;
-  page?: string;
+> extends BSINamed, BSIHidden, BSICommentable, BSIModifiable, BSIReference {
   targetId: string;
   target?: T;
   type: "profile" | "rule" | "infoGroup";
-  modifiers?: BSIModifier[];
-  modifierGroups?: BSIModifierGroup[];
   characteristics?: BSICharacteristic[];
 }
-export interface BSIInfoGroup {
-  id: string;
-  name: string;
-  hidden: boolean;
-  page?: string;
-
+export interface BSIInfoGroup extends BSICommentable, BSINamed, BSIHidden, BSIModifiable, BSIReference {
   profiles?: BSIProfile[];
   rules?: BSIRule[];
   infoGroups?: BSIInfoGroup[];
   infoLinks?: BSIInfoLink[];
-  modifiers?: BSIModifier[];
-  modifierGroups?: BSIModifierGroup[];
 }
 
-export interface BSIPublication {
-  id: string;
-  name?: string;
+export interface BSIPublication extends BSICommentable, BSINamed {
   shortName?: string;
   publisher?: string;
   publicationDate?: string | number;
   publisherUrl?: string;
 }
-
 export interface AssociationConstraint {
   type: "min" | "max";
   value: number;
   childId: string;
   field: "associations";
 }
-export interface NRAssociation {
-  name: string;
-  id?: string;
-
+export interface NRAssociation extends BSINamed, BSICommentable {
   ids?: string[];
   min?: number;
   max?: number;

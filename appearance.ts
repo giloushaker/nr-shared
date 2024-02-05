@@ -14,10 +14,10 @@ function hexToRgb(hex: string): RGB | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16),
+    }
     : null;
 }
 
@@ -60,26 +60,6 @@ function setBackground(id: string, colors: string[], backgroundAlpha: number): v
 }
 
 export function updateCssVars(appearence: AppearanceTheme) {
-  if (appearence.background) {
-    setBackground("bg", appearence.background.colors, appearence.background.alpha);
-    setBackground("popups_background", appearence.background.colors, 100);
-  }
-
-  if (appearence.title) {
-    setBackground("title", appearence.title.colors, appearence.title.alpha);
-  }
-
-  if (appearence.forcesBackground) {
-    setBackground("forces_background", appearence.forcesBackground.colors, appearence.forcesBackground.alpha);
-  } else if (appearence.title) {
-    setBackground("forces_background", appearence.title.colors, appearence.title.alpha);
-    appearence.forcesBackground = appearence.title;
-  }
-
-  if (appearence.unitsBackground) {
-    setBackground("units_background", appearence.unitsBackground.colors, appearence.unitsBackground.alpha);
-  }
-
   if (appearence.highlight) {
     const titleRgb = hexToRgb(appearence.highlight);
     if (titleRgb != null) {
@@ -134,11 +114,6 @@ export function updateCssVars(appearence: AppearanceTheme) {
     document.documentElement.style.setProperty(`--input-background`, appearence.inputBackground);
   }
 
-  if (appearence.hoverColor) {
-    setBackground("hover-color", appearence.hoverColor.colors, appearence.hoverColor.alpha);
-    setBackground("popups-hover", appearence.hoverColor.colors, 100);
-  }
-
   if (appearence.fontColor) {
     document.documentElement.style.setProperty(`--font-color`, appearence.fontColor);
   }
@@ -166,7 +141,7 @@ export function updateCssVars(appearence: AppearanceTheme) {
   }
 
   if (appearence.invertImagesBrightness) {
-    const deg = 180 * (parseInt(appearence.invertImagesBrightness) / 100);
+    const deg = 180 * (Number(appearence.invertImagesBrightness) / 100);
     document.documentElement.style.setProperty(
       `--image-filter`,
       `invert(${appearence.invertImagesBrightness}%) hue-rotate(${deg}deg)`

@@ -1,15 +1,12 @@
-export interface AppearanceBackground {
-  colors: string[];
-  alpha: number;
-}
-
 export interface AppearanceTheme {
-  background: AppearanceBackground;
+  background: string;
   backgroundTexture: string;
+  backgroundSize: string;
 
-  title: AppearanceBackground;
-  forcesBackground: AppearanceBackground;
-  unitsBackground: AppearanceBackground;
+  bga: number | string;
+  title: string;
+  forcesBackground: string;
+  unitsBackground: string;
 
   hue: number;
   highlight: string;
@@ -23,7 +20,7 @@ export interface AppearanceTheme {
   costsLeft: boolean;
   invertColors: boolean;
   invertImages: boolean;
-  invertImagesBrightness: string;
+  invertImagesBrightness: number | string;
 
   italic?: "italic" | "normal";
   font: string;
@@ -47,5 +44,5 @@ export interface AppearanceTheme {
   fitBackground: boolean;
 
   titleBarColor: string;
-  hoverColor: AppearanceBackground;
+  hoverColor: string;
 }

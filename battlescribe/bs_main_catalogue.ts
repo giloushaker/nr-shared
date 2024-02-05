@@ -44,6 +44,7 @@ import type {
   BSIReference,
   BSIRule,
 } from "./bs_types";
+import { GameSystemFiles } from "./local_game_system";
 
 if (typeof $toRaw === "undefined") {
   globalThis.$toRaw = function (o) {
@@ -133,7 +134,7 @@ export class Catalogue extends Base {
   units!: Array<Base | Link>;
   roster_constraints!: BSIExtraConstraint[];
 
-  manager!: BSCatalogueManager;
+  manager!: typeof isEditor extends true ? GameSystemFiles : BSCatalogueManager;
   book!: any;
   short!: string;
   version!: string;
@@ -340,7 +341,7 @@ export class Catalogue extends Base {
     }
   }
 
-  *iterateProfileTypes(): Iterable<BSIProfileType> {
+  *iterateProfileTypes(): Iterator<BSIProfileType> {
     for (const catalogue of this.imports) {
       if (catalogue.profileTypes) {
         yield* catalogue.profileTypes;

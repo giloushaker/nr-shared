@@ -562,7 +562,7 @@ export function onAddEntry(
     });
   }
   if (reload && parent) {
-    const catalogue = parent.catalogue || parent;
+    const catalogue = parent.catalogue || (parent as Catalogue);
     catalogue.reload(manager);
   }
 }

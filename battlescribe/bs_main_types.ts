@@ -19,7 +19,7 @@ import {
 } from "./bs_main";
 import { Catalogue, CatalogueLink, Publication } from "./bs_main_catalogue";
 import { isObject, isDefaultObject } from "./bs_helpers";
-import { getTypeName } from "./bs_editor";
+import { getName, getTypeName } from "./bs_editor";
 
 export class NoObserve {
   get [Symbol.toStringTag](): string {
@@ -36,7 +36,7 @@ function getKeyInfoClass(cache: Record<string, any>, parentKey: string, obj: any
   if (parentKey in cache) {
     return cache[parentKey];
   }
-  const _key = class extends Base {
+  class EditorBase extends Base {
     get parentKey(): string {
       return parentKey;
     }
@@ -44,13 +44,14 @@ function getKeyInfoClass(cache: Record<string, any>, parentKey: string, obj: any
       return getTypeName(parentKey, this);
     }
     toString(): string {
-      return `${this.editorTypeName} - ${this.getName()}`;
+      return `${this.editorTypeName} - ${getName(this)}`;
     }
+
   };
-  _key.prototype.parentKey;
-  Object.setPrototypeOf(_key.prototype, Object.getPrototypeOf(obj));
-  cache[parentKey] = _key.prototype;
-  return _key.prototype;
+  EditorBase.prototype.parentKey;
+  Object.setPrototypeOf(EditorBase.prototype, Object.getPrototypeOf(obj));
+  cache[parentKey] = EditorBase.prototype;
+  return EditorBase.prototype;
 }
 function setKeyInfo(cache: Record<string, any>, key: string, obj: any): void {
   Object.setPrototypeOf(obj, getKeyInfoClass(cache, key, obj));
@@ -145,7 +146,7 @@ export function setPrototypeRecursive(obj: any): void {
         //  If Array: Set Prototypes on each object inside array (assumes all objects if first is)
         if (Array.isArray(value)) {
           if (value.length && isObject(value[0])) {
-            for (let i = value.length; i--; ) {
+            for (let i = value.length; i--;) {
               const cur = value[i];
               if (isDefaultObject(cur)) {
                 setPrototype(cur, key);
