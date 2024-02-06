@@ -23,7 +23,9 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40): BSI
     const value = groupedByType[key];
     groupedByType[key] = value.map((o) => [o.name, o] as [string, BSIGroupedProfile]).map(([, v]) => v);
   }
-  const profilesByType = Object.values(groupedByType).filter((o) => o.length).map(b => sortByAscending(b, (c) => c.name));
+  const profilesByType = Object.values(groupedByType)
+    .filter((o) => o.length)
+    .map((b) => sortByAscending(b, (c) => c.name));
   for (const profiles of profilesByType) {
     const maxes = {} as Record<string, number>;
     for (const profile of profiles) {
@@ -43,8 +45,33 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40): BSI
           profile.big.push(characteristic);
         } else {
           profile.small.push(characteristic);
-        } 
+        }
       }
+    }
+
+    // Sort profiles that have a "Number" characteristic
+    try {
+      if (profiles.length && profiles[0].characteristics.find((elt) => elt.name === "Number")) {
+        profiles.sort((p1, p2) => {
+          const c1 = p1.characteristics.find((c) => c.name === "Number");
+          const c2 = p2.characteristics.find((c) => c.name === "Number");
+
+          if (!c1 || !c2) {
+            return 0;
+          }
+
+          if ((c1.$text || 0) > (c2.$text || 0)) {
+            return 1;
+          }
+          if ((c1.$text || 0) < (c2.$text || 0)) {
+            return -1;
+          }
+
+          return 0;
+        });
+      }
+    } catch {
+      //
     }
   }
 
