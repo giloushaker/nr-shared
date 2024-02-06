@@ -124,7 +124,7 @@ export class Base implements BSModifierBase {
   // Data
   id!: string;
   type?: string;
-  subType?: "mount" | "crew";
+  subType?: "mount" | "crew" | "unit-group";
   shared?: boolean;
   import?: boolean;
   collective?: boolean;
