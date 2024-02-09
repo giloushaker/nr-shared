@@ -1,8 +1,9 @@
 import { ObjectId } from "bson";
 import JSZip, { OutputType } from "jszip";
 
+
 export function getRandomKey(): string {
-  return new ObjectId().toString();
+  return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
 
 export function crossRefs(tab1: Array<any>, tab2: Array<any>): boolean {
