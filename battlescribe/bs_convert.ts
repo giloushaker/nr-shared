@@ -99,10 +99,10 @@ export function xmlToJson(data: string) {
     isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
       return !isAttribute && tagName in containers;
     },
-    attributeValueProcessor: (name, val) => {
+    attributeValueProcessor: (name: string, val: string) => {
       return parseValue(unescape(val))
     },
-    tagValueProcessor: (name, val) => unescape(val),
+    tagValueProcessor: (name: string, val: string) => unescape(val),
   };
   return new XMLParser(options).parse(data);
 }
