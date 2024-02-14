@@ -5,7 +5,7 @@ import { Catalogue } from "./bs_main_catalogue";
 import { loadData } from "./bs_load_data";
 import type { GithubIntegration } from "./github";
 import { db } from "./cataloguesdexie";
-import { Base, getDataObject } from "./bs_main";
+import { Base } from "./bs_main";
 import { noObserve } from "./bs_main_types";
 
 export class GameSystemFiles extends BSCatalogueManager {

@@ -44,7 +44,7 @@ import type {
   BSIReference,
   BSIRule,
 } from "./bs_types";
-import { GameSystemFiles } from "./local_game_system";
+import type { GameSystemFiles } from "./local_game_system";
 
 if (typeof $toRaw === "undefined") {
   globalThis.$toRaw = function (o) {
@@ -240,7 +240,7 @@ export class Catalogue extends Base {
         }
         this.refreshErrors(cur);
       },
-      goodJsonArrayKeys
+      goodJsonArrayKeys,
     );
   }
   get url(): string {
@@ -640,7 +640,7 @@ export class Catalogue extends Base {
       if (copiedForce.forceEntries) {
         copiedForce.generateForces(categories);
       }
-      this.generateForces(categories, copiedForce.forcesIterator(), copiedForce)
+      this.generateForces(categories, copiedForce.forcesIterator(), copiedForce);
       result.push(copiedForce);
     }
     parent.forces = result;
@@ -727,7 +727,7 @@ export class Catalogue extends Base {
     function localAddBoundCategoryConstraints(
       catalogue: Catalogue,
       category: Category,
-      constraints: Iterable<BSIConstraint>
+      constraints: Iterable<BSIConstraint>,
     ) {
       const target = category.target || category;
       for (const constraint of constraints) {
@@ -1043,7 +1043,7 @@ export class Catalogue extends Base {
           unresolvedChildIds.push(cur);
         }
       },
-      goodKeys
+      goodKeys,
     );
 
     const indexes = this.getIndexes();
@@ -1211,7 +1211,7 @@ export function resolveLinks(
   unresolved: Link[] = [],
   indexes: Record<string, Base>[],
   parents: Base[],
-  deleteBadLinks = true
+  deleteBadLinks = true,
 ) {
   const length = unresolved.length;
   const resolved = [];
@@ -1278,7 +1278,7 @@ export function resolveLinks(
  */
 export function resolvePublications(
   unresolved: Array<BSIInfoLink | BSIRule | BSIProfile> = [],
-  indexes: Record<string, Base>[]
+  indexes: Record<string, Base>[],
 ) {
   const nextUnresolved = [];
   for (const current of unresolved) {
