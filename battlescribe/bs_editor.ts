@@ -1,4 +1,4 @@
-import { Base, Condition, Constraint, Link, Modifier, ModifierGroup, Profile, goodJsonKeys } from "./bs_main";
+import { Base, BaseChildsT, Condition, Constraint, Link, Modifier, ModifierGroup, Profile, goodJsonKeys } from "./bs_main";
 import { Catalogue, CatalogueLink, EditorBase } from "./bs_main_catalogue";
 import { conditionToString, fieldToText, getModifierOrConditionParent, modifierToString } from "./bs_modifiers";
 import {
@@ -715,7 +715,7 @@ export function scrambleIds(catalogue: Catalogue, entry_or_entries: MaybeArray<E
   }
 }
 
-export function fixKey(parent: EditorBase | Catalogue, key: keyof Base, catalogueKey?: string) {
+export function fixKey(parent: EditorBase | Catalogue, key: BaseChildsT, catalogueKey?: BaseChildsT | ""): BaseChildsT | "" {
   if (!parent.isCatalogue()) {
     switch (key) {
       case "sharedRules":
@@ -736,31 +736,31 @@ export function fixKey(parent: EditorBase | Catalogue, key: keyof Base, catalogu
       case "sharedRules":
       case "rules":
         if (["sharedRules", "rules"].includes(catalogueKey)) {
-          return catalogueKey as keyof Base;
+          return catalogueKey
         }
         return "";
       case "sharedProfiles":
       case "profiles":
         if (["sharedProfiles", "profiles"].includes(catalogueKey)) {
-          return catalogueKey as keyof Base;
+          return catalogueKey
         }
         return "";
       case "sharedInfoGroups":
       case "infoGroups":
         if (["sharedInfoGroups", "infoGroups"].includes(catalogueKey)) {
-          return catalogueKey as keyof Base;
+          return catalogueKey
         }
         return "";
       case "sharedSelectionEntries":
       case "selectionEntries":
         if (["sharedSelectionEntries", "selectionEntries"].includes(catalogueKey)) {
-          return catalogueKey as keyof Base;
+          return catalogueKey
         }
         return "";
       case "sharedSelectionEntryGroups":
       case "selectionEntryGroups":
         if (["sharedSelectionEntryGroups", "selectionEntryGroups"].includes(catalogueKey)) {
-          return catalogueKey as keyof Base;
+          return catalogueKey
         }
         return "";
       default:
