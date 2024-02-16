@@ -1,7 +1,6 @@
 import { ObjectId } from "bson";
 import JSZip, { OutputType } from "jszip";
 
-
 export function getRandomKey(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
 }
@@ -43,7 +42,17 @@ export function getRandomInt(max: number): number {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
+function isHtml(str: string): boolean {
+  // Simple check for common HTML tag patterns
+  const pattern = /<[^>]+>/;
+  return pattern.test(str);
+}
+
 export function stripHtml(originalString: string): string {
+  if (!isHtml(originalString)) {
+    return originalString;
+  }
+
   if (originalString == null) {
     return "";
   }
