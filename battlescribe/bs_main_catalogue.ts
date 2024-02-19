@@ -1100,6 +1100,7 @@ export class Catalogue extends Base {
       link.catalogue.removeError(link, "bad-link-target");
       link.target = target;
       if (link.target) {
+        link.name = target.name
         this.addRef(link, link.target as EditorBase);
         const targetType = (link.target as EditorBase).editorTypeName;
         if (targetType == "category") {
