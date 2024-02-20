@@ -14,10 +14,10 @@ function hexToRgb(hex: string): RGB | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16),
-    }
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
     : null;
 }
 
@@ -166,10 +166,10 @@ export function updateCssVars(appearence: AppearanceTheme) {
   }
 
   if (appearence.invertImagesBrightness) {
-    const deg = 180 * (parseInt(appearence.invertImagesBrightness) / 100);
+    const deg = 180 * (parseInt(`${appearence.invertImagesBrightness}`) / 100);
     document.documentElement.style.setProperty(
       `--image-filter`,
-      `invert(${appearence.invertImagesBrightness}%) hue-rotate(${deg}deg)`
+      `invert(${appearence.invertImagesBrightness}%) hue-rotate(${deg}deg)`,
     );
   } else if (appearence.invertImages) {
     document.documentElement.style.setProperty(`--image-filter`, "invert(100%) hue-rotate(180deg)");
@@ -210,7 +210,7 @@ export function setAppearanceFont(
   appearence: AppearanceTheme,
   key: string,
   _defaultFamily = "sans-serif",
-  _defaultSize = 16
+  _defaultSize = 16,
 ) {
   const keyFont = `font${key}` as keyof AppearanceTheme;
   const keyFontSize = `font${key}Size` as keyof AppearanceTheme;

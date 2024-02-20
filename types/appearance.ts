@@ -1,12 +1,17 @@
+export interface AppearanceColor {
+  colors: string[];
+  alpha: number;
+}
+
 export interface AppearanceTheme {
-  background: string;
+  background: AppearanceColor;
+  title: AppearanceColor;
+  forcesBackground: AppearanceColor;
+  unitsBackground: AppearanceColor;
+  hoverColor: AppearanceColor;
+
   backgroundTexture: string;
   backgroundSize: string;
-
-  bga: number | string;
-  title: string;
-  forcesBackground: string;
-  unitsBackground: string;
 
   hue: number;
   highlight: string;
@@ -44,5 +49,4 @@ export interface AppearanceTheme {
   fitBackground: boolean;
 
   titleBarColor: string;
-  hoverColor: string;
 }
