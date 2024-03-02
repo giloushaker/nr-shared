@@ -62,11 +62,11 @@ export interface IErrorMessage {
 
 export interface WikiLink extends Link {
   parent: WikiBase;
-  links?: WikiLink[];
+  refs?: WikiLink[];
 }
 export interface WikiBase extends Base {
   parent?: WikiBase;
-  links?: WikiLink[];
+  refs?: WikiLink[];
 }
 export interface EditorBase extends Base {
   parent?: EditorBase;
