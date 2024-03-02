@@ -385,7 +385,6 @@ export function setConditionsText(
 }
 
 export function setRepeatText(base: Base | Link, repeat: BSIRepeat, fieldToString = fieldToText): PrintableRepeat {
-  const result = repeat as PrintableRepeat;
-  result.html = conditionToString(base, repeat, false, fieldToString);
+  const result = { ...repeat, catalogue: undefined, html: conditionToString(base, repeat, false, fieldToString) }
   return result;
 }
