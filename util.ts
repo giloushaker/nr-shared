@@ -526,7 +526,7 @@ export class LogHook {
     }
   }
   static replay(messages: Array<LogHookMessage>) {
-    for (const message of messages) {
+    for (const message of messages || []) {
       switch (message.type) {
         case "log":
           console.log(...message.args);
