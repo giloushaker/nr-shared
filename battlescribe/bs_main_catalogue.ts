@@ -1,3 +1,4 @@
+import { InfoIndex } from "~/assets/ts/battlescribe/bs_info_index";
 import { isScopeValid, validScopes } from "./bs_condition";
 import type { ItemTypeNames } from "./bs_editor";
 import {
@@ -127,6 +128,10 @@ export class Catalogue extends Base {
   imports!: Catalogue[];
   importsWithEntries!: Catalogue[];
   index!: Record<string, Base>;
+  /**
+   * Used for quickly finding references to rules within rules & profiles
+   */
+  infoIndex?: InfoIndex;
   unresolvedLinks: Record<string, Array<(Condition | Link) & EditorBase>> = {};
 
   forces!: Force[];
@@ -163,6 +168,7 @@ export class Catalogue extends Base {
     this.generateImports(deleteBadLinks);
     this.resolveAllLinks(deleteBadLinks);
     this.generateCostIndex();
+    this.indexInfo()
   }
 
   process() {
@@ -556,6 +562,25 @@ export class Catalogue extends Base {
 
     this.costIndex = result;
     return result;
+  }
+  getSystem() {
+    return this.gameSystem ?? this
+  }
+  indexInfo() {
+    const system = this.gameSystem ?? this
+    if (system === this) {
+      system.infoIndex = new InfoIndex()
+    }
+    const index = system.infoIndex;
+    if (!index) {
+      throw new Error("Couldn't index info: system isn't initialized");
+    }
+    const p1 = performance.now()
+    this.forEachObjectWhitelist((obj, parent) => {
+      if (!obj.isLink() && (obj.isProfile() || obj.isRule())) {
+        index.add(obj.getName(), obj)
+      }
+    })
   }
   generateImports(deleteBadLinks = true) {
     const importsWithEntries: Record<string, Catalogue> = {};
