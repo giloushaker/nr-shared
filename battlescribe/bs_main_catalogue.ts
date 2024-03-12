@@ -1,4 +1,4 @@
-import { InfoIndex } from "~/assets/ts/battlescribe/bs_info_index";
+import { InfoIndex } from "~/assets/shared/battlescribe/bs_info_index";
 import { isScopeValid, validScopes } from "./bs_condition";
 import type { ItemTypeNames } from "./bs_editor";
 import {
