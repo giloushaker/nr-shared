@@ -1,6 +1,4 @@
-const splitChars = ['[', ']', ' ', '(', ')', ',', '\n', '\r']
-const or = splitChars.map(o => `\\${o}`).join("|");
-const regex = new RegExp(`(?<=${or})|(?=${or})`, "g")
+
 function addToIndex(out: Record<string, any>, obj: any, words: string[], index = 0) {
     if (index < words.length) {
         const word = words[index].trim().toLowerCase()
@@ -18,7 +16,8 @@ function addToIndex(out: Record<string, any>, obj: any, words: string[], index =
 export class InfoIndex<T = any> {
     index = {} as Record<string, any>;
     words(str: string) {
-        return `${str}`.trim().split(regex)
+        const stringed = `${str}`
+        return stringed.trim().match(/(\w+|\s|\W(?!\s))/g) ?? [stringed]
     }
     add(text: string, value: T) {
         if (typeof text !== "string" || !text.match(/(?=.*[a-zA-Z].*[a-zA-Z])/)) {
