@@ -40,7 +40,7 @@ export const containerTags = {
 
   associations: "association",
 } as Record<string, string | undefined>;
-export const textNodeTags = new Set(["description", "readme", "comment"]);
+export const textNodeTags = new Set(["description", "readme", "comment", "alias"]);
 import { entries } from "./entries";
 
 const escapedHtml = /&(?:amp|lt|gt|quot|#39|apos);/g;
@@ -94,7 +94,7 @@ export function xmlToJson(data: string) {
     processEntities: false,
     parseTagValue: false,
     ignoreDeclaration: true,
-    alwaysCreateTextNode: true,
+    alwaysCreateTextNode: false,
 
     isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
       return !isAttribute && tagName in containers;
@@ -102,7 +102,9 @@ export function xmlToJson(data: string) {
     attributeValueProcessor: (name: string, val: string) => {
       return parseValue(unescape(val))
     },
-    tagValueProcessor: (name: string, val: string) => unescape(val),
+    tagValueProcessor: (name: string, val: string) => {
+      return unescape(val)
+    },
   };
   return new XMLParser(options).parse(data);
 }
@@ -198,7 +200,7 @@ export function normalize(x: any) {
           delete x[attr]
         }
       }
-    } else if (textNodeTags.has(attr)) {
+    } else if (textNodeTags.has(attr) && typeof x[attr] !== "string") {
       x[attr] = x[attr]["$text"] ?? "";
     }
   }

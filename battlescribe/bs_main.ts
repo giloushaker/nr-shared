@@ -1193,6 +1193,7 @@ export const goodJsonKeys = new Set([
   "xmlns",
   "readme",
   "description",
+  "alias",
   "comment",
   "publicationDate",
   "publisher",
