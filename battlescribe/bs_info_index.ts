@@ -17,7 +17,7 @@ export class InfoIndex<T = any> {
     index = {} as Record<string, any>;
     words(str: string) {
         const stringed = `${str}`
-        return stringed.trim().match(/(\w+|\s|\W(?!\s))/g) ?? [stringed]
+        return stringed.trim().match(/(\w+|\s|\W)/g) ?? [stringed]
     }
     add(text: string, value: T) {
         if (typeof text !== "string" || !text.match(/(?=.*[a-zA-Z].*[a-zA-Z])/)) {
