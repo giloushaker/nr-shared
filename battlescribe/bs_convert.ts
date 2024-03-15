@@ -200,7 +200,7 @@ export function normalize(x: any) {
           delete x[attr]
         }
       }
-    } else if (textNodeTags.has(attr) && typeof x[attr] !== "string") {
+    } else if (textNodeTags.has(attr) && typeof x[attr] === "object" && !Array.isArray(x[attr])) {
       x[attr] = x[attr]["$text"] ?? "";
     }
   }
