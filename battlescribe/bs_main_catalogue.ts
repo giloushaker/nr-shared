@@ -581,7 +581,9 @@ export class Catalogue extends Base {
         index.add(obj.getName(), obj)
         if (obj.alias) {
           for (const alias of obj.alias) {
-            index.add(alias, obj)
+            const copy = clone(obj)
+            copy.name = alias;
+            index.add(alias, copy)
           }
         }
       }
