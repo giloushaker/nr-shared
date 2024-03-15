@@ -579,6 +579,11 @@ export class Catalogue extends Base {
     this.forEachObjectWhitelist((obj, parent) => {
       if (!obj.isLink() && (obj.isProfile() || obj.isRule())) {
         index.add(obj.getName(), obj)
+        if (obj.alias) {
+          for (const alias of obj.alias) {
+            index.add(alias, obj)
+          }
+        }
       }
     })
   }

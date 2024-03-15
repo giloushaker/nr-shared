@@ -187,6 +187,8 @@ export class Base implements BSModifierBase {
   flatten?: boolean;
   collapsible?: boolean;
   sortIndex?: number;
+  alias?: string[];
+
 
   constructor(json: any) {
     return Object.setPrototypeOf(json, Object.getPrototypeOf(this));
