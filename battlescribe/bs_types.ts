@@ -325,7 +325,7 @@ export interface BSIProfileType extends BSINamed {
 
 export interface BSIRule extends BSINamed, BSIHidden, BSIModifiable, BSICommentable, BSIReference {
 
-  description: string | string[];
+  description: string;
 }
 
 export interface BSIInfoLink<
