@@ -40,7 +40,7 @@ export const containerTags = {
 
   associations: "association",
 } as Record<string, string | undefined>;
-export const textNodeTags = new Set(["description", "readme", "comment", "alias"]);
+export const textNodeTags = new Set(["description", "readme", "comment"]);
 import { entries } from "./entries";
 
 const escapedHtml = /&(?:amp|lt|gt|quot|#39|apos);/g;
