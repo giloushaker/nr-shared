@@ -61,7 +61,7 @@ export class InfoIndex<T = any> {
             }
 
 
-            if (clean[i]) {
+            if (clean[i] !== " ") {
                 for (let j = i; j < clean.length; j++) {
                     const word = clean[j]
                     if (word === " ") continue;
