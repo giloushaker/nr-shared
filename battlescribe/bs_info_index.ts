@@ -18,7 +18,7 @@ export class InfoIndex<T = any> {
     private addToIndex(out: Record<string, any>, obj: any, words: string[], index = 0) {
         if (index < words.length) {
             const word = this.clean(words[index])
-            if (word) {
+            if (word !== " ") {
                 if (!out[word]) out[word] = {}
                 this.addToIndex(out[word], obj, words, index + 1)
             } else {
