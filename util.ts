@@ -1,4 +1,3 @@
-import { ObjectId } from "bson";
 import JSZip, { OutputType } from "jszip";
 
 export function getRandomKey(): string {
@@ -602,4 +601,27 @@ export function getMimeTypeFromBase64(base64String: string) {
 
   // Return the extracted MIME type or null if not found
   return match ? match[1] : null;
+}
+
+export function isDateLessThanNDaysInPast(expiration: Date, n: number): boolean {
+  // Get the current date and time
+  const now = new Date();
+
+  // Calculate the date that is N days before now
+  const nDaysBeforeNow = new Date(now);
+  nDaysBeforeNow.setDate(now.getDate() - n);
+
+  // Check if the expiration date is after nDaysBeforeNow and before the current time
+  return expiration > nDaysBeforeNow && expiration < now;
+}
+
+export function daysBetweenDates(date1: Date, date2: Date): number {
+  // Calculate the difference in milliseconds
+  const difference = date2.getTime() - date1.getTime();
+
+  // Convert the difference from milliseconds to days
+  // 1 day = 24 hours/day * 60 minutes/hour * 60 seconds/minute * 1000 milliseconds/second
+  const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+
+  return days;
 }
