@@ -617,7 +617,7 @@ export function isDateLessThanNDaysInPast(expiration: Date, n: number): boolean 
 
 export function daysBetweenDates(date1: Date, date2: Date): number {
   // Calculate the difference in milliseconds
-  const difference = date2.getTime() - date1.getTime();
+  const difference = new Date(date2).getTime() - new Date(date1).getTime();
 
   // Convert the difference from milliseconds to days
   // 1 day = 24 hours/day * 60 minutes/hour * 60 seconds/minute * 1000 milliseconds/second
