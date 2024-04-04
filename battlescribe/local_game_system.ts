@@ -7,6 +7,7 @@ import type { GithubIntegration } from "./github";
 import { db } from "./cataloguesdexie";
 import { Base } from "./bs_main";
 import { noObserve } from "./bs_main_types";
+import { db as cataloguesdb } from "~/assets/shared/battlescribe/cataloguesdexie";
 
 export class GameSystemFiles extends BSCatalogueManager {
   gameSystem: BSIDataSystem | null = null;
@@ -16,6 +17,7 @@ export class GameSystemFiles extends BSCatalogueManager {
   github?: GithubIntegration;
   unresolvedLinks: Record<string, Array<Base>> = {};
   index: Record<string, Base> = {};
+  update?: (file: BSIData) => void | Promise<void>
   async loadData(data: BSIData, booksDate?: BooksDate): Promise<Catalogue> {
     const loaded = await loadData(this, data, booksDate, { deleteBadLinks: false });
     return loaded;
@@ -89,10 +91,15 @@ export class GameSystemFiles extends BSCatalogueManager {
   }
   setSystem(system: BSIDataSystem) {
     this.gameSystem = system;
+    cataloguesdb.systems.put({ id: system.gameSystem.id, content: system })
+    this.update && this.update(system)
   }
   setCatalogue(catalogue: BSIDataCatalogue) {
     const catalogueId = catalogue.catalogue.id;
     this.catalogueFiles[catalogueId] = catalogue;
+    cataloguesdb.catalogues.put({ id: catalogue.catalogue.id, content: catalogue })
+    this.update && this.update(catalogue)
+
   }
   removeCatalogue(catalogue: BSIDataCatalogue) {
     for (const [key, value] of Object.entries(this.catalogueFiles)) {
@@ -101,6 +108,8 @@ export class GameSystemFiles extends BSCatalogueManager {
       }
     }
   }
+
+
 
   async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData> {
     if (catalogueLink.targetId == this.gameSystem?.gameSystem.id) {

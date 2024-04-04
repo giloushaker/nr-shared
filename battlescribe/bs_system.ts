@@ -13,6 +13,9 @@ export class BSCatalogueManager {
   async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData> {
     throw new Error("Method not implemented.");
   }
+  async loadAll() {
+    throw new Error("Method not implemented.");
+  }
   getCatalogueInfo(catalogueLink: BSICatalogueLink): BSICatalogue | BSIGameSystem | undefined {
     return undefined;
   }
@@ -39,6 +42,7 @@ export class BSCatalogueManager {
   unloadAll() {
     this.catalogues = {};
   }
+
 
   async loadData(data: BSIData, booksDate?: BooksDate): Promise<Catalogue> {
     const loaded = await loadData(this, data, booksDate);

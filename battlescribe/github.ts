@@ -10,7 +10,10 @@ export interface GithubIntegration {
   repoData?: BattleScribeRepoData;
   discovered?: boolean;
 }
+const headers = {
+  'Accept': 'application/vnd.github.v3+json',
 
+};
 export function normalizeGithubRepoUrl(input: string): string | null {
   const githubUrlRegex = /^(?:(http(s?)?:\/\/)?github.com\/)?([^\/]+)\/([^\/]+)$/;
   const match = input.match(githubUrlRegex);
@@ -109,3 +112,55 @@ export async function getNextRevision(github: GithubIntegration, catalogue: Cata
   }
   return catalogue.revision || 1;
 }
+
+export async function normalizeSha(owner: string, repo: string, sha: string | "latest-commit" | "latest-tag"): Promise<string> {
+  switch (sha) {
+    case "latest-commit":
+      const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
+      const repoJson = await repoResponse.json()
+      const branchResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/${repoJson.default_branch}`, { headers });
+      const mainBranch = await branchResponse.json();
+      const mainBranchSha = mainBranch.commit.sha;
+      return mainBranchSha
+    case "latest-tag":
+      const tagsResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/tags`, { headers });
+      const tags = await tagsResponse.json();
+      const latestTagSha = tags[0]?.commit?.sha;
+      if (!latestTagSha) {
+        throw new Error("Repo has no releases/tags, use latest commit (Head)")
+      }
+      return latestTagSha
+    default:
+      return sha
+  }
+}
+export async function getBlob(url: string) {
+  const resp = await fetch(url)
+  const json = await resp.json()
+  json.content = atob(json.content)
+  delete json.encoding
+  return json
+}
+
+export interface GitTreeFile {
+  path?: string;
+  mode?: string;
+  type?: string;
+  sha?: string;
+  size?: number;
+  url?: string;
+}
+
+export interface GitTree {
+  sha: string;
+  url: string;
+  truncated: boolean;
+  tree: GitTreeFile[];
+}
+
+export async function getTree(owner: string, repo: string, sha: string): Promise<GitTree> {
+  const treeResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${sha}`, { headers });
+  const tree = await treeResponse.json();
+  return tree;
+}
+
