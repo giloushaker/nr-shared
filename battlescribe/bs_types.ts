@@ -209,8 +209,10 @@ export interface BSIDataCommon {
   sharedInfoGroups?: BSIInfoGroup[];
   selectionEntries?: BSISelectionEntry[];
   rules?: BSIRule[];
+  library: boolean;
 
   fullFilePath?: string;
+  sha?: string;
   xmlns?: string;
 }
 export interface BSIGameSystem extends BSIDataCommon {
@@ -218,7 +220,6 @@ export interface BSIGameSystem extends BSIDataCommon {
   catalogueLinks?: undefined;
 }
 export interface BSICatalogue extends BSIDataCommon {
-  library: boolean;
   gameSystemId: string;
   gameSystemRevision: number;
   catalogueLinks?: BSICatalogueLink[];
