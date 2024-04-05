@@ -489,10 +489,6 @@ export function removeEntry(entry: EditorBase) {
   }
 }
 
-/**
- * Removes an entry and fixes up the index
- * Returns all the removed data for undoing
- */
 export function onRemoveEntry(removed: EditorBase, manager?: BSCatalogueManager) {
   const catalogue = removed.catalogue;
   forEachEntryRecursive(removed, (entry, key, parent) => {

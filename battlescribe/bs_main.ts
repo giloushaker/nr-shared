@@ -475,37 +475,46 @@ export class Base implements BSModifierBase {
 
   // console.log("foreachobjectwhitelist", keys);
 
-  forEachObjectWhitelist<T extends Base>(callbackfn: (value: T, parent: T) => unknown, whiteList = goodKeys) {
-    const stack = [this as any];
+  forEachObjectWhitelist<T extends Base>(callbackfn: (value: T, parent: T) => unknown, whiteList = goodKeys, maxDepth?: number) {
+    let stack = [this as any];
+    let next = []
+    let depth = 0;
     // const keys = {} as any;
 
     while (stack.length) {
-      const current = stack.pop()!;
-      for (const key in current) {
-        const value = current[key];
-        if (!whiteList.has(key)) {
-          // addOne(keys, key);
-          continue;
-        }
-        //  If Array: add each object inside array if (Array.isArray(value)) {
+      while (stack.length) {
+        const current = stack.pop()!;
+        for (const key in current) {
+          const value = current[key];
+          if (!whiteList.has(key)) {
+            // addOne(keys, key);
+            continue;
+          }
+          //  If Array: add each object inside array if (Array.isArray(value)) {
 
-        if (isObject(value)) {
-          if (Array.isArray(value)) {
-            if (value.length && isObject(value[0])) {
-              for (let i = 0; i < value.length; i++) {
-                const cur = value[i];
-                callbackfn(cur, current);
-                stack.push(cur);
+          if (isObject(value)) {
+            if (Array.isArray(value)) {
+              if (value.length && isObject(value[0])) {
+                for (let i = 0; i < value.length; i++) {
+                  const cur = value[i];
+                  if (callbackfn(cur, current) !== false) {
+                    next.push(cur);
+                  }
+                }
+              }
+            } else {
+              if (callbackfn(value, current) !== false) {
+                next.push(value);
               }
             }
-          } else {
-            callbackfn(value, current);
-            stack.push(value);
           }
         }
       }
+      stack = next;
+      next = []
+      depth++;
+      if (maxDepth && depth >= maxDepth) break;
     }
-
     // console.log("foreachobjectwhitelist", keys);
   }
   forEachObject(callbackfn: (value: Base | Link, parent: Base) => unknown, badKeys = new Set()) {
@@ -545,6 +554,80 @@ export class Base implements BSModifierBase {
     while (stack.length) {
       const current = stack.pop()!;
       if (cb(current)) return current;
+    }
+  }
+  find_recursive(cb: (opt: Base) => boolean, includeTargets = false) {
+    let stack = [this as any];
+    let next = []
+
+    while (stack.length) {
+      while (stack.length) {
+        const current = stack.pop()!;
+        for (const key in current) {
+          const value = current[key];
+          if (!goodKeys.has(key)) continue;
+          if (isObject(value)) {
+            if (Array.isArray(value)) {
+              if (value.length && isObject(value[0])) {
+                for (let i = 0; i < value.length; i++) {
+                  const cur = value[i];
+                  const res = cb(cur)
+                  if (res) return cur;
+                  if (res !== false) {
+                    next.push(cur);
+                    if (cur.target && includeTargets) next.push(cur.target)
+
+                  }
+                }
+              }
+            } else {
+              const res = cb(value)
+              if (res) return value;
+              if (res !== false) {
+                next.push(value);
+                if (value.target && includeTargets) next.push(value.target)
+              }
+
+            }
+          }
+        }
+      }
+      stack = next;
+      next = []
+    }
+  }
+  find(cb: (opt: Base) => boolean, includeTargets = false) {
+    let stack = [this as any];
+    let next = []
+    let first = true;
+    while (stack.length) {
+      while (stack.length) {
+        const current = stack.pop()!;
+        for (const key in current) {
+          const value = current[key];
+          if (!goodKeys.has(key)) continue;
+          if (isObject(value)) {
+            if (Array.isArray(value)) {
+              if (value.length && isObject(value[0])) {
+                for (let i = 0; i < value.length; i++) {
+                  const cur = value[i];
+                  if (cb(cur)) return cur;
+                  next.push(cur);
+                  if (cur.target && includeTargets) next.push(cur.target)
+                }
+              }
+            } else {
+              if (cb(value)) return value;
+              next.push(value);
+              if (value.target && includeTargets) next.push(value.target)
+            }
+          }
+        }
+      }
+      if (!first) return
+      first = false;
+      stack = next;
+      next = []
     }
   }
   getCosts(): BSICost[] {
@@ -778,9 +861,6 @@ export class Link<T extends Base = Group | Entry> extends Base {
   }
   getName(): string {
     return this.target?.name || this.name;
-  }
-  getParent(): Base | undefined {
-    return (this as any as EditorBase).parent;
   }
   getPrimaryCategory(): string {
     for (const categoryLink of this.categoryLinks || []) {

@@ -37,6 +37,7 @@ function getKeyInfoClass(cache: Record<string, any>, parentKey: string, obj: any
     return cache[parentKey];
   }
   class EditorBase extends Base {
+    parent?: EditorBase
     get parentKey(): string {
       return parentKey;
     }
@@ -46,7 +47,6 @@ function getKeyInfoClass(cache: Record<string, any>, parentKey: string, obj: any
     toString(): string {
       return `${this.editorTypeName} - ${getName(this)}`;
     }
-
   };
   EditorBase.prototype.parentKey;
   Object.setPrototypeOf(EditorBase.prototype, Object.getPrototypeOf(obj));
