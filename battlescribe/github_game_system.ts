@@ -39,6 +39,7 @@ export class GithubGameSystemFiles extends GameSystemFiles {
                 } else if (json.catalogue) {
                     this.setCatalogue(json)
                 }
+                showMessage({ msg: `Updated ${treeFile.path} sha: ${obj.sha} -> ${treeFile.sha}`, severity: "info" })
                 console.log(`Updated ${treeFile.path} sha: ${obj.sha} -> ${treeFile.sha}`)
                 return json
             }
