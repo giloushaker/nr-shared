@@ -866,7 +866,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
     for (const categoryLink of this.categoryLinks || []) {
       if (categoryLink.primary) return categoryLink.targetId;
     }
-    for (const categoryLink of this.target.categoryLinks || []) {
+    for (const categoryLink of this.target?.categoryLinks || []) {
       if (categoryLink.primary) return categoryLink.targetId;
     }
     return this.getCategoryEntryId() ?? UNCATEGORIZED_ID;
@@ -875,7 +875,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
     for (const categoryLink of this.categoryLinks || []) {
       if (categoryLink.primary) return categoryLink;
     }
-    for (const categoryLink of this.target.categoryLinks || []) {
+    for (const categoryLink of this.target?.categoryLinks || []) {
       if (categoryLink.primary) return categoryLink;
     }
   }
