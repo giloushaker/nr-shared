@@ -625,3 +625,11 @@ export function daysBetweenDates(date1: Date, date2: Date): number {
 
   return days;
 }
+
+export function shortName(input: string): string {
+  // Split the string by spaces and underscores.
+  const words = input.split(/[\s_]+/);
+  // Map over the words to get the first character of each, then join them.
+  const abbreviation = words.map((word) => word.charAt(0).toUpperCase()).join("");
+  return abbreviation;
+}
