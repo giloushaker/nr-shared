@@ -126,6 +126,25 @@ export function dateTimeFormat(p: Date | string): string {
   return year + "-" + month + "-" + day + ` ${hour}:${minutes}`;
 }
 
+export function localDateTimeFormat(p: Date | string): string {
+  const date = new Date(p);
+  const year = date.getFullYear().toString();
+  let month = (date.getMonth() + 1).toString();
+  let day = date.getDate().toString();
+  const hour = date.getHours();
+  const minutes = date.getMinutes();
+
+  // add leading zeros if necessary
+  if (month.length === 1) {
+    month = "0" + month;
+  }
+  if (day.length === 1) {
+    day = "0" + day;
+  }
+
+  return year + "-" + month + "-" + day + ` ${hour}:${minutes}`;
+}
+
 export function copyJsData(tsObject: any, json: any): void {
   for (const field in json) {
     if (!Array.isArray(json[field]) && json[field] != null) {
