@@ -379,10 +379,10 @@ export function baseLog(x: number, y: number): number {
 }
 
 export function bookUrl(id_sys: number | string, id: number | string, date?: string | null) {
-  let res = `/api/rpc?m=books_get_book&id_sys=${id_sys}&id=${id}`;
+  let res = `/api/rpc?m=books_get_book&id_sys=${encodeURIComponent(id_sys)}&id=${encodeURIComponent(id)}`;
 
   if (date != null) {
-    res += "&date=" + date;
+    res += "&date=" + encodeURIComponent(date);
   }
 
   return res;
