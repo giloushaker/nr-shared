@@ -1,22 +1,22 @@
 import { GameSystemFiles } from "~/assets/shared/battlescribe/local_game_system"
 import type { BSICatalogueLink, BSIData } from "./bs_types"
 import type { BooksDate } from "./bs_versioning"
-import { getBlob, getTree, GitTree, normalizeSha, parseGitHubUrl } from "./github"
+import { getBlob, getTree, GitTree, fetchRef, parseGitHubUrl } from "./github"
 import { getDataObject } from "./bs_main"
 import { convertToJson, getExtension } from "./bs_convert"
 
 
 export class GithubGameSystemFiles extends GameSystemFiles {
     tree?: GitTree
-    constructor(public url: string, public sha: string) {
+    constructor(public url: string, public ref: string) {
         super()
     }
 
     async getTree() {
         if (this.tree) return this.tree;
         const { githubName, githubOwner } = parseGitHubUrl(this.url)
-        const sha = await normalizeSha(githubOwner, githubName, this.sha)
-        const tree = await getTree(githubOwner, githubName, sha)
+        const { ref } = await fetchRef(githubOwner, githubName, this.ref)
+        const tree = await getTree(githubOwner, githubName, ref)
         this.tree = tree
         return tree;
 

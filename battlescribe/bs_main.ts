@@ -278,7 +278,7 @@ export class Base implements BSModifierBase {
     return this.page;
   }
   getName(): string {
-    return this.name;
+    return this.name ?? "";
   }
   getDefaultAmount(): number | undefined {
     return this.defaultAmount;
@@ -860,7 +860,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
     return this.defaultAmount === undefined ? this.target.defaultAmount : this.defaultAmount;
   }
   getName(): string {
-    return this.target?.name || this.name;
+    return this.target?.name || (this.name ?? "");
   }
   getPrimaryCategory(): string {
     for (const categoryLink of this.categoryLinks || []) {
