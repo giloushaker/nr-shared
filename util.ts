@@ -126,7 +126,7 @@ export function dateTimeFormat(p: Date | string): string {
   return year + "-" + month + "-" + day + ` ${hour}:${minutes}`;
 }
 
-export function localDateTimeFormat(p: Date | string): string {
+export function localDateTimeFormat(p: Date | string, breakTime = false): string {
   const date = new Date(p);
   const year = date.getFullYear().toString();
   let month = (date.getMonth() + 1).toString();
@@ -145,7 +145,7 @@ export function localDateTimeFormat(p: Date | string): string {
   if (minutes.length == 1) {
     minutes = "0" + minutes;
   }
-  return year + "-" + month + "-" + day + ` ${hour}:${minutes}`;
+  return year + "-" + month + "-" + day + `${breakTime ? "<br/>" : " "}${hour}:${minutes}`;
 }
 
 export function copyJsData(tsObject: any, json: any): void {
