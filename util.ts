@@ -364,7 +364,7 @@ const dateStrings = {
   ms: " minutes",
   s: " second",
   ss: " seconds",
-  now: " just now",
+  now: "just now",
   ago: " ago",
   ago_pre: "",
 };
@@ -576,4 +576,11 @@ export function shortName(input: string): string {
   // Map over the words to get the first character of each, then join them.
   const abbreviation = words.map((word) => word.charAt(0).toUpperCase()).join("");
   return abbreviation;
+}
+
+export function calcBattlepoints() {
+  throw new Error('Unimplemented')
+}
+export function CalculatedBP() {
+  throw new Error('Unimplemented')
 }
