@@ -131,8 +131,8 @@ export function localDateTimeFormat(p: Date | string): string {
   const year = date.getFullYear().toString();
   let month = (date.getMonth() + 1).toString();
   let day = date.getDate().toString();
-  const hour = date.getHours();
-  const minutes = date.getMinutes();
+  const hour = date.getHours().toString();
+  let minutes = date.getMinutes().toString();
 
   // add leading zeros if necessary
   if (month.length === 1) {
@@ -142,6 +142,9 @@ export function localDateTimeFormat(p: Date | string): string {
     day = "0" + day;
   }
 
+  if (minutes.length == 1) {
+    minutes = "0" + minutes;
+  }
   return year + "-" + month + "-" + day + ` ${hour}:${minutes}`;
 }
 
