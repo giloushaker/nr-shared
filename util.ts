@@ -326,10 +326,10 @@ export function baseLog(x: number, y: number): number {
 }
 
 export function bookUrl(id_sys: number | string, id: number | string, date?: string | null) {
-  let res = `/api/rpc?m=books_get_book&id_sys=${id_sys}&id=${id}`;
+  let res = `/api/rpc?m=books_get_book&id_sys=${encodeURIComponent(id_sys)}&id=${encodeURIComponent(id)}`;
 
   if (date != null) {
-    res += "&date=" + date;
+    res += "&date=" + encodeURIComponent(date);
   }
 
   return res;
@@ -367,7 +367,7 @@ const dateStrings = {
   ms: " minutes",
   s: " second",
   ss: " seconds",
-  now: " just now",
+  now: "just now",
   ago: " ago",
   ago_pre: "",
 };
@@ -579,4 +579,11 @@ export function shortName(input: string): string {
   // Map over the words to get the first character of each, then join them.
   const abbreviation = words.map((word) => word.charAt(0).toUpperCase()).join("");
   return abbreviation;
+}
+
+export function calcBattlepoints() {
+  throw new Error('Unimplemented')
+}
+export function CalculatedBP() {
+  throw new Error('Unimplemented')
 }
