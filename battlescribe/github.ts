@@ -2,6 +2,7 @@ import type { Catalogue } from "~/assets/shared/battlescribe/bs_main_catalogue";
 import { filename } from "~/electron/node_helpers";
 import type { BattleScribeRepoData } from "~/assets/shared/battlescribe/bs_import_data";
 import { removeSuffix } from "~/assets/shared/battlescribe/bs_helpers";
+import { XMLParser } from "fast-xml-parser";
 export interface GithubIntegration {
   githubUrl: string;
   githubRepo?: string;
@@ -12,8 +13,14 @@ export interface GithubIntegration {
 }
 const headers = {
   'Accept': 'application/vnd.github.v3+json',
+} as Record<string, string>;
+if (process.env.githubToken) {
+  headers["Authorization"] = `Bearer ${process.env.githubToken}`
+}
 
-};
+function throwIfError(response: { message?: string }) {
+  if (response.message) throw new Error(response.message);
+}
 export function normalizeGithubRepoUrl(input: string): string | null {
   const githubUrlRegex = /^(?:(http(s?)?:\/\/)?github.com\/)?([^\/]+)\/([^\/]+)$/;
   const match = input.match(githubUrlRegex);
@@ -112,34 +119,137 @@ export async function getNextRevision(github: GithubIntegration, catalogue: Cata
   }
   return catalogue.revision || 1;
 }
-
-export async function normalizeSha(owner: string, repo: string, sha: string | "latest-commit" | "latest-tag"): Promise<string> {
-  switch (sha) {
-    case "latest-commit":
-      const repoResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
-      const repoJson = await repoResponse.json()
-      const branchResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches/${repoJson.default_branch}`, { headers });
-      const mainBranch = await branchResponse.json();
-      const mainBranchSha = mainBranch.commit.sha;
-      return mainBranchSha
+export async function fetchRef(owner: string, repo: string, ref: string): Promise<{ ref: string | null, sha?: string; name?: string, date?: string }> {
+  switch (ref) {
+    case "latest-commit": {
+      const { sha } = await getTree(owner, repo, "HEAD");
+      return { ref: sha, sha: sha }
+    }
     case "latest-tag":
+    case "TAG_HEAD": {
       const tagsResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/tags`, { headers });
       const tags = await tagsResponse.json();
+      throwIfError(tags)
       const latestTagSha = tags[0]?.commit?.sha;
       if (!latestTagSha) {
         throw new Error("Repo has no releases/tags, use latest commit (Head)")
       }
-      return latestTagSha
+      return { ref: tags[0].name, name: tags[0].name, sha: latestTagSha }
+    }
+    case "latest-release-or-commit": {
+      const releaseResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`, { headers })
+      if (releaseResponse.status !== 404) {
+        const release = await releaseResponse.json()
+        throwIfError(release)
+        const tag = release.tag_name
+        return { ref: tag, name: tag, date: release.published_at };
+      }
+      const { sha } = await getTree(owner, repo, "HEAD");
+      return { ref: sha, sha }
+    }
+    case "latest-release-atom": {
+      const atomResponse = await fetch(`https://github.com/${owner}/${repo}/releases.atom`)
+      const atomXml = await atomResponse.text()
+      function parseValue(str: string): any {
+        switch (str) {
+          case "true": return true;
+          case "false": return false;
+          default:
+            if (isNaN(str as any)) return str;
+            const float = parseFloat(str);
+            if (isFinite(float) && str.includes("+") == false) return float;
+            return str;
+        }
+      }
+      const options = {
+        allowBooleanAttributes: true,
+        ignoreAttributes: false,
+        attributeNamePrefix: "",
+        textNodeName: "$text",
+        processEntities: false,
+        parseTagValue: false,
+        ignoreDeclaration: true,
+        alwaysCreateTextNode: false,
+
+        isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
+          return !isAttribute && ["entry", "link"].includes(tagName)
+        },
+        attributeValueProcessor: (name: string, val: string) => {
+          return parseValue(unescape(val))
+        },
+        tagValueProcessor: (name: string, val: string) => {
+          return unescape(val)
+        },
+      };
+      const parsed = new XMLParser(options).parse(atomXml);
+      if (!parsed.feed?.entry?.length) {
+        return { ref: null }
+      } else {
+        const entry = parsed.feed.entry[0]
+        const tag = entry.id.split('/').pop()
+        return { ref: tag, name: tag }
+      }
+    }
+    case "latest-release":
+    case "RELEASE_HEAD":
+      const releaseResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`, { headers })
+      const release = await releaseResponse.json()
+      throwIfError(release)
+      const tag = release.tag_name
+      return { ref: tag, name: tag, date: release.published_at };
     default:
-      return sha
+      return { ref: ref }
   }
 }
 export async function getBlob(url: string) {
-  const resp = await fetch(url)
+  const resp = await fetch(url, { headers })
   const json = await resp.json()
+  throwIfError(json)
   json.content = atob(json.content)
   delete json.encoding
   return json
+}
+export async function getCommit(owner: string, repo: string, sha: string) {
+  const resp = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits/${sha}`, { headers })
+  const json = await resp.json()
+  throwIfError(json)
+  return json
+}
+export async function getCommitDate(owner: string, repo: string, sha: string) {
+  const resp = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits/${sha}`, { headers })
+  const json = await resp.json()
+  throwIfError(json)
+  return json.commit.committer.date
+
+}
+export async function findLatestCommitDate(owner: string, repo: string, path: string, commitSha: string, blobSha: string) {
+  const apiUrlBase = `https://api.github.com/repos/${owner}/${repo}`;
+
+  try {
+    // List commits affecting the file up to the commit resolved from the tag
+    const response = await fetch(`${apiUrlBase}/commits?path=${path}&sha=${commitSha}`, { headers });
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    const commits = await response.json();
+    throwIfError(commits)
+
+    // Check each commit for the blob SHA (This part is not fully implemented here)
+    for (let commit of commits) {
+      let commitResponse = await fetch(`${apiUrlBase}/git/trees/${commit.sha}`, { headers });
+      if (!commitResponse.ok) continue; // Skip on error
+      let commitData = await commitResponse.json();
+      throwIfError(commitData)
+
+      // You would need to traverse the tree to find the file and check its blob SHA
+      // This part is simplified and needs proper tree traversal depending on repository structure
+      if (commitData.tree.some((entry: { path?: string, sha?: string }) => entry.path === path && entry.sha === blobSha)) {
+        return commit.commit.committer.date
+      }
+    }
+    return 'No matching commit found';
+  } catch (error) {
+    console.error('Error fetching commit data:', error);
+    return null;
+  }
 }
 
 export interface GitTreeFile {
@@ -158,9 +268,10 @@ export interface GitTree {
   tree: GitTreeFile[];
 }
 
-export async function getTree(owner: string, repo: string, sha: string): Promise<GitTree> {
-  const treeResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${sha}`, { headers });
+export async function getTree(owner: string, repo: string, ref: string): Promise<GitTree> {
+  const treeResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${ref}`, { headers });
   const tree = await treeResponse.json();
+  throwIfError(tree)
   return tree;
 }
 

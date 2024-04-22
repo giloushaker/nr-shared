@@ -126,6 +126,28 @@ export function dateTimeFormat(p: Date | string): string {
   return year + "-" + month + "-" + day + ` ${hour}:${minutes}`;
 }
 
+export function localDateTimeFormat(p: Date | string, breakTime = false): string {
+  const date = new Date(p);
+  const year = date.getFullYear().toString();
+  let month = (date.getMonth() + 1).toString();
+  let day = date.getDate().toString();
+  const hour = date.getHours().toString();
+  let minutes = date.getMinutes().toString();
+
+  // add leading zeros if necessary
+  if (month.length === 1) {
+    month = "0" + month;
+  }
+  if (day.length === 1) {
+    day = "0" + day;
+  }
+
+  if (minutes.length == 1) {
+    minutes = "0" + minutes;
+  }
+  return year + "-" + month + "-" + day + `${breakTime ? "<br/>" : " "}${hour}:${minutes}`;
+}
+
 export function copyJsData(tsObject: any, json: any): void {
   for (const field in json) {
     if (!Array.isArray(json[field]) && json[field] != null) {
@@ -295,81 +317,6 @@ export function shallowCopy(res: any, obj: any): any {
   return res;
 }
 
-export function calcBattlepointsWobj(battlepoints: number[], obj: number): number[] {
-  const wobj = [battlepoints[0], battlepoints[1]];
-  if (obj != 0) {
-    if (obj == 1) {
-      wobj[0] += 3;
-      wobj[1] -= 3;
-    } else {
-      wobj[0] -= 3;
-      wobj[1] += 3;
-    }
-  }
-  return wobj;
-}
-
-export interface CalculatedBP {
-  diff: number;
-  diffPercent: number;
-  battlepoints: number[];
-  objective: number;
-  battlepointsWobj: number[];
-  vp: number[];
-}
-
-/*
- ** obj: 0 if noone won, 1 if p1 won, 2 if p2 won
- */
-export function calcBattlepoints(maxCost: number, p1vp: number, p2vp: number, obj: number): CalculatedBP {
-  const scores = [
-    [5, 10],
-    [10, 11],
-    [20, 12],
-    [30, 13],
-    [40, 14],
-    [50, 15],
-    [70, 16],
-    [100, 17],
-  ];
-  const p1 = p1vp;
-  const p2 = p2vp;
-  const val = p1 - p2;
-  const perc = Math.abs(val / maxCost) * 100;
-  let found = 0;
-  for (const val of scores) {
-    if (perc <= val[0]) {
-      break;
-    }
-    found++;
-  }
-
-  if (found >= 8) {
-    found = 7;
-  }
-
-  let p1Score = scores[found][1];
-  let p2Score = 20 - p1Score;
-
-  if (val < 0) {
-    const tmp = p1Score;
-    p1Score = p2Score;
-    p2Score = tmp;
-  }
-
-  const res = {
-    diff: val,
-    diffPercent: Math.floor(perc),
-    battlepoints: [p1Score, p2Score],
-    objective: obj,
-    battlepointsWobj: null as any,
-    vp: [p1vp, p2vp],
-  };
-
-  res.battlepointsWobj = calcBattlepointsWobj(res.battlepoints, res.objective);
-  return res;
-}
-
 export function closest500(n: number): number {
   return Math.round(n / 500) * 500;
 }
@@ -379,10 +326,10 @@ export function baseLog(x: number, y: number): number {
 }
 
 export function bookUrl(id_sys: number | string, id: number | string, date?: string | null) {
-  let res = `/api/rpc?m=books_get_book&id_sys=${id_sys}&id=${id}`;
+  let res = `/api/rpc?m=books_get_book&id_sys=${encodeURIComponent(id_sys)}&id=${encodeURIComponent(id)}`;
 
   if (date != null) {
-    res += "&date=" + date;
+    res += "&date=" + encodeURIComponent(date);
   }
 
   return res;
@@ -420,7 +367,7 @@ const dateStrings = {
   ms: " minutes",
   s: " second",
   ss: " seconds",
-  now: " just now",
+  now: "just now",
   ago: " ago",
   ago_pre: "",
 };
@@ -624,4 +571,19 @@ export function daysBetweenDates(date1: Date, date2: Date): number {
   const days = Math.floor(difference / (1000 * 60 * 60 * 24));
 
   return days;
+}
+
+export function shortName(input: string): string {
+  // Split the string by spaces and underscores.
+  const words = input.split(/[\s_]+/);
+  // Map over the words to get the first character of each, then join them.
+  const abbreviation = words.map((word) => word.charAt(0).toUpperCase()).join("");
+  return abbreviation;
+}
+
+export function calcBattlepoints() {
+  throw new Error('Unimplemented')
+}
+export function CalculatedBP() {
+  throw new Error('Unimplemented')
 }
