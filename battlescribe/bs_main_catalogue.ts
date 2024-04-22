@@ -244,7 +244,7 @@ export class Catalogue extends Base {
             addObjUnique(target, "other_refs", cur);
           }
         }
-        this.refreshErrors(cur);
+        cur.isLink() ? this.updateLink(cur) : this.refreshErrors(cur);
       },
       goodJsonArrayKeys,
     );
@@ -503,8 +503,8 @@ export class Catalogue extends Base {
     }
     return result;
   }
-  findOptionsByText(text?: string): Base[] {
-    if (!text || !text.trim()) {
+  findOptionsByText(text?: string, exact = false): Base[] {
+    if (!text || !text.trim() || exact) {
       const result = [];
       for (const imported of [this, ...this.imports]) {
         for (const val of Object.values(imported.index) as EditorBase[]) {
@@ -514,7 +514,11 @@ export class Catalogue extends Base {
                 continue;
               }
             }
-            result.push(val);
+            if (!exact) {
+              result.push(val);
+            } else if (val.getName() === text) {
+              result.push(val)
+            }
           } else {
             console.log(val);
           }
@@ -910,6 +914,7 @@ export class Catalogue extends Base {
     return loaded;
   }
   refreshErrors(cur: EditorBase, deleted = false) {
+    this.removeErrors(cur)
     if (cur.isLink()) {
       if (!cur.target) {
         this.addError(cur, {
@@ -925,15 +930,30 @@ export class Catalogue extends Base {
           addObj(this.manager.unresolvedLinks!, cur.targetId, $toRaw(cur));
         }
       } else {
-        this.removeError(cur, "no-target");
         popObj(this.unresolvedLinks!, cur.targetId, $toRaw(cur));
         popObj(this.manager.unresolvedLinks!, cur.targetId, $toRaw(cur));
+      }
+
+      const target = resolveLink(cur.targetId, this.getIndexes()) as EditorBase;
+      const parents = getAllPossibleParents(cur)
+      if (parents.find(o => o.id === cur.targetId)) {
+        cur.catalogue.addError(cur, {
+          id: "bad-link-target",
+          msg: "Link target cannot be itself or include itself as a child",
+          source: cur,
+        });
+      }
+      else if (target?.isLink()) {
+        cur.catalogue.addError(cur, {
+          id: "bad-link-target",
+          msg: "Link target Cannot be a Link",
+          source: cur,
+        });
+        return;
       }
     } else if (cur.isProfile()) {
       if (!(cur as Profile).typeId) {
         this.addError(cur, { source: cur, severity: "error", msg: "Profile has no type", id: "no-profile-type" });
-      } else {
-        this.removeError(cur, "no-profile-type");
       }
     } else if (cur instanceof Condition) {
       this.updateCondition(cur);
@@ -1120,30 +1140,20 @@ export class Catalogue extends Base {
       this.removeRef(link, link.target as EditorBase);
     }
     const target = resolveLink(link.targetId, this.getIndexes()) as EditorBase;
-    if (target?.isLink()) {
-      console.warn(`Failed to resolve link (target is a link): ${link.getName()}(${link.id})`);
-      link.catalogue.addError(link, {
-        id: "bad-link-target",
-        msg: "Link target Cannot be a Link",
-        source: link,
-      });
-      return;
-    } else {
-      link.catalogue.removeError(link, "bad-link-target");
-      link.target = target;
-      if (link.target) {
-        link.name = target.name
-        this.addRef(link, link.target as EditorBase);
-        const targetType = (link.target as EditorBase).editorTypeName;
-        if (targetType == "category") {
-          delete link.type;
-        } else {
-          link.type = targetType;
-        }
+    link.target = target;
+    if (link.target) {
+      link.name = target.name
+      this.addRef(link, link.target as EditorBase);
+      const targetType = (link.target as EditorBase).editorTypeName;
+      if (targetType == "category") {
+        delete link.type;
+      } else {
+        link.type = targetType;
       }
-      this.refreshErrors(link);
-      return link.target !== undefined;
     }
+    this.refreshErrors(link);
+    return link.target !== undefined;
+
   }
   updateConstraint(constraint: Constraint & EditorBase, deleted = false) {
     const ids = new Set();
@@ -1337,4 +1347,17 @@ export class NoObserve {
 }
 export function noObserve(): object {
   return new NoObserve();
+}
+
+function getAllPossibleParents(node: EditorBase) {
+  const result = [node] as EditorBase[];
+  const set = new Set()
+  for (let i = 0; i < result.length; i++) {
+    const cur = result[i]!;
+    if (set.has(cur.id)) continue;
+    set.add(cur.id)
+    if (cur.parent && !cur.parent.isCatalogue()) result.push(cur.parent);
+    if (cur.refs) result.push(...cur.refs);
+  }
+  return result;
 }
