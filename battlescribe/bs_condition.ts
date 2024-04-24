@@ -17,7 +17,7 @@ export function isScopeValid(parent: EditorBase, scope: string) {
   const catalogue = parent.catalogue;
   const found = catalogue.findOptionById(scope);
   if (found) {
-    if (found.isForce()) return true;
+    if (found.isForce() && !parent.isForce()) return true;
     if (found.isCategory()) return true;
     if (found.isCatalogue()) return true;
   }
