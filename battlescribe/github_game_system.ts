@@ -29,7 +29,7 @@ export class GithubGameSystemFiles extends GameSystemFiles {
             const treeFile = tree.find(o => o.path === obj.fullFilePath)
             if (treeFile?.url && treeFile.path && treeFile.sha !== obj.sha) {
                 const extension = getExtension(treeFile.path);
-                const { content } = await getBlob(treeFile.url)
+                const content = await getBlob(treeFile.url)
                 const json = await convertToJson(content, extension);
                 const data = getDataObject(json)
                 data.fullFilePath = treeFile.path;

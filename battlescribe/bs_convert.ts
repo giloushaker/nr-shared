@@ -1,5 +1,5 @@
 import { unzip } from "unzipit";
-import { X2jOptionsOptional, XMLParser, XMLBuilder, XmlBuilderOptionsOptional } from "fast-xml-parser";
+import { X2jOptions, XMLParser, XMLBuilder, XmlBuilderOptions } from "fast-xml-parser";
 import { forEachValueRecursive, hashFnv32a, isObject, removePrefix, to_snake_case } from "./bs_helpers";
 import { rootToJson, getDataObject, goodJsonArrayKeys } from "./bs_main";
 import type { BSICatalogue, BSIGameSystem } from "./bs_types";
@@ -87,7 +87,7 @@ function parseValue(str: string): any {
   }
 }
 export function xmlToJson(data: string) {
-  const options: X2jOptionsOptional = {
+  const options: X2jOptions = {
     allowBooleanAttributes: true,
     ignoreAttributes: false,
     attributeNamePrefix: "",
@@ -167,7 +167,7 @@ export function isAllowedExtension(file: string) {
   return true;
 }
 const oldBuggedTypes = {
-  sharedRules: "shareRule",
+  sharedRules: "sharedRule",
   sharedProfiles: "sharedProfile",
   sharedInfoGroups: "sharedInfoGroup",
   sharedSelectionEntries: "sharedSelectionEntry",
@@ -325,7 +325,7 @@ function putAttributesIn$(first: any) {
 export function convertToXml(data: BSICatalogue | Catalogue | BSIGameSystem) {
   const json = JSON.parse(rootToJson(data));
   putAttributesIn$(json);
-  const options: XmlBuilderOptionsOptional = {
+  const options: XmlBuilderOptions = {
     textNodeName: "$text",
     format: true,
     attributeNamePrefix: "_",

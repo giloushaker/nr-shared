@@ -201,13 +201,11 @@ export async function fetchRef(owner: string, repo: string, ref: string): Promis
       return { ref: ref }
   }
 }
-export async function getBlob(url: string) {
-  const resp = await fetch(url, { headers })
-  const json = await resp.json()
-  throwIfError(json)
-  json.content = atob(json.content)
-  delete json.encoding
-  return json
+export async function getBlob(url: string): Promise<string> {
+  const resp = await fetch(url, { headers: { ...headers, "Accept": "application/vnd.github.raw+json" } })
+  if (!resp.ok) throw new Error(`Failed to fetch blob: ${resp.status}, url: ${url}`);
+  const text = await resp.text()
+  return text
 }
 export async function getCommit(owner: string, repo: string, sha: string) {
   const resp = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits/${sha}`, { headers })
@@ -275,3 +273,33 @@ export async function getTree(owner: string, repo: string, ref: string): Promise
   return tree;
 }
 
+
+
+export async function starAndWatchRepo(owner: string, repo: string) {
+  // Star the repository
+  try {
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/stargazers`, {
+      method: "PUT",
+      headers
+    });
+    const json = await response.json()
+    throwIfError(json)
+  } catch (error) {
+    console.error(`Failed to star the repository ${owner}/${repo}:`, error);
+  }
+
+  // Watch the repository
+  try {
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/subscription`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({
+        subscribed: true, ignored: false
+      })
+    });
+    const json = await response.json()
+    throwIfError(json)
+  } catch (error) {
+    console.error(`Failed to watch the repository ${owner}/${repo}:`, error);
+  }
+}
