@@ -101,10 +101,10 @@ export function xmlToJson(data: string) {
       return !isAttribute && (tagName in containers || textArrayTags.has(tagName));
     },
     attributeValueProcessor: (name: string, val: string) => {
-      return parseValue(unescape(val))
+      return parseValue(unescape(val));
     },
     tagValueProcessor: (name: string, val: string) => {
-      return unescape(val)
+      return unescape(val);
     },
   };
   return new XMLParser(options).parse(data);
@@ -113,7 +113,7 @@ export function xmlToJson(data: string) {
 export async function unzipFolder(file: string | ArrayBuffer | Blob, path: string) {
   const unzipped = await unzip(file);
   const result = {} as Record<string, ArrayBuffer | string>;
-  console.log("unzipping folder", unzipped, "path", path);
+
   for (const entry in unzipped.entries) {
     const value = unzipped.entries[entry];
     if (value.isDirectory) {
@@ -183,7 +183,6 @@ export function normalize(x: any) {
     if (x[attr] === "") {
       delete x[attr];
     } else if (containerTags[attr] && x[attr]) {
-
       if (attr in oldBuggedTypes) {
         const normal = x[attr][containerTags[attr] as string];
         const old = x[attr][oldBuggedTypes[attr]];
@@ -196,9 +195,8 @@ export function normalize(x: any) {
         if (Array.isArray(val)) {
           x[attr] = val;
           x[attr]?.forEach(normalize);
-        }
-        else if (isObject(x[attr])) {
-          delete x[attr]
+        } else if (isObject(x[attr])) {
+          delete x[attr];
         }
       }
     } else if (textNodeTags.has(attr) && typeof x[attr] === "object" && !Array.isArray(x[attr])) {
