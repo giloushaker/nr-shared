@@ -278,12 +278,14 @@ export async function getTree(owner: string, repo: string, ref: string): Promise
 export async function starAndWatchRepo(owner: string, repo: string) {
   // Star the repository
   try {
-    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/stargazers`, {
+    const response = await fetch(`https://api.github.com/user/starred/${owner}/${repo}`, {
       method: "PUT",
       headers
     });
-    const json = await response.json()
-    throwIfError(json)
+    if (response.status !== 204) {
+      const json = await response.json()
+      throwIfError(json)
+    }
   } catch (error) {
     console.error(`Failed to star the repository ${owner}/${repo}:`, error);
   }
