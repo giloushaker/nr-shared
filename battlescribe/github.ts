@@ -273,8 +273,6 @@ export async function getTree(owner: string, repo: string, ref: string): Promise
   return tree;
 }
 
-
-
 export async function starAndWatchRepo(owner: string, repo: string) {
   // Star the repository
   try {
@@ -304,4 +302,52 @@ export async function starAndWatchRepo(owner: string, repo: string) {
   } catch (error) {
     console.error(`Failed to watch the repository ${owner}/${repo}:`, error);
   }
+}
+
+export interface GithubNotification {
+  repository: {
+    name: string,
+    full_name: string,
+    owner: {
+      login: string
+    }
+  },
+  subject: {
+    title: string,
+    type: string,
+  }
+  reason: string,
+  unread: boolean,
+  updated_at: string,
+  last_read_at: string
+}
+
+export async function getNotifications(since?: string | Date) {
+  if (since) since = (new Date(since)).toISOString();
+
+  const notificationHeaders = {} as Record<string, string>
+  const params = {} as Record<string, any>
+  if (since) {
+    notificationHeaders["If-Modified-Since"] = since;
+    params.push(`since=${since}`)
+    params.push(`all=true`)
+  }
+  const query = params.length ? `?=${params.map((o) => encodeURIComponent(o)).join('&')}` : ""
+  const response = await fetch(`https://api.github.com/notifications${query}`, {
+    headers: { ...headers, ...notificationHeaders },
+  })
+  const json = await response.json()
+  throwIfError(json)
+  if (response.status === 200) {
+    try {
+      const response = await fetch(`https://api.github.com/notifications${query}`, {
+        headers,
+        method: "PUT",
+        body: JSON.stringify({ last_read_at: since })
+      })
+    } catch (e) {
+      console.error("Error in github.ts:getNotifications()", e);
+    }
+  }
+  return json
 }
