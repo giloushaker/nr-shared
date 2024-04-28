@@ -319,35 +319,93 @@ export interface GithubNotification {
   reason: string,
   unread: boolean,
   updated_at: string,
-  last_read_at: string
+  last_read_at: string,
+  x_poll_interval?: number
 }
 
-export async function getNotifications(since?: string | Date) {
-  if (since) since = (new Date(since)).toISOString();
+const NOT_MODIFIED = 304
+const SUCCESS = 200
+export async function getNotifications(since?: Date) {
+  const sinceString = since ? since.toISOString() : undefined;
 
   const notificationHeaders = {} as Record<string, string>
-  const params = {} as Record<string, any>
-  if (since) {
-    notificationHeaders["If-Modified-Since"] = since;
-    params.push(`since=${since}`)
+  const params = [] as string[]
+  if (sinceString) {
+    notificationHeaders["If-Modified-Since"] = sinceString;
+    params.push(`since=${encodeURIComponent(sinceString)}`)
     params.push(`all=true`)
+  } else {
+    params.push(`all=false`)
   }
-  const query = params.length ? `?=${params.map((o) => encodeURIComponent(o)).join('&')}` : ""
+  const query = params.length ? `?${params.join('&')}` : ""
   const response = await fetch(`https://api.github.com/notifications${query}`, {
     headers: { ...headers, ...notificationHeaders },
   })
-  const json = await response.json()
-  throwIfError(json)
-  if (response.status === 200) {
-    try {
-      const response = await fetch(`https://api.github.com/notifications${query}`, {
-        headers,
-        method: "PUT",
-        body: JSON.stringify({ last_read_at: since })
-      })
-    } catch (e) {
-      console.error("Error in github.ts:getNotifications()", e);
+  const x_poll_interval = response.headers.get("X-Poll-Interval") ? Number(response.headers.get("X-Poll-Interval")) : null
+  if (response.status === NOT_MODIFIED) {
+    return {
+      notifications: [],
+      x_poll_interval,
     }
   }
-  return json
+  const last_modified = response.headers.get("Last-Modified") ? new Date(response.headers.get("Last-Modified")!) : new Date()
+  const json = await response.json()
+  throwIfError(json)
+  if (response.status === SUCCESS) {
+    if ((json as GithubNotification[]).length) {
+      try {
+        const mark_as_read_response = await fetch(`https://api.github.com/notifications`, {
+          headers,
+          method: "PUT",
+          body: JSON.stringify({ last_read_at: new Date().toISOString(), read: true })
+        })
+        console.log(mark_as_read_response)
+      } catch (e) {
+        console.error("Error in github.ts:getNotifications()", e);
+      }
+    }
+  }
+  return {
+    notifications: json as GithubNotification[],
+    x_poll_interval,
+    last_modified
+  }
+}
+export class DynamicPoller {
+  private interval: number;
+  private timerId?: NodeJS.Timeout;
+  private isPolling: boolean = false;
+
+  constructor(initialInterval: number) {
+    this.interval = initialInterval;
+  }
+
+  // Method to start the polling
+  start(task: () => Promise<number | null | void | undefined>): void {
+    if (this.isPolling) {
+      this.stop()
+    }
+    this.isPolling = true;
+    const executeTask = async () => {
+      try {
+        const newInterval = await task();
+        if (typeof newInterval === 'number')
+          this.interval = newInterval;
+      } catch (error) {
+      } finally {
+        if (this.isPolling) {
+          this.timerId = setTimeout(executeTask, this.interval);
+        }
+      }
+    };
+    executeTask();
+  }
+
+  stop(): void {
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+      this.timerId = undefined;
+    }
+    this.isPolling = false;
+  }
 }
