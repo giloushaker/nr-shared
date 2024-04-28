@@ -209,7 +209,7 @@ export interface BSIDataCommon {
   sharedInfoGroups?: BSIInfoGroup[];
   selectionEntries?: BSISelectionEntry[];
   rules?: BSIRule[];
-  library: boolean;
+  library?: boolean;
 
   fullFilePath?: string;
   sha?: string;
