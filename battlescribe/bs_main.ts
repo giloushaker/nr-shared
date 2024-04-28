@@ -280,7 +280,7 @@ export class Base implements BSModifierBase {
   getName(): string {
     return this.name ?? "";
   }
-  getDefaultAmount(): number | undefined {
+  getDefaultAmount(): number | string | undefined {
     return this.defaultAmount;
   }
   isCollective(): boolean | undefined {
@@ -856,7 +856,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
     yield* this.target.infoProfilesIterator();
     yield* super.infoProfilesIterator();
   }
-  getDefaultAmount(): number | undefined {
+  getDefaultAmount(): number | string | undefined {
     return this.defaultAmount === undefined ? this.target.defaultAmount : this.defaultAmount;
   }
   getName(): string {

@@ -348,7 +348,7 @@ export async function getNotifications(since?: Date) {
       x_poll_interval,
     }
   }
-  const last_modified = response.headers.get("Last-Modified") ? new Date(response.headers.get("Last-Modified")!) : new Date()
+  const last_modified = new Date(response.headers.get("Last-Modified")!)
   const json = await response.json()
   throwIfError(json)
   if (response.status === SUCCESS) {
