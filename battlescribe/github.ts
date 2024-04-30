@@ -352,6 +352,9 @@ export async function getNotifications(since?: Date) {
     params.push(`all=false`);
   }
   const query = params.length ? `?${params.join("&")}` : "";
+  console.log(`await fetch(\`https://api.github.com/notifications${query}\`, {
+    headers: ${{ ...headers, ...notificationHeaders }},
+  });`)
   const response = await fetch(`https://api.github.com/notifications${query}`, {
     headers: { ...headers, ...notificationHeaders },
   });
