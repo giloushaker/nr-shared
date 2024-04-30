@@ -168,7 +168,7 @@ export class Catalogue extends Base {
     this.generateImports(deleteBadLinks);
     this.resolveAllLinks(deleteBadLinks);
     this.generateCostIndex();
-    this.indexInfo()
+    this.indexInfo();
   }
 
   process() {
@@ -517,10 +517,10 @@ export class Catalogue extends Base {
             if (!exact) {
               result.push(val);
             } else if (val.getName() === text) {
-              result.push(val)
+              result.push(val);
             }
           } else {
-            console.log(val);
+            //  console.log(val);
           }
         }
       }
@@ -568,30 +568,30 @@ export class Catalogue extends Base {
     return result;
   }
   getSystem() {
-    return this.gameSystem ?? this
+    return this.gameSystem ?? this;
   }
   indexInfo() {
-    const system = this.gameSystem ?? this
+    const system = this.gameSystem ?? this;
     if (system === this) {
-      system.infoIndex = new InfoIndex()
+      system.infoIndex = new InfoIndex();
     }
     const index = system.infoIndex;
     if (!index) {
       throw new Error("Couldn't index info: system isn't initialized");
     }
-    const p1 = performance.now()
+    const p1 = performance.now();
     this.forEachObjectWhitelist((obj, parent) => {
       if (!obj.isLink() && (obj.isProfile() || obj.isRule())) {
-        index.add(obj.getName(), obj)
+        index.add(obj.getName(), obj);
         if (obj.alias) {
           for (const alias of obj.alias) {
-            const copy = clone(obj)
+            const copy = clone(obj);
             copy.name = alias;
-            index.add(alias, copy)
+            index.add(alias, copy);
           }
         }
       }
-    })
+    });
   }
   generateImports(deleteBadLinks = true) {
     const importsWithEntries: Record<string, Catalogue> = {};
@@ -914,7 +914,7 @@ export class Catalogue extends Base {
     return loaded;
   }
   refreshErrors(cur: EditorBase, deleted = false) {
-    this.removeErrors(cur)
+    this.removeErrors(cur);
     if (cur.isLink()) {
       if (!cur.target) {
         this.addError(cur, {
@@ -935,15 +935,14 @@ export class Catalogue extends Base {
       }
 
       const target = resolveLink(cur.targetId, this.getIndexes()) as EditorBase;
-      const parents = getAllPossibleParents(cur)
-      if (parents.find(o => o.id === cur.targetId)) {
+      const parents = getAllPossibleParents(cur);
+      if (parents.find((o) => o.id === cur.targetId)) {
         cur.catalogue.addError(cur, {
           id: "bad-link-target",
           msg: "Link target cannot be itself or include itself as a child",
           source: cur,
         });
-      }
-      else if (target?.isLink()) {
+      } else if (target?.isLink()) {
         cur.catalogue.addError(cur, {
           id: "bad-link-target",
           msg: "Link target Cannot be a Link",
@@ -1142,7 +1141,7 @@ export class Catalogue extends Base {
     const target = resolveLink(link.targetId, this.getIndexes()) as EditorBase;
     link.target = target;
     if (link.target) {
-      link.name = target.name
+      link.name = target.name;
       this.addRef(link, link.target as EditorBase);
       const targetType = (link.target as EditorBase).editorTypeName;
       if (targetType == "category") {
@@ -1153,7 +1152,6 @@ export class Catalogue extends Base {
     }
     this.refreshErrors(link);
     return link.target !== undefined;
-
   }
   updateConstraint(constraint: Constraint & EditorBase, deleted = false) {
     const ids = new Set();
@@ -1351,11 +1349,11 @@ export function noObserve(): object {
 
 function getAllPossibleParents(node: EditorBase) {
   const result = [node] as EditorBase[];
-  const set = new Set()
+  const set = new Set();
   for (let i = 0; i < result.length; i++) {
     const cur = result[i]!;
     if (set.has(cur.id)) continue;
-    set.add(cur.id)
+    set.add(cur.id);
     if (cur.parent && !cur.parent.isCatalogue()) result.push(cur.parent);
     if (cur.refs) result.push(...cur.refs);
   }
