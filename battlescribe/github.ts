@@ -352,9 +352,6 @@ export async function getNotifications(since?: Date) {
     params.push(`all=false`);
   }
   const query = params.length ? `?${params.join("&")}` : "";
-  console.log(`await fetch(\`https://api.github.com/notifications${query}\`, {
-    headers: ${{ ...headers, ...notificationHeaders }},
-  });`)
   const response = await fetch(`https://api.github.com/notifications${query}`, {
     headers: { ...headers, ...notificationHeaders },
   });
@@ -365,7 +362,7 @@ export async function getNotifications(since?: Date) {
     return {
       notifications: [],
       x_poll_interval,
-    };
+    }
   }
   const last_modified = new Date(response.headers.get("Last-Modified")!);
   const json = await response.json();
