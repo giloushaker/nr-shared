@@ -359,7 +359,6 @@ export async function getNotifications(since?: Date) {
           method: "PUT",
           body: JSON.stringify({ last_read_at: new Date().toISOString(), read: true })
         })
-        console.log(mark_as_read_response)
       } catch (e) {
         console.error("Error in github.ts:getNotifications()", e);
       }
