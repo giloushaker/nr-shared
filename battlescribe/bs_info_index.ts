@@ -1,3 +1,4 @@
+import { stripHtml } from "../util";
 
 
 export class InfoIndex<T = any> {
@@ -13,7 +14,7 @@ export class InfoIndex<T = any> {
         if (typeof text !== "string" || !text.match(/(?=.*[a-zA-Z].*[a-zA-Z])/)) {
             return;
         }
-        this.addToIndex(this.index, value, this.words(text));
+        this.addToIndex(this.index, value, this.words(escapeHtml(text)));
     }
     private addToIndex(out: Record<string, any>, obj: any, words: string[], index = 0) {
         if (index < words.length) {
@@ -119,4 +120,12 @@ function isCodeBlockStart(clean: string[], i: number) {
 function isMultilineCodeBlockStart(clean: string[], i: number) {
     return clean[i] === "`" && clean[i + 1] === "`" && clean[i + 2] === "`"
 }
-
+function escapeHtml(htmlString: string) {
+    if (globalThis.document) {
+        const div = document.createElement("div");
+        div.appendChild(document.createTextNode(htmlString));
+        return div.innerHTML;
+    } else {
+        return stripHtml(htmlString);
+    }
+}
