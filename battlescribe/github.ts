@@ -14,7 +14,7 @@ export interface GithubIntegration {
 const headers = {
   Accept: "application/vnd.github.v3+json",
 } as Record<string, string>;
-if (process?.env?.githubToken) {
+if (globalThis.process?.env?.githubToken) {
   headers["Authorization"] = `Bearer ${process.env.githubToken}`;
 }
 
