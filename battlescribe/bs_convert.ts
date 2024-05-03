@@ -145,7 +145,7 @@ export async function unzipFile(file: string | ArrayBuffer | Blob): Promise<stri
 }
 
 const zipExtensions = ["gstz", "zip", "catz"];
-const allowedExtensions = ["gst", "gstz", "xml", "zip", "cat", "catz", "json"];
+const allowedExtensions = ["gst", "gstz", "cat", "catz", "json"];
 export function removeExtension(extension_or_file: string) {
   const idx = extension_or_file.lastIndexOf(".");
   if (idx === -1) return extension_or_file;

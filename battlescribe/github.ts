@@ -207,10 +207,16 @@ export async function fetchRef(
       return { ref: ref };
   }
 }
-export async function getBlob(url: string): Promise<string> {
+export async function getBlob(url: string,): Promise<string> {
   const resp = await fetch(url, { headers: { ...headers, Accept: "application/vnd.github.raw+json" } });
   if (!resp.ok) throw new Error(`Failed to fetch blob: ${resp.status}, url: ${url}`);
   const text = await resp.text();
+  return text;
+}
+export async function getRawBlob(url: string): Promise<Blob> {
+  const resp = await fetch(url, { headers: { ...headers, Accept: "application/vnd.github.raw+json" } });
+  if (!resp.ok) throw new Error(`Failed to fetch blob: ${resp.status}, url: ${url}`);
+  const text = await resp.blob();
   return text;
 }
 export async function getCommit(owner: string, repo: string, sha: string) {
