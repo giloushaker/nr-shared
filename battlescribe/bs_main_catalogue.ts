@@ -767,6 +767,7 @@ export class Catalogue extends Base {
     ) {
       const target = category.target || category;
       for (const constraint of constraints) {
+        if (constraint.type === "max") continue
         const hash = `${constraint.id}::${category.id}`;
 
         switch (constraint.scope) {
