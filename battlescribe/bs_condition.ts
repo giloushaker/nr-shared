@@ -10,6 +10,7 @@ export const validScopes = new Set([
   "force",
   "roster",
   "primary-catalogue",
+  "root-entry", "unit", "model", "upgrade", "model-or-unit"
 ]);
 export const validChildIds = new Set(["any", "unit", "model", "upgrade", "mount", "crew"]);
 export function isScopeValid(parent: EditorBase, scope: string) {
@@ -25,7 +26,8 @@ export function isScopeValid(parent: EditorBase, scope: string) {
   while (stack.length) {
     const current = stack.pop()!;
     if (current.id === scope) return true;
-    if (current.parent) [stack.push(current.parent)];
+    if (current.parent) stack.push(current.parent);
+    if (current.refs) stack.push(...current.refs)
   }
   return false;
 }

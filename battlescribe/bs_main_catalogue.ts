@@ -244,10 +244,10 @@ export class Catalogue extends Base {
             addObjUnique(target, "other_refs", cur);
           }
         }
-        cur.isLink() ? this.updateLink(cur) : this.refreshErrors(cur);
       },
       goodJsonArrayKeys,
     );
+    forEachObjectWhitelist2<EditorBase>(this, (cur) => cur.isLink() ? this.updateLink(cur) : this.refreshErrors(cur), goodJsonArrayKeys);
   }
   get url(): string {
     return "%{book}";
@@ -1348,15 +1348,26 @@ export function noObserve(): object {
   return new NoObserve();
 }
 
-function getAllPossibleParents(node: EditorBase) {
-  const result = [node] as EditorBase[];
+
+export function getAllPossibleParents(node: EditorBase) {
+  const result = [] as EditorBase[];
+  if (!node.parent && !node.refs?.length) return result
+  let temp = [] as EditorBase[]
+  const stack = [] as EditorBase[];
+  const refsStack = [node.parent, ...(node?.refs ?? [])] as EditorBase[]
   const set = new Set();
-  for (let i = 0; i < result.length; i++) {
-    const cur = result[i]!;
-    if (set.has(cur.id)) continue;
-    set.add(cur.id);
-    if (cur.parent && !cur.parent.isCatalogue()) result.push(cur.parent);
-    if (cur.refs) result.push(...cur.refs);
+  while (refsStack.length) {
+    stack.push(refsStack.shift()!)
+    temp = []
+    while (stack.length) {
+      const cur = stack.pop()!
+      if (set.has(cur.id)) continue;
+      set.add(cur.id);
+      temp.push(cur)
+      if (cur.parent && !cur.parent.isCatalogue()) stack.push(cur.parent);
+      if (cur.refs) refsStack.push(...cur.refs);
+    }
+    result.push(...temp.reverse())
   }
-  return result;
+  return result
 }
