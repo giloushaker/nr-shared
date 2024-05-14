@@ -40,7 +40,7 @@ export interface BSIValued {
   percentValue?: boolean;
 }
 
-export interface BSIQuery {
+export interface BSIQuery extends BSICommentable {
   scope: string | "parent" | "force" | "roster" | "primary-catalogue" | "primary-category";
   childId?: string | "any" | "model" | "unit" | "upgrade" | "mount" | "crew";
   field: string | "selections" | "forces";
