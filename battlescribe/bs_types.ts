@@ -312,6 +312,7 @@ export interface BSIProfile extends BSINamed, BSIHidden, BSICommentable, BSIRefe
   characteristics: BSICharacteristic[];
   typeId: string;
   typeName: string;
+  group?: string;
 }
 
 export interface BSICharacteristicType extends BSINamed {
