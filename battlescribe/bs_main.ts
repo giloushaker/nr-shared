@@ -1298,6 +1298,7 @@ export const goodJsonKeys = new Set([
   "sortIndex",
   "subType",
   "arg",
+  "negative",
   // "includeChildSelections",
   // "scope",
   // "type",
@@ -1308,7 +1309,6 @@ export const goodJsonKeys = new Set([
   "costTypeId",
   "profileTypeId",
   "characteristicTypeId",
-  "value",
 ]);
 export function rootToJson(data: Catalogue | BSICatalogue | Record<string, any>, fixRoot = false): string {
   const root: any = {
