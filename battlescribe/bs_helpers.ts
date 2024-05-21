@@ -268,18 +268,26 @@ export interface Sortable {
   toString: () => string;
 }
 export function sortByAscending<T>(array: T[], getKey: (item: T) => Sortable): T[] {
-  return [...array].sort((a, b) => (getKey(a) ?? "").toString().localeCompare((getKey(b) ?? "").toString(), undefined, { numeric: true }))
+  return [...array].sort((a, b) =>
+    (getKey(a) ?? "").toString().localeCompare((getKey(b) ?? "").toString(), undefined, { numeric: true })
+  );
 }
 export function sortByDescending<T>(array: T[], getKey: (item: T) => Sortable): T[] {
-  return [...array].sort((a, b) => (getKey(b) ?? "").toString().localeCompare((getKey(a) ?? "").toString(), undefined, { numeric: true }))
+  return [...array].sort((a, b) =>
+    (getKey(b) ?? "").toString().localeCompare((getKey(a) ?? "").toString(), undefined, { numeric: true })
+  );
 }
-export const sortBy = sortByAscending
+export const sortBy = sortByAscending;
 
 export function sortByAscendingInplace<T>(array: T[], getKey: (item: T) => Sortable): T[] {
-  return array.sort((a, b) => (getKey(a) ?? "").toString().localeCompare((getKey(b) ?? "").toString(), undefined, { numeric: true }))
+  return array.sort((a, b) =>
+    (getKey(a) ?? "").toString().localeCompare((getKey(b) ?? "").toString(), undefined, { numeric: true })
+  );
 }
 export function sortByDescendingInplace<T>(array: T[], getKey: (item: T) => Sortable): T[] {
-  return array.sort((a, b) => (getKey(b) ?? "").toString().localeCompare((getKey(a) ?? "").toString(), undefined, { numeric: true }))
+  return array.sort((a, b) =>
+    (getKey(b) ?? "").toString().localeCompare((getKey(a) ?? "").toString(), undefined, { numeric: true })
+  );
 }
 
 export function findMax<T>(array: T[], getKey: (item: T) => any): T {
@@ -596,9 +604,12 @@ export function textSearchRegex(query: string) {
 }
 
 export function generateBattlescribeId(): string {
-  return [getRandomInt(0xffff), getRandomInt(0xffff), getRandomInt(0xffff), getRandomInt(0xffff)]
-    .map((o) => o.toString(16))
-    .join("-");
+  const hexChars = "0123456789abcdef";
+  let result = "";
+  for (let i = 0; i < 16; i++) {
+    result += hexChars[Math.floor(Math.random() * hexChars.length)];
+  }
+  return result.match(/.{1,4}/g)?.join("-") ?? "";
 }
 
 // function like pythons zips
