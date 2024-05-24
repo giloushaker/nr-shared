@@ -18,7 +18,18 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40): BSI
   const allVisible = (profiles as Array<BSIGroupedProfile>).filter((o) => !o.hidden);
   const uniques = hashProfiles(allVisible);
 
-  const groupedByType = groupBy(uniques, (o) => o.typeId);
+  const profilesWithGroup = uniques.filter((elt) => elt.group != null);
+  const groupedByGroup = groupBy(profilesWithGroup, (o) => o.group as string);
+
+  const groupedByType = groupBy(
+    uniques.filter((elt) => elt.group == null),
+    (o) => o.typeId,
+  );
+
+  for (let key in groupedByGroup) {
+    groupedByType[key] = groupedByGroup[key];
+  }
+
   for (const key of Object.keys(groupedByType)) {
     const value = groupedByType[key];
     groupedByType[key] = value.map((o) => [o.name, o] as [string, BSIGroupedProfile]).map(([, v]) => v);
@@ -32,7 +43,7 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40): BSI
       for (const characteristic of profile.characteristics) {
         maxes[characteristic.typeId] = Math.max(
           characteristic.$text?.toString().length || 0,
-          maxes[characteristic.typeId] || 0
+          maxes[characteristic.typeId] || 0,
         );
       }
     }
