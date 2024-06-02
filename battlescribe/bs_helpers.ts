@@ -604,12 +604,9 @@ export function textSearchRegex(query: string) {
 }
 
 export function generateBattlescribeId(): string {
-  const hexChars = "0123456789abcdef";
-  let result = "";
-  for (let i = 0; i < 16; i++) {
-    result += hexChars[Math.floor(Math.random() * hexChars.length)];
-  }
-  return result.match(/.{1,4}/g)?.join("-") ?? "";
+  return [getRandomInt(0xffff), getRandomInt(0xffff), getRandomInt(0xffff), getRandomInt(0xffff)]
+    .map((o) => o.toString(16).padStart(4, "0"))
+    .join("-");
 }
 
 // function like pythons zips

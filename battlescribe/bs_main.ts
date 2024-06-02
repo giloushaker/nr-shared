@@ -475,7 +475,7 @@ export class Base implements BSModifierBase {
 
   // console.log("foreachobjectwhitelist", keys);
 
-  forEachObjectWhitelist<T extends Base>(callbackfn: (value: T, parent: T) => unknown, whiteList = goodKeys, maxDepth?: number) {
+  forEachObject<T extends Base>(callbackfn: (value: T, parent: T) => unknown, whiteList = goodKeys, maxDepth?: number) {
     let stack = [this as any];
     let next = []
     let depth = 0;
@@ -517,32 +517,8 @@ export class Base implements BSModifierBase {
     }
     // console.log("foreachobjectwhitelist", keys);
   }
-  forEachObject(callbackfn: (value: Base | Link, parent: Base) => unknown, badKeys = new Set()) {
-    const stack = [this as any];
-    // const keys = {} as any;
-    while (stack.length) {
-      const current = stack.pop()!;
-      for (const key of Object.keys(current)) {
-        const value = current[key];
-        if (badKeys.has(key)) continue;
-        //  If Array: add each object inside array if (Array.isArray(value)) {
-
-        if (isObject(value)) {
-          if (Array.isArray(value)) {
-            if (value.length && isObject(value[0])) {
-              for (let i = value.length; i--;) {
-                const cur = value[i];
-                callbackfn(cur, current);
-                stack.push(cur);
-              }
-            }
-          } else {
-            callbackfn(value, current);
-            stack.push(value);
-          }
-        }
-      }
-    }
+  forEachObjectWhitelist<T extends Base>(callbackfn: (value: T, parent: T) => unknown, whiteList = goodKeys, maxDepth?: number) {
+    return this.forEachObject(callbackfn, whiteList, maxDepth);
   }
   findOption(cb: (opt: Base | Link) => boolean): Base | Link | undefined {
     for (const s of this.selectionsIterator()) {
