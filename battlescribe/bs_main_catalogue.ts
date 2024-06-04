@@ -579,9 +579,9 @@ export class Catalogue extends Base {
     if (!index) {
       throw new Error("Couldn't index info: system isn't initialized");
     }
-    const p1 = performance.now();
     this.forEachObjectWhitelist((obj, parent) => {
-      if (!obj.isLink() && (obj.isProfile() || obj.isRule())) {
+      if (obj.isLink()) return
+      if (obj.isProfile() || obj.isRule() || obj.isCategory()) {
         index.add(obj.getName(), obj);
         if (obj.alias) {
           for (const alias of obj.alias) {
