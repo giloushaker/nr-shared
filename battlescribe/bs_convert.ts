@@ -293,7 +293,7 @@ export function toPlural(key: string) {
 const skipKeys = new Set(["?xml", "$text", "_"]);
 function renestChilds(obj: any) {
   for (const [key, value] of Object.entries(obj)) {
-    if (textNodeTags.has(key)) {
+    if (textNodeTags.has(key) || textArrayTags.has(key)) {
       obj[key] = Array.isArray(value) ? value : [value];
     } else if (Array.isArray(value) && !skipKeys.has(key)) {
       obj[key] = [{ [toSingle(key)!]: value }];
