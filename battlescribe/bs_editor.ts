@@ -435,7 +435,7 @@ export function getName(obj: any): string {
       return `Repeat ${repeat.repeats} times for every ${repeat.value} ${fieldToText(
         parent,
         repeat.field
-      )} in ${fieldToText(parent, repeat.scope)} of ${repeat.childId ? fieldToText(parent, repeat.childId) : " any"}`;
+      )} in ${fieldToText(parent, repeat.scope)} of ${repeat.childId ? fieldToText(parent, repeat.childId) : " any"}` + (repeat.includeChildSelections ? " (recursive)" : "");
     }
     case "conditions":
       return conditionToString(getModifierOrConditionParent(obj), obj);
