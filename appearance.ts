@@ -67,6 +67,7 @@ export function updateCssVars(appearence: AppearanceTheme) {
 
   if (appearence.title) {
     setBackground("title", appearence.title.colors, appearence.title.alpha);
+    setBackground("popups_header", appearence.title.colors, 100);
   }
 
   if (appearence.forcesBackground) {
