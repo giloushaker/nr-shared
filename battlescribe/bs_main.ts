@@ -630,13 +630,13 @@ export class Base implements BSModifierBase {
     result.childId = this.isLink() && useTarget ? this.targetId : this.id;
     result.modifiers = [];
     for (const modifier of this.modifiersIterator()) {
-      if (modifier.field === constraint.id || (modifier.field === "hidden" && constraint.type === 'min')) result.modifiers.push(modifier);
+      if (modifier.field === constraint.id || (modifier.field === "hidden" && constraint.type === 'min' && !this.isCategory())) result.modifiers.push(modifier);
     }
     result.modifierGroups = [];
     for (const group of this.modifierGroupsIterator()) {
       current: for (const sub_grp of iterateModifierGroupsRecursive([group])) {
         for (const modifier of sub_grp.modifiers || []) {
-          if (modifier.field === constraint.id || (modifier.field === "hidden" && constraint.type === 'min')) {
+          if (modifier.field === constraint.id || (modifier.field === "hidden" && constraint.type === 'min' && !this.isCategory())) {
             result.modifierGroups.push(group);
             break current;
           }
