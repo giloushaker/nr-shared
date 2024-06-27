@@ -22,14 +22,14 @@ function throwIfError(response: { message?: string }) {
   if (response.message) throw new Error(response.message);
 }
 export function normalizeGithubRepoUrl(input: string): string | null {
-  const githubUrlRegex = /^(?:(http(s?)?:\/\/)?github.com\/)?([^\/]+)\/([^\/]+)$/;
+  const githubUrlRegex = /^(?:(http(?:s?)?:\/\/)?github.com\/)?([^\/]+)\/([^\/]+)\/?.*$/;
   const match = input.match(githubUrlRegex);
 
   if (!match) {
     return null;
   }
 
-  const [, protocol = "https://", _, user, repo] = match;
+  const [, protocol = "https://", user, repo] = match;
 
   if (!user || !repo) {
     return null;
