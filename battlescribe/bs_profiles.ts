@@ -15,7 +15,7 @@ export interface BSIGroupedProfile extends BSIProfile {
  * @param bigStringLength Any string above this length is considered `big`
  */
 export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40): BSIGroupedProfile[][] {
-  const allVisible = (profiles as Array<BSIGroupedProfile>).filter((o) => !o.hidden);
+  const allVisible = (profiles as Array<BSIGroupedProfile>).filter((o) => !o?.hidden);
   const uniques = hashProfiles(allVisible);
 
   const profilesWithGroup = uniques.filter((elt) => elt.group != null);
@@ -114,6 +114,7 @@ export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles
   const modifieds = [];
   const not_modified = [];
   for (const profile of Object.values(hashed)) {
+    if (!profile) continue;
     addOne(totalNames, `${profile.typeName}-${profile.name}`);
     if (isProfileModified(profile)) {
       modifieds.push(profile);
@@ -145,6 +146,7 @@ export function getProfilesFromIndex<T extends BSIProfile | BSIGroupedProfile>(i
   const result = [];
   const modifieds = [];
   for (const profile of Object.values(index)) {
+    if (!profile) continue;
     if (!isProfileModified(profile)) result.push(profile);
     else modifieds.push(profile);
   }

@@ -44,9 +44,11 @@ export interface AppearanceTheme {
   colorGreen: string;
   colorLightblue: string;
   costColor: string;
+  lightblue: string;
 
   dark?: boolean;
   fitBackground: boolean;
 
   titleBarColor: string;
+  backgroundRepeat: string;
 }

@@ -1,8 +1,10 @@
 import type { Catalogue } from "~/assets/shared/battlescribe/bs_main_catalogue";
 import { filename } from "~/electron/node_helpers";
 import type { BattleScribeRepoData } from "~/assets/shared/battlescribe/bs_import_data";
-import { removeSuffix } from "~/assets/shared/battlescribe/bs_helpers";
+import { removePrefix, removeSuffix } from "~/assets/shared/battlescribe/bs_helpers";
 import { XMLParser } from "fast-xml-parser";
+import { unzip } from "unzipit";
+
 export interface GithubIntegration {
   githubUrl: string;
   githubRepo?: string;
@@ -22,14 +24,14 @@ function throwIfError(response: { message?: string }) {
   if (response.message) throw new Error(response.message);
 }
 export function normalizeGithubRepoUrl(input: string): string | null {
-  const githubUrlRegex = /^(?:(http(s?)?:\/\/)?github.com\/)?([^\/]+)\/([^\/]+)$/;
+  const githubUrlRegex = /^(?:(http(?:s?)?:\/\/)?github.com\/)?([^\/]+)\/([^\/]+)\/?.*$/;
   const match = input.match(githubUrlRegex);
 
   if (!match) {
     return null;
   }
 
-  const [, protocol = "https://", _, user, repo] = match;
+  const [, protocol = "https://", user, repo] = match;
 
   if (!user || !repo) {
     return null;
@@ -276,6 +278,7 @@ export interface GitTreeFile {
   sha?: string;
   size?: number;
   url?: string;
+  content?: string;
 }
 
 export interface GitTree {
@@ -428,4 +431,26 @@ export class DynamicPoller {
     }
     this.isPolling = false;
   }
+}
+
+export async function getRepoZip(owner: string, name: string, ref: string = "HEAD") {
+  const tagUrl = `https://codeload.github.com/${owner}/${name}/legacy.zip/refs/tags/${ref}`
+  const headUrl = `https://codeload.github.com/${owner}/${name}/legacy.zip/refs/heads/${ref}`
+
+
+
+  let zipFile: Blob;
+  try {
+    zipFile = await $fetch<Blob>(`https://corsproxy.io/?${encodeURIComponent(tagUrl)}`)
+  }
+  catch (e) {
+    zipFile = await $fetch<Blob>(`https://corsproxy.io/?${encodeURIComponent(headUrl)}`)
+  }
+
+  // Extract the useful files
+  const folder = await unzip(zipFile);
+  const entries = Object.entries(folder.entries)
+  const root = entries[0][0]
+  const result = entries.map(([k, v]) => [removePrefix(k, root), v]) as typeof entries
+  return result
 }
