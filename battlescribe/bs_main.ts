@@ -645,15 +645,13 @@ export class Base implements BSModifierBase {
     }
     return result;
   }
-  // Modifiers a constraints query to have the same effect when checked from a roster/force.
+  // Modifies a constraints query to have the same effect when checked from a roster/force.
   // packs modifiers & modifiers groups inside it
   getBoundConstraint(constraint: BSIConstraint): BSIExtraConstraint {
     const result = this.getPackedConstraint(constraint);
     result.scope = "self"
     return result;
   }
-  // checks if extra constraints are null before adding them to prevent duplicates
-  // because of this, this must be called before setting roster/force constraints
   getChildBoundConstraints(skipGroup?: boolean): BSIExtraConstraint[] {
     const result = [];
     for (const child of this.selectionsIterator()) {
