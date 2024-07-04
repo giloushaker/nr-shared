@@ -916,6 +916,34 @@ export class Catalogue extends Base {
   }
   refreshErrors(cur: EditorBase, deleted = false) {
     this.removeErrors(cur);
+
+    if (cur.comment?.startsWith("todo:")) {
+      this.addError(cur, {
+        source: cur,
+        severity: "info",
+        msg: `${cur.getName()}: ${cur.comment}`,
+        id: "comment"
+      });
+    }
+    else if (cur.comment?.startsWith("warning:")) {
+      this.addError(cur, {
+        source: cur,
+        severity: "warning",
+        msg: `${cur.getName()}: ${cur.comment}`,
+        id: "comment"
+      });
+    }
+    else if (cur.comment?.startsWith("error:")) {
+      this.addError(cur, {
+        source: cur,
+        severity: "error",
+        msg: `${cur.getName()}: ${cur.comment}`,
+        id: "comment"
+      });
+    }
+    else {
+      this.removeError(cur, "comment")
+    }
     if (cur.isLink()) {
       if (!cur.target) {
         this.addError(cur, {
