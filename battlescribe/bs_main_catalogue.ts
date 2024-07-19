@@ -890,6 +890,13 @@ export class Catalogue extends Base {
       if (force_extra_constraints.length) {
         force.extra_constraints = force_extra_constraints;
       }
+      for (const nested_force of force.forcesIterator()) {
+        for (const constraint of nested_force.constraintsIterator()) {
+          if (constraint.type === "min" || constraint.type === "exactly") {
+            if (["parent", "force", nested_force.id].includes(constraint.scope)) force_extra_constraints.push(nested_force.getBoundConstraint(constraint));
+          }
+        }
+      }
     }
 
     for (const category of this.categories) {
