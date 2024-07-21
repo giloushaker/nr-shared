@@ -89,16 +89,19 @@ export class GameSystemFiles extends BSCatalogueManager {
   getAllCatalogueFiles() {
     return [...(this.gameSystem ? [this.gameSystem] : []), ...Object.values(this.catalogueFiles)];
   }
+
   setSystem(system: BSIDataSystem) {
     this.gameSystem = system;
-    cataloguesdb.systems.put({ id: system.gameSystem.id, content: system })
+    const promise = cataloguesdb.systems.put({ id: system.gameSystem.id, content: system })
     this.update && this.update(system)
+    return promise
   }
   setCatalogue(catalogue: BSIDataCatalogue) {
     const catalogueId = catalogue.catalogue.id;
     this.catalogueFiles[catalogueId] = catalogue;
-    cataloguesdb.catalogues.put({ id: catalogue.catalogue.id, content: catalogue })
+    const promise = cataloguesdb.catalogues.put({ id: catalogue.catalogue.id, content: catalogue })
     this.update && this.update(catalogue)
+    return promise
 
   }
   removeCatalogue(catalogue: BSIDataCatalogue) {
@@ -108,8 +111,6 @@ export class GameSystemFiles extends BSCatalogueManager {
       }
     }
   }
-
-
 
   async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate): Promise<BSIData> {
     if (catalogueLink.targetId == this.gameSystem?.gameSystem.id) {

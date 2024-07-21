@@ -3,12 +3,13 @@ import type { BSICatalogueLink, BSIData } from "./bs_types"
 import type { BooksDate } from "./bs_versioning"
 import { getBlob, getTree, GitTree, fetchRef, parseGitHubUrl } from "./github"
 import { getDataObject } from "./bs_main"
-import { convertToJson, getExtension } from "./bs_convert"
+import { convertToJson, getExtension, isAllowedExtension } from "./bs_convert"
+import { db as cataloguesdb } from "~/assets/shared/battlescribe/cataloguesdexie";
 
 
 export class GithubGameSystemFiles extends GameSystemFiles {
     tree?: GitTree
-    constructor(public url: string, public ref: string) {
+    constructor(public url: string, public ref: string, public sha?: string, public bsid?: string) {
         super()
     }
 
@@ -18,9 +19,46 @@ export class GithubGameSystemFiles extends GameSystemFiles {
         const { ref } = await fetchRef(githubOwner, githubName, this.ref)
         const tree = await getTree(githubOwner, githubName, ref)
         this.tree = tree
+        if (tree.sha !== this.sha && this.bsid) {
+
+            // Add files that are not currently stored (eg recently added catalogues) as they will never be updated otherwise
+            const current = new Set()
+            await cataloguesdb.catalogues.where({ "content.catalogue.gameSystemId": this.bsid }).each((o) => {
+                current.add(o.content.catalogue.fullFilePath)
+            })
+            await cataloguesdb.systems.where({ "id": this.bsid }).each((o) => {
+                current.add(o.content.gameSystem.fullFilePath)
+            })
+            let count = 0;
+            for (const treeFile of tree.tree) {
+                const path = treeFile.path
+                if (!path) continue
+                if (path?.includes('/')) continue;
+                if (path?.startsWith('.')) continue;
+                if (!isAllowedExtension(path)) continue
+                if (current.has(path)) continue;
+                const extension = getExtension(path)
+                const content = await getBlob(treeFile.url!)
+                const json = await convertToJson(content, extension);
+                const data = getDataObject(json)
+                data.fullFilePath = treeFile.path;
+                data.sha = treeFile.sha;
+                if (json.gameSystem) {
+                    await this.setSystem(json)
+                } else if (json.catalogue) {
+                    await this.setCatalogue(json)
+                }
+                count++;
+            }
+            if (count) {
+                showMessage({ msg: `Added ${count} catalogues` })
+            }
+        }
         return tree;
 
     }
+
+
     async getData(catalogueLink: BSICatalogueLink, booksDate?: BooksDate | undefined): Promise<BSIData> {
         const current = await super.getData(catalogueLink, booksDate)
         try {
@@ -35,12 +73,11 @@ export class GithubGameSystemFiles extends GameSystemFiles {
                 data.fullFilePath = treeFile.path;
                 data.sha = treeFile.sha;
                 if (json.gameSystem) {
-                    this.setSystem(json)
+                    await this.setSystem(json)
                 } else if (json.catalogue) {
-                    this.setCatalogue(json)
+                    await this.setCatalogue(json)
                 }
-                showMessage({ msg: `Updated ${treeFile.path} sha: ${obj.sha} -> ${treeFile.sha}`, severity: "info" })
-                console.log(`Updated ${treeFile.path} sha: ${obj.sha} -> ${treeFile.sha}`)
+                showMessage({ msg: `Updated ${treeFile.path} to v${data.revision}` })
                 return json
             }
         } catch (e) {
