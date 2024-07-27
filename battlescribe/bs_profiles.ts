@@ -14,9 +14,9 @@ export interface BSIGroupedProfile extends BSIProfile {
  * @param profiles The profiles to group
  * @param bigStringLength Any string above this length is considered `big`
  */
-export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40): BSIGroupedProfile[][] {
+export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40, sumAmount = true): BSIGroupedProfile[][] {
   const allVisible = (profiles as Array<BSIGroupedProfile>).filter((o) => !o?.hidden);
-  const uniques = hashProfiles(allVisible);
+  const uniques = hashProfiles(allVisible, sumAmount);
 
   const profilesWithGroup = uniques.filter((elt) => elt.group != null);
   const groupedByGroup = groupBy(profilesWithGroup, (o) => o.group as string);
@@ -99,13 +99,17 @@ export function isProfileModified(profile: BSIProfile) {
 export function hashProfile(profile: BSIProfile): string {
   return entryToJson({ ...profile, id: undefined });
 }
-export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[]): Record<string, T> {
+export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[], sumAmount = true): Record<string, T> {
   const hashed: { [hash: string]: T } = {};
   // const counts: { [hash: string]: number } = {};
   for (const profile of profiles) {
     // delete profile.dupeCount;
     const hash = hashProfile(profile);
-    hashed[hash] = profile;
+    if (hash in hashed && sumAmount) {
+      hashed[hash].amount = (hashed[hash].amount || 1) + (profile.amount || 1)
+    } else {
+      hashed[hash] = { amount: 1, ...profile }
+    }
     // addOne(counts, hash);
     // profile.dupeCount = counts[hash];
   }
@@ -115,6 +119,9 @@ export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles
   const not_modified = [];
   for (const profile of Object.values(hashed)) {
     if (!profile) continue;
+    if (sumAmount && profile.amount && profile.amount > 1) {
+      profile.name = `${profile.name} (x${profile.amount})`
+    }
     addOne(totalNames, `${profile.typeName}-${profile.name}`);
     if (isProfileModified(profile)) {
       modifieds.push(profile);
@@ -154,14 +161,14 @@ export function getProfilesFromIndex<T extends BSIProfile | BSIGroupedProfile>(i
   return result as any;
 }
 
-export function hashProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[]): T[] {
-  const hashed = indexProfiles(profiles);
+export function hashProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[], sumAmount = true): T[] {
+  const hashed = indexProfiles(profiles, sumAmount);
   return getProfilesFromIndex(hashed);
 }
 
-export function hashAndExcludeProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[], toExclude: T[]): T[] {
-  const hashedToExclude = indexProfiles(toExclude);
-  const hashed = indexProfiles(profiles);
+export function hashAndExcludeProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[], toExclude: T[], sumAmount = true): T[] {
+  const hashedToExclude = indexProfiles(toExclude, false);
+  const hashed = indexProfiles(profiles, sumAmount);
   const hashedFiltered = {} as typeof hashed;
   for (const key in hashed) {
     if (!(key in hashedToExclude)) {
