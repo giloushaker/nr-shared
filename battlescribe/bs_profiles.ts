@@ -119,7 +119,7 @@ export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles
   const not_modified = [];
   for (const profile of Object.values(hashed)) {
     if (!profile) continue;
-    if (sumAmount && profile.amount && profile.amount > 1) {
+    if (sumAmount && profile.amount && profile.amount > 1 && profile.characteristics.length > 1) {
       profile.name = `${profile.name} (x${profile.amount})`
     }
     addOne(totalNames, `${profile.typeName}-${profile.name}`);
