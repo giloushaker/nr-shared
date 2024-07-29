@@ -91,6 +91,7 @@ export type BSIModifierType =
   | "increment"
   | "multiply"
   | "divide"
+  | "modulo"
   | "append"
   | "prepend"
   | "replace";
