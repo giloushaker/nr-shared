@@ -418,6 +418,11 @@ export class Base implements BSModifierBase {
       if (cat.rules) {
         yield* cat.rules;
       }
+      for (const imported of cat.importsWithEntries) {
+        if (imported.rules) {
+          yield* imported.rules;
+        }
+      }
     }
     if (this.rules) yield* this.rules;
   }
