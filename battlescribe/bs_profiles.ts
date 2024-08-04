@@ -40,7 +40,7 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40, sumA
   for (const profiles of profilesByType) {
     const maxes = {} as Record<string, number>;
     for (const profile of profiles) {
-      for (const characteristic of profile.characteristics) {
+      for (const characteristic of profile.characteristics || []) {
         maxes[characteristic.typeId] = Math.max(
           characteristic.$text?.toString().length || 0,
           maxes[characteristic.typeId] || 0,
@@ -50,7 +50,7 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40, sumA
     for (const profile of profiles) {
       profile.big = [] as BSICharacteristic[];
       profile.small = [] as BSICharacteristic[];
-      for (const characteristic of profile.characteristics) {
+      for (const characteristic of profile.characteristics || []) {
         const maxCharacteristicLength = maxes[characteristic.typeId];
         if (maxCharacteristicLength > bigStringLength) {
           profile.big.push(characteristic);
@@ -90,7 +90,7 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40, sumA
 }
 
 export function isProfileModified(profile: BSIProfile) {
-  for (const characteristic of profile.characteristics) {
+  for (const characteristic of profile.characteristics || []) {
     if (characteristic.originalValue !== undefined && characteristic.originalValue !== characteristic.$text)
       return true;
   }
