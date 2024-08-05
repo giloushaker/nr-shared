@@ -1,4 +1,4 @@
-import { groupBy, sortBy, addOne, sortByAscending } from "./bs_helpers";
+import { groupBy, sortBy, addOne, sortByAscending, sortByAscendingInplace } from "./bs_helpers";
 import { entryToJson } from "./bs_main";
 import { BSIProfile, BSICharacteristic } from "./bs_types";
 
@@ -36,7 +36,7 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40, sumA
   }
   const profilesByType = Object.values(groupedByType)
     .filter((o) => o.length)
-    .map((b) => sortByAscending(b, (c) => c.name));
+    .map((b) => b[0].characteristics.length <= 1 ? b : sortByAscendingInplace(b, (c) => c.name));
   for (const profiles of profilesByType) {
     const maxes = {} as Record<string, number>;
     for (const profile of profiles) {
