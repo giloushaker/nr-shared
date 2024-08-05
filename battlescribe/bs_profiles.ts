@@ -36,7 +36,7 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40, sumA
   }
   const profilesByType = Object.values(groupedByType)
     .filter((o) => o.length)
-    .map((b) => b[0].characteristics.length <= 1 ? b : sortByAscendingInplace(b, (c) => c.name));
+    .map((b) => b[0].characteristics.length <= 1 ? sortByAscendingInplace(b, (c) => c.name) : b);
   for (const profiles of profilesByType) {
     const maxes = {} as Record<string, number>;
     for (const profile of profiles) {
