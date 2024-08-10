@@ -10,6 +10,7 @@ export interface BSINamed extends BSICommentable {
 }
 export interface BSIAliasable {
   alias?: string[]
+  noindex?: boolean;
 }
 export interface BSIHidden {
   hidden: boolean;
