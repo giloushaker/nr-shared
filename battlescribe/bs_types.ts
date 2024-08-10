@@ -77,6 +77,7 @@ export interface BSIConstraint extends BSIQuery, BSIValued, BSICommentable {
   type: "min" | "max" | "exactly";
   shared?: boolean;
   negative?: boolean;
+  message?: string;
 }
 
 export interface BSICategory extends BSINamed { }

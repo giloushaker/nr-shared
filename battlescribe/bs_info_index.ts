@@ -11,7 +11,7 @@ export class InfoIndex<T = any> {
         return word.match(/[a-z]/) ? word.toLowerCase() : word;
     }
     add(text: string, value: T) {
-        if (typeof text !== "string" || !text.match(/(?=.*[a-zA-Z].*[a-zA-Z])/)) {
+        if (typeof text !== "string" || !text.match(/(?=.*[a-zA-Z0-9].*[a-zA-Z0-9])/)) {
             return;
         }
         this.addToIndex(this.index, value, this.words(escapeHtml(text)));
@@ -31,7 +31,7 @@ export class InfoIndex<T = any> {
         }
     }
     match(text: string | number): { match?: T[], text?: string }[] {
-        if (typeof text !== "string" || !text.match(/(?=.*[a-zA-Z].*[a-zA-Z])/)) {
+        if (typeof text !== "string" || !text.match(/(?=.*[a-zA-Z0-9].*[a-zA-Z0-9])/)) {
             return [{ text: text as string }]
         }
         const words = this.words(text)
