@@ -1264,7 +1264,8 @@ export const goodJsonKeys = new Set([
   "defaultCostLimit",
   "publicationId",
 
-  // NR SPECIFIC
+
+  // associations
   "label",
   "labelMembers",
   "maxAssociationsPerMember",
@@ -1272,17 +1273,18 @@ export const goodJsonKeys = new Set([
   "min",
   "max",
   "of",
+
+  // groups
   "flatten",
   "collapsible",
+
+  // entries
   "sortIndex",
   "subType",
-  "arg",
-  "negative",
-  // "includeChildSelections",
-  // "scope",
-  // "type",
-  // "conditions",
-  // "conditionGroups",
+
+  "arg", // (replace modifier)
+  "negative", // (constraints)
+  "message", // (constraints)
 
   //Legacy
   "costTypeId",
