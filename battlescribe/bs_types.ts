@@ -78,6 +78,7 @@ export interface BSIConstraint extends BSIQuery, BSIValued, BSICommentable {
   type: "min" | "max" | "exactly";
   shared?: boolean;
   negative?: boolean;
+  message?: string;
 }
 
 export interface BSICategory extends BSINamed { }
@@ -330,7 +331,6 @@ export interface BSIProfileType extends BSINamed {
 }
 
 export interface BSIRule extends BSINamed, BSIHidden, BSIModifiable, BSICommentable, BSIReference {
-
   description: string;
 }
 

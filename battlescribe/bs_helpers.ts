@@ -440,7 +440,15 @@ export function copy<T>(obj: T): T {
   return Object.assign(Object.create(Object.getPrototypeOf(obj)), obj);
 }
 
-export function arrayRemove<T>(arr: T[], obj: T): boolean {
+export function findAndRemove<T>(arr: T[], cb: (obj: T) => any): boolean {
+  const index = arr.findIndex((o) => cb);
+  if (index !== -1) {
+    arr.splice(index, 1);
+    return true;
+  }
+  return false;
+}
+export function remove<T>(arr: T[], obj: T): boolean {
   const index = arr.findIndex((o) => o === obj);
   if (index !== -1) {
     arr.splice(index, 1);
@@ -499,17 +507,6 @@ export function add(obj: any, key: string, amount = 1) {
   }
   return prev;
 }
-export function remove(obj: any, key: string, amount = 1) {
-  const prev = obj[key] || 0;
-  const next = prev - amount;
-  if (next === 0) {
-    delete obj[key];
-  } else {
-    obj[key] = next;
-  }
-  return next;
-}
-
 /** return the previous value */
 export function addOne(obj: any, key: string) {
   const prev = obj[key] || 0;

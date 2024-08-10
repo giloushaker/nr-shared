@@ -582,7 +582,9 @@ export class Catalogue extends Base {
     this.forEachObjectWhitelist((obj, parent) => {
       if (obj.isLink()) return
       if (obj.isProfile() || obj.isRule() || obj.isCategory()) {
-        index.add(obj.getName(), obj);
+        if (!obj.noindex) {
+          index.add(obj.getName(), obj);
+        }
         if (obj.alias) {
           for (const alias of obj.alias) {
             const copy = clone(obj);

@@ -188,6 +188,7 @@ export class Base implements BSModifierBase {
   collapsible?: boolean;
   sortIndex?: number;
   alias?: string[];
+  noindex?: boolean;
 
 
   constructor(json: any) {
@@ -901,6 +902,7 @@ export class Category extends Base {
   declare id: string;
   units!: Array<Base | Link>;
   main_catalogue!: Catalogue;
+
   isCategory(): this is Category {
     return true;
   }
@@ -1252,7 +1254,6 @@ export const goodJsonKeys = new Set([
   "xmlns",
   "readme",
   "description",
-  "alias",
   "comment",
   "publicationDate",
   "publisher",
@@ -1285,6 +1286,10 @@ export const goodJsonKeys = new Set([
   "arg", // (replace modifier)
   "negative", // (constraints)
   "message", // (constraints)
+
+  // refs
+  "alias",
+  "noindex",
 
   //Legacy
   "costTypeId",
