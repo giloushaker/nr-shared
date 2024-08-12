@@ -14,10 +14,10 @@ function hexToRgb(hex: string): RGB | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16),
-    }
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
     : null;
 }
 
@@ -79,6 +79,28 @@ export function updateCssVars(appearence: AppearanceTheme) {
 
   if (appearence.unitsBackground) {
     setBackground("units_background", appearence.unitsBackground.colors, appearence.unitsBackground.alpha);
+  }
+
+  if (appearence.costsBackground) {
+    setBackground("costs_background", appearence.costsBackground.colors, appearence.costsBackground.alpha);
+  }
+
+  if (appearence.fontColorUnits) {
+    document.documentElement.style.setProperty(`--font-color-units`, appearence.fontColorUnits);
+  } else {
+    document.documentElement.style.setProperty(`--font-color-units`, appearence.fontColor);
+  }
+
+  if (appearence.fontColorTitle) {
+    document.documentElement.style.setProperty(`--font-color-title`, appearence.fontColorTitle);
+  } else {
+    document.documentElement.style.setProperty(`--font-color-title`, appearence.fontColor);
+  }
+
+  if (appearence.fontColorForces) {
+    document.documentElement.style.setProperty(`--font-color-forces`, appearence.fontColorForces);
+  } else {
+    document.documentElement.style.setProperty(`--font-color-forces`, appearence.fontColor);
   }
 
   if (appearence.highlight) {
@@ -174,9 +196,9 @@ export function updateCssVars(appearence: AppearanceTheme) {
       `invert(${appearence.invertImagesBrightness}%) hue-rotate(${deg}deg)`,
     );
     if (invertImagesBrightness > 50) {
-      document.firstElementChild?.classList.add('dark')
+      document.firstElementChild?.classList.add("dark");
     } else {
-      document.firstElementChild?.classList.remove('dark')
+      document.firstElementChild?.classList.remove("dark");
     }
   } else if (appearence.invertImages) {
     document.documentElement.style.setProperty(`--image-filter`, "invert(100%) hue-rotate(180deg)");
