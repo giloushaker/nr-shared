@@ -8,6 +8,7 @@ export interface AppearanceTheme {
   title: AppearanceColor;
   forcesBackground: AppearanceColor;
   unitsBackground: AppearanceColor;
+  costsBackground: AppearanceColor;
   hoverColor: AppearanceColor;
 
   backgroundTexture: string;
@@ -51,4 +52,8 @@ export interface AppearanceTheme {
 
   titleBarColor: string;
   backgroundRepeat: string;
+
+  fontColorUnits?: string;
+  fontColorTitle?: string;
+  fontColorForces?: string;
 }
