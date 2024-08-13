@@ -49,15 +49,15 @@ export class InfoIndex<T = any> {
                 let end = findMultilineCodeBlockEnd(i, clean)
                 if (end !== -1) {
                     currentText.push(words.slice(i, end).join(""))
+                    i = end - 1;
                 }
-                i = end - 1;
                 continue;
             } else if (isCodeBlockStart(clean, i)) {
                 let end = findCodeBlockEnd(i, clean)
                 if (end !== -1) {
                     currentText.push(words.slice(i, end).join(""))
+                    i = end - 1;
                 }
-                i = end - 1;
                 continue;
             }
 
