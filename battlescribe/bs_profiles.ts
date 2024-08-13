@@ -107,7 +107,7 @@ export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles
     if (hash in hashed && sumAmount) {
       hashed[hash].amount = (hashed[hash].amount || 1) + (profile.amount || 1)
     } else {
-      hashed[hash] = { amount: 1, ...profile }
+      hashed[hash] = { ...profile, amount: (profile.amount || 1), }
     }
     // addOne(counts, hash);
     // profile.dupeCount = counts[hash];
@@ -148,21 +148,9 @@ export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles
   return hashed;
 }
 
-export function getProfilesFromIndex<T extends BSIProfile | BSIGroupedProfile>(index: Record<string, T>): T[] {
-  const result = [];
-  const modifieds = [];
-  for (const profile of Object.values(index)) {
-    if (!profile) continue;
-    if (!isProfileModified(profile)) result.push(profile);
-    else modifieds.push(profile);
-  }
-  result.push(...modifieds);
-  return result as any;
-}
-
 export function hashProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[], sumAmount = true): T[] {
   const hashed = indexProfiles(profiles, sumAmount);
-  return getProfilesFromIndex(hashed);
+  return Object.values(hashed);
 }
 
 export function hashAndExcludeProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[], toExclude: T[], sumAmount = true): T[] {
@@ -174,5 +162,5 @@ export function hashAndExcludeProfiles<T extends BSIProfile | BSIGroupedProfile>
       hashedFiltered[key] = hashed[key];
     }
   }
-  return getProfilesFromIndex(hashedFiltered);
+  return Object.values(hashedFiltered);
 }
