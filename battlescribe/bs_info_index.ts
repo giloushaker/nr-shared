@@ -14,7 +14,7 @@ export class InfoIndex<T = any> {
         if (typeof text !== "string" || !text.match(/(?=.*[a-zA-Z0-9].*[a-zA-Z0-9])/)) {
             return;
         }
-        this.addToIndex(this.index, value, this.words(escapeHtml(text)));
+        this.addToIndex(this.index, value, this.words(text));
     }
     private addToIndex(out: Record<string, any>, obj: any, words: string[], index = 0) {
         if (index < words.length) {
