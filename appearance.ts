@@ -14,10 +14,10 @@ function hexToRgb(hex: string): RGB | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16),
-    }
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
     : null;
 }
 
@@ -49,7 +49,7 @@ function setBackground(id: string, colors: string[], backgroundAlpha: number): v
   if (colors.length == 1) {
     // If colors is a string, set only the `--${id}` variable to that color with alpha
     const rgbaColor = convertToRgba(colors[0], backgroundAlpha / 100);
-    document.documentElement.style.setProperty(`--${id}`, rgbaColor);
+    document.documentElement.style.setProperty(`--${id}`, `linear-gradient(${rgbaColor}, ${rgbaColor})`);
   } else if (Array.isArray(colors)) {
     // If colors is an array, construct a linear gradient from the colors with alpha
     const gradient = `linear-gradient(to right, ${colors
