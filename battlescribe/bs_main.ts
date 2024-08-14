@@ -410,21 +410,6 @@ export class Base implements BSModifierBase {
     if (this.infoGroups) yield* this.infoGroups;
   }
   *infoRulesIterator(): Iterable<Rule> {
-    if (this.isForce()) {
-      const gst = this.getGameSystem();
-      if (gst.rules) {
-        yield* gst.rules;
-      }
-      const cat = this.main_catalogue;
-      if (cat.rules) {
-        yield* cat.rules;
-      }
-      for (const imported of cat.importsWithEntries) {
-        if (imported.rules) {
-          yield* imported.rules;
-        }
-      }
-    }
     if (this.rules) yield* this.rules;
   }
   *infoProfilesIterator(): Iterable<Profile> {
@@ -932,6 +917,29 @@ export class Force extends Base {
   isIdUnique() {
     return true;
   }
+
+  *infoLinksIterator(): Iterable<InfoLink> {
+    if (this.isForce()) {
+      const cat = this.main_catalogue;
+      for (const imported of cat.imports) {
+        yield* imported.infoLinksIterator();
+      }
+      yield* cat.infoLinksIterator();
+    }
+    yield* super.infoLinksIterator()
+  }
+
+  *infoRulesIterator(): Iterable<Rule> {
+    if (this.isForce()) {
+      const cat = this.main_catalogue;
+      for (const imported of cat.imports) {
+        yield* imported.infoRulesIterator();
+      }
+      yield* cat.infoRulesIterator();
+    }
+    yield* super.infoRulesIterator()
+  }
+
   *selectionsIterator(): Iterable<Base> {
     yield* this.categories;
     if (this.forces) yield* this.forces;
