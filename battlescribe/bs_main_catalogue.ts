@@ -1388,6 +1388,7 @@ export function noObserve(): object {
 
 export function getAllPossibleParents(node: EditorBase) {
   const result = [] as EditorBase[];
+  if (node.isCatalogue()) return result
   if (!node.parent && !node.refs?.length) return result
   let temp = [] as EditorBase[]
   const stack = [] as EditorBase[];
