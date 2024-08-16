@@ -1392,7 +1392,7 @@ export function getAllPossibleParents(node: EditorBase) {
   if (!node.parent && !node.refs?.length) return result
   let temp = [] as EditorBase[]
   const stack = [] as EditorBase[];
-  const refsStack = [node.parent, ...(node?.refs ?? [])] as EditorBase[]
+  const refsStack = [node.parent, ...(node?.refs ?? [])].filter(Boolean) as EditorBase[]
   const set = new Set();
   while (refsStack.length) {
     stack.push(refsStack.shift()!)
