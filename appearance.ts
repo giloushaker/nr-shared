@@ -14,10 +14,10 @@ function hexToRgb(hex: string): RGB | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16),
+    }
     : null;
 }
 
@@ -197,8 +197,10 @@ export function updateCssVars(appearence: AppearanceTheme) {
     );
     if (invertImagesBrightness > 50) {
       document.firstElementChild?.classList.add("dark");
+      appearence.dark = true
     } else {
       document.firstElementChild?.classList.remove("dark");
+      appearence.dark = false
     }
   } else if (appearence.invertImages) {
     document.documentElement.style.setProperty(`--image-filter`, "invert(100%) hue-rotate(180deg)");
@@ -225,9 +227,13 @@ export function updateCssVars(appearence: AppearanceTheme) {
   if (appearence.dark) {
     document.documentElement.style.setProperty(`--hover-brighten-color`, "rgba(0, 0, 0, 0.15)");
     document.documentElement.style.setProperty(`--hover-darken-color`, "rgba(255, 255, 255, 0.15)");
+    document.documentElement.style.setProperty(`--hover-brighten-pct`, "85%");
+    document.documentElement.style.setProperty(`--hover-darken-pct`, "110%");
   } else {
     document.documentElement.style.setProperty(`--hover-darken-color`, "rgba(0, 0, 0, 0.15)");
     document.documentElement.style.setProperty(`--hover-brighten-color`, "rgba(255, 255, 255, 0.15)");
+    document.documentElement.style.setProperty(`--hover-darken-pct`, "85%");
+    document.documentElement.style.setProperty(`--hover-brighten-pct`, "110°%");
   }
 
   if (appearence.titleBarColor) {
