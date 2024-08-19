@@ -14,10 +14,10 @@ function hexToRgb(hex: string): RGB | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16),
-    }
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
     : null;
 }
 
@@ -85,7 +85,11 @@ export function updateCssVars(appearence: AppearanceTheme) {
     setBackground("costs_background", appearence.costsBackground.colors, appearence.costsBackground.alpha);
   }
 
-  if (appearence.fontColorUnits) {
+  document.documentElement.style.setProperty(`--font-color-units`, appearence.fontColor);
+  document.documentElement.style.setProperty(`--font-color-title`, appearence.fontColor);
+  document.documentElement.style.setProperty(`--font-color-forces`, appearence.fontColor);
+
+  /*   if (appearence.fontColorUnits) {
     document.documentElement.style.setProperty(`--font-color-units`, appearence.fontColorUnits);
   } else {
     document.documentElement.style.setProperty(`--font-color-units`, appearence.fontColor);
@@ -101,7 +105,7 @@ export function updateCssVars(appearence: AppearanceTheme) {
     document.documentElement.style.setProperty(`--font-color-forces`, appearence.fontColorForces);
   } else {
     document.documentElement.style.setProperty(`--font-color-forces`, appearence.fontColor);
-  }
+  } */
 
   if (appearence.highlight) {
     const titleRgb = hexToRgb(appearence.highlight);
@@ -197,10 +201,10 @@ export function updateCssVars(appearence: AppearanceTheme) {
     );
     if (invertImagesBrightness > 50) {
       document.firstElementChild?.classList.add("dark");
-      appearence.dark = true
+      appearence.dark = true;
     } else {
       document.firstElementChild?.classList.remove("dark");
-      appearence.dark = false
+      appearence.dark = false;
     }
   } else if (appearence.invertImages) {
     document.documentElement.style.setProperty(`--image-filter`, "invert(100%) hue-rotate(180deg)");
