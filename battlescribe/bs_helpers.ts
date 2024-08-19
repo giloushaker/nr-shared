@@ -441,7 +441,7 @@ export function copy<T>(obj: T): T {
 }
 
 export function findAndRemove<T>(arr: T[], cb: (obj: T) => any): boolean {
-  const index = arr.findIndex((o) => cb);
+  const index = arr.findIndex(cb);
   if (index !== -1) {
     arr.splice(index, 1);
     return true;
