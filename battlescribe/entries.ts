@@ -6,7 +6,7 @@ export const entries = {
     allowedChildrens: [],
   },
   costTypes: {
-    allowedChildrens: [],
+    allowedChildrens: ["modifiers"],
   },
   profileTypes: {
     allowedChildrens: ["characteristicTypes"],
