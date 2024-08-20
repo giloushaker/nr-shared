@@ -1154,6 +1154,18 @@ export class Rule extends Base implements BSIRule {
 export function getStaticFilters(source: Base): string[] {
   const ids = ["any", source.id];
   if (source.isLink()) ids.push(source.targetId);
+
+  if (source.isEntry()) ids.push("entry")
+  //@ts-ignore
+  else if (source.isGroup()) ids.push("group")
+  //@ts-ignore
+  else if (source.isCategory()) ids.push("category")
+  //@ts-ignore
+  else if (source.isForce()) ids.push("force")
+  //@ts-ignore
+  else if (source.isRoster()) ids.push("roster")
+
+
   const type = source.getType();
   if (type) ids.push(type);
   return ids;

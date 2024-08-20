@@ -23,7 +23,7 @@ export interface BSILink extends BSINamed, BSIOption, BSIHidden {
 export interface BSICategoryLink extends BSILink {
   primary?: boolean;
 }
-export interface BSICostType extends BSIOption, BSIHidden, BSINamed {
+export interface BSICostType extends BSIOption, BSIHidden, BSINamed, BSIModifiable {
   defaultCostLimit: number;
 }
 export interface BSISelectionCategory extends BSINamed {
