@@ -192,6 +192,12 @@ export function updateCssVars(appearence: AppearanceTheme) {
     document.documentElement.style.setProperty(`--color-lightblue`, appearence.colorLightblue);
   }
 
+  if (appearence.dark) {
+    document.documentElement.style.setProperty(`--checkbox-background`, "white");
+  } else {
+    document.documentElement.style.setProperty(`--checkbox-background`, appearence.inputHighlights);
+  }
+
   if (appearence.invertImagesBrightness) {
     const invertImagesBrightness = parseInt(`${appearence.invertImagesBrightness}`);
     const deg = 180 * (invertImagesBrightness / 100);
