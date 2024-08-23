@@ -273,7 +273,7 @@ export function getTypeLabel(key: string, obj?: any): string {
       return "Game System";
     default:
       console.warn("unknown getTypeLabel key", key);
-      return key as any;
+      return String(key);
   }
 }
 export function getTypeName(key: string, obj?: any): ItemTypeNames {
@@ -519,8 +519,8 @@ export function onRemoveEntry(removed: EditorBase, manager?: BSCatalogueManager)
         }
       }
     }
-    delete (entry as any).parent;
-    delete (entry as any).catalogue;
+    delete (entry as Partial<EditorBase>).parent;
+    delete (entry as Partial<EditorBase>).catalogue;
   });
   if (manager && removed instanceof CatalogueLink) {
     catalogue.reload(manager);
@@ -605,7 +605,7 @@ export function getEntryPathInfo(entry: EditorBase): EntryPathEntry[] {
         label: entry.getTypeName(),
         display: getName(entry),
         key: entry.parentKey,
-        index: parent[(entry as any).parentKey].indexOf(entry),
+        index: parent[(entry as EditorBase).parentKey].indexOf(entry),
         id: entry.id,
       });
     } else {

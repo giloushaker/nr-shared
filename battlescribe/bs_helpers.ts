@@ -456,6 +456,14 @@ export function remove<T>(arr: T[], obj: T): boolean {
   }
   return false;
 }
+export function insert<T>(arr: T[], obj: T): boolean {
+
+  if (arr.findIndex((o) => o === obj) === -1) {
+    arr.push(obj);
+    return true;
+  }
+  return false;
+}
 type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends readonly (infer ElementType)[]
   ? ElementType
   : never;

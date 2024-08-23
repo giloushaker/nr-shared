@@ -863,6 +863,9 @@ export class InfoLink<T extends Rule | InfoGroup | Profile = Rule | InfoGroup | 
   getTypeName() {
     return (this.target as Profile)?.typeName;
   }
+  getTypeId() {
+    return (this.target as Profile)?.typeId;
+  }
 }
 export class CategoryLink extends Link {
   declare targetId: string;
@@ -1077,6 +1080,9 @@ export class Profile extends Base implements BSIProfile {
   }
   getTypeName() {
     return this.typeName;
+  }
+  getTypeId() {
+    return this.typeId;
   }
   isIdUnique() {
     return true;
