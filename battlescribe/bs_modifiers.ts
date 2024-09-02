@@ -8,7 +8,7 @@ import type {
   BSICondition,
   BSIRepeat,
 } from "./bs_types";
-import { Condition, Modifier, ModifierGroup, type Base, type InfoGroup, type Link } from "./bs_main";
+import { Condition, Modifier, ModifierGroup, Link, Constraint } from "./bs_main";
 import type { Catalogue, EditorBase } from "./bs_main_catalogue";
 import { findSelfOrParentWhere, has, removePrefix } from "./bs_helpers";
 
@@ -42,7 +42,7 @@ export function getModifiedField(base: Base | Link | undefined, field: string) {
     const parent = getModifierOrConditionParent(base as EditorBase);
     if (parent) {
       for (const constraint of parent.constraintsIterator()) {
-        if (constraint.id === field) return constraint as any as Base;
+        if (constraint.id === field) return constraint as unknown as Constraint;
       }
     }
   }

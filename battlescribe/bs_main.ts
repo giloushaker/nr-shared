@@ -908,6 +908,7 @@ export class Category extends Base {
 export class Force extends Base {
   declare name: string;
   declare id: string;
+  childForcesLabel?: string;
   categories!: Array<Category | CategoryLink>;
   forces?: Force[];
   main_catalogue!: Catalogue;
@@ -1312,6 +1313,8 @@ export const goodJsonKeys = new Set([
   "arg", // (replace modifier)
   "negative", // (constraints)
   "message", // (constraints)
+  "childForceLabel",
+  "affects",
 
   // refs
   "alias",
