@@ -14,10 +14,10 @@ function hexToRgb(hex: string): RGB | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16),
+    }
     : null;
 }
 
@@ -192,11 +192,6 @@ export function updateCssVars(appearence: AppearanceTheme) {
     document.documentElement.style.setProperty(`--color-lightblue`, appearence.colorLightblue);
   }
 
-  if (appearence.dark) {
-    document.documentElement.style.setProperty(`--checkbox-background`, "white");
-  } else {
-    document.documentElement.style.setProperty(`--checkbox-background`, appearence.inputHighlights);
-  }
 
   if (appearence.invertImagesBrightness) {
     const invertImagesBrightness = parseInt(`${appearence.invertImagesBrightness}`);
@@ -218,6 +213,11 @@ export function updateCssVars(appearence: AppearanceTheme) {
     document.documentElement.style.setProperty(`--image-filter`, "");
   }
 
+  if (appearence.dark) {
+    document.documentElement.style.setProperty(`--checkbox-background`, "white");
+  } else {
+    document.documentElement.style.setProperty(`--checkbox-background`, appearence.inputHighlights);
+  }
   if (appearence.costColor) {
     const fontColor = appearence.costColor;
     document.documentElement.style.setProperty(`--cost-color`, fontColor);

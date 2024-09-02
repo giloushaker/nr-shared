@@ -863,6 +863,9 @@ export class InfoLink<T extends Rule | InfoGroup | Profile = Rule | InfoGroup | 
   getTypeName() {
     return (this.target as Profile)?.typeName;
   }
+  getTypeId() {
+    return (this.target as Profile)?.typeId;
+  }
 }
 export class CategoryLink extends Link {
   declare targetId: string;
@@ -905,6 +908,7 @@ export class Category extends Base {
 export class Force extends Base {
   declare name: string;
   declare id: string;
+  childForcesLabel?: string;
   categories!: Array<Category | CategoryLink>;
   forces?: Force[];
   main_catalogue!: Catalogue;
@@ -1077,6 +1081,9 @@ export class Profile extends Base implements BSIProfile {
   }
   getTypeName() {
     return this.typeName;
+  }
+  getTypeId() {
+    return this.typeId;
   }
   isIdUnique() {
     return true;
@@ -1309,6 +1316,8 @@ export const goodJsonKeys = new Set([
   "arg", // (replace modifier)
   "negative", // (constraints)
   "message", // (constraints)
+  "childForceLabel",
+  "affects",
 
   // refs
   "alias",

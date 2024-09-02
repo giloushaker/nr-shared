@@ -456,6 +456,14 @@ export function remove<T>(arr: T[], obj: T): boolean {
   }
   return false;
 }
+export function insert<T>(arr: T[], obj: T): boolean {
+
+  if (arr.findIndex((o) => o === obj) === -1) {
+    arr.push(obj);
+    return true;
+  }
+  return false;
+}
 type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends readonly (infer ElementType)[]
   ? ElementType
   : never;
@@ -683,8 +691,8 @@ export function has<T>(arr: Iterable<T>, _item: T): boolean {
 export function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
-export function arrayIf(bool: boolean | undefined | string | number | null | object, obj: any) {
-  return bool ? [obj] : [];
+export function arrayIf(obj: any) {
+  return obj ? [obj] : [];
 }
 
 export function inBounds(n: number, min: number, max: number) {

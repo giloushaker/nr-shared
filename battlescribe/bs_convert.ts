@@ -76,7 +76,8 @@ function parseValue(str: string): any {
     case "false":
       return false;
     default:
-      if (isNaN(str as any)) {
+      //@ts-ignore
+      if (isNaN(str)) {
         return str;
       }
 
