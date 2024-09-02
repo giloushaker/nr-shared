@@ -152,7 +152,7 @@ export class Base implements BSModifierBase {
   selectionEntries?: Entry[];
   selectionEntryGroups?: Group[];
   entryLinks?: Link[];
-  profileTypes?: BSIProfileType[];
+  profileTypes?: ProfileType[];
   categoryEntries?: Category[];
   categoryLinks?: CategoryLink[];
   forceEntries?: Force[];
@@ -1285,6 +1285,9 @@ export const goodJsonKeys = new Set([
   "defaultCostLimit",
   "publicationId",
 
+
+  //queries
+  "affects",
 
   // associations
   "label",

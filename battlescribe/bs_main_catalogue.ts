@@ -22,6 +22,7 @@ import {
   ILLEGAL_ID,
   Link,
   Profile,
+  ProfileType,
   Rule,
   UNCATEGORIZED_ID,
   basicQueryFields,
@@ -347,7 +348,7 @@ export class Catalogue extends Base {
     }
   }
 
-  *iterateProfileTypes(): Iterator<BSIProfileType> {
+  *iterateProfileTypes(): Iterable<ProfileType> {
     for (const catalogue of this.imports) {
       if (catalogue.profileTypes) {
         yield* catalogue.profileTypes;
