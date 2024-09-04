@@ -104,6 +104,7 @@ export interface BSIModifier extends BSIConditional, BSICommentable {
   field: "category" | "name" | "hidden" | string; //costId
   value: number | string | boolean;
   arg?: number | string | boolean;
+  join?: string;
 
   scope?: string;
   affects?: string;
