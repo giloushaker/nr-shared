@@ -10,7 +10,7 @@ import type {
 } from "./bs_types";
 import { Condition, Modifier, ModifierGroup, Link, Constraint } from "./bs_main";
 import type { Catalogue, EditorBase } from "./bs_main_catalogue";
-import { findSelfOrParentWhere, has, removePrefix } from "./bs_helpers";
+import { findSelfOrParentWhere, has, prefixIf, removePrefix } from "./bs_helpers";
 
 export function getModifierOrConditionParent(obj: EditorBase) {
   const parent = findSelfOrParentWhere(obj, (o) => {
@@ -166,7 +166,8 @@ export function modifierToString(
   modifier: BSIModifier,
   fieldToString = fieldToText
 ): string {
-  return `${modifier.type} ${fieldToString(base, modifier.field)} ${fieldToString(base, modifier.value?.toString())}`;
+  const _in = prefixIf(" in ", [modifier.scope, modifier.affects].filter(o => o).join('.'))
+  return `${modifier.type} ${fieldToString(base, modifier.field)} ${fieldToString(base, modifier.value?.toString())}${_in}`;
 }
 
 export function conditionGroupToString(

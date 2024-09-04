@@ -1314,6 +1314,7 @@ export const goodJsonKeys = new Set([
   "subType",
 
   "arg", // (replace modifier)
+  "join", // (apprend/prepend modifier)
   "negative", // (constraints)
   "message", // (constraints)
   "childForceLabel",
