@@ -8,7 +8,7 @@ import type {
   BSICondition,
   BSIRepeat,
 } from "./bs_types";
-import { Condition, Modifier, ModifierGroup, Link, Constraint } from "./bs_main";
+import { Condition, Modifier, ModifierGroup, Link, Constraint, Base } from "./bs_main";
 import type { Catalogue, EditorBase } from "./bs_main_catalogue";
 import { findSelfOrParentWhere, has, prefixIf, removePrefix } from "./bs_helpers";
 
@@ -167,6 +167,9 @@ export function modifierToString(
   fieldToString = fieldToText
 ): string {
   const _in = prefixIf(" in ", [modifier.scope, modifier.affects].filter(o => o).join('.'))
+  if (modifier.type === "replace") {
+    return `${modifier.type} ${fieldToString(base, modifier.field)} ${modifier.arg} with ${fieldToString(base, modifier.value?.toString())}${_in}`;
+  }
   return `${modifier.type} ${fieldToString(base, modifier.field)} ${fieldToString(base, modifier.value?.toString())}${_in}`;
 }
 
