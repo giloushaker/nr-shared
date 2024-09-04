@@ -1033,23 +1033,23 @@ export class Catalogue extends Base {
                 other: existing,
                 extra: this.name,
               });
+              this.addError(existing as EditorBase, {
+                source: existing,
+                severity: "error",
+                msg: `Duplicate id ${cur.id}  ${cur.getName()}`,
+                id: "duplicate-id-1",
+                other: cur,
+                extra: existingCatalogue.name,
+              });
+              this.addError(cur as EditorBase, {
+                source: cur,
+                severity: "error",
+                msg: `Duplicate id ${cur.id} ${existing.getName()}`,
+                id: "duplicate-id-2",
+                other: existing,
+                extra: this.name,
+              });
             }
-            this.addError(existing as EditorBase, {
-              source: existing,
-              severity: "error",
-              msg: `Duplicate id ${cur.id}  ${cur.getName()}`,
-              id: "duplicate-id-1",
-              other: cur,
-              extra: isCatalogueDifferent ? existingCatalogue.name : undefined,
-            });
-            this.addError(cur as EditorBase, {
-              source: cur,
-              severity: "error",
-              msg: `Duplicate id ${cur.id} ${existing.getName()}`,
-              id: "duplicate-id-2",
-              other: existing,
-              extra: isCatalogueDifferent ? this.name : undefined,
-            });
           }
         }
         index[cur.id] = cur;
