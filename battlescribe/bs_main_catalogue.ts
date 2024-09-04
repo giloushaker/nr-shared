@@ -918,10 +918,17 @@ export class Catalogue extends Base {
     delete this.initialized;
     delete this.loaded;
     delete this.loaded_editor;
+    const refs = (this as Base as EditorBase).refs
     delete (this as Partial<typeof this>).index;
     const key = this.isGameSystem() ? "gameSystem" : "catalogue";
     const loaded = await manager.loadData({ [key]: this } as any);
     this.processForEditor();
+    if (refs) {
+      for (const ref of refs) {
+        if (ref.editorTypeName === "catalogueLink")
+          await ref.catalogue?.reload(manager)
+      }
+    }
     return loaded;
   }
   refreshErrors(cur: EditorBase, deleted = false) {

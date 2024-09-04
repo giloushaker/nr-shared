@@ -1136,6 +1136,11 @@ export class Modifier extends Base implements BSIModifier {
   declare type: BSIModifierType;
   declare field: "category" | "name" | "hidden" | string; //costId
   declare value: number | string | boolean;
+  declare affects?: string;
+  declare scope?: string;
+  declare join?: string;
+  declare arg?: string;
+
 }
 export class ModifierGroup extends Base implements BSIModifierGroup { }
 
@@ -1317,7 +1322,7 @@ export const goodJsonKeys = new Set([
   "join", // (apprend/prepend modifier)
   "negative", // (constraints)
   "message", // (constraints)
-  "childForceLabel",
+  "childForcesLabel",
   "affects",
 
   // refs
