@@ -97,7 +97,7 @@ export function xmlToJson(data: string) {
     parseTagValue: false,
     ignoreDeclaration: true,
     alwaysCreateTextNode: false,
-
+    trimValues: false,
     isArray: (tagName: string, jPath: string, isLeafNode: boolean, isAttribute: boolean) => {
       return !isAttribute && (tagName in containers || textArrayTags.has(tagName));
     },
