@@ -186,7 +186,7 @@ export async function fetchRef(
           return parseValue(unescape(val));
         },
         tagValueProcessor: (name: string, val: string) => {
-          return unescape(val);
+          return unescape(val).trim();
         },
       };
       const parsed = new XMLParser(options).parse(atomXml);
