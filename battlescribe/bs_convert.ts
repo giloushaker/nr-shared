@@ -105,7 +105,7 @@ export function xmlToJson(data: string) {
       return parseValue(unescape(val));
     },
     tagValueProcessor: (name: string, val: string) => {
-      return unescape(val);
+      return unescape(val).trim();
     },
   };
   return new XMLParser(options).parse(data);
