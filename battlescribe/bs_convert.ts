@@ -108,7 +108,8 @@ export function xmlToJson(data: string) {
       return unescape(val).trim();
     },
   };
-  return new XMLParser(options).parse(data);
+  const result = new XMLParser(options).parse(data);
+  return result;
 }
 
 export async function unzipFolder(file: string | ArrayBuffer | Blob, path: string) {
@@ -181,9 +182,7 @@ const oldBuggedTypes = {
 
 export function normalize(x: any) {
   for (let attr in x) {
-    if (x[attr] === "") {
-      delete x[attr];
-    } else if (containerTags[attr] && x[attr]) {
+    if (containerTags[attr] && x[attr]) {
       if (attr in oldBuggedTypes) {
         const normal = x[attr][containerTags[attr] as string];
         const old = x[attr][oldBuggedTypes[attr]];
