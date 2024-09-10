@@ -5,6 +5,7 @@ import { getBlob, getTree, GitTree, fetchRef, parseGitHubUrl } from "./github"
 import { getDataObject } from "./bs_main"
 import { convertToJson, getExtension, isAllowedExtension } from "./bs_convert"
 import { db as cataloguesdb } from "~/assets/shared/battlescribe/cataloguesdexie";
+import { GithubGameSystemRow } from "~/assets/ts/types/db_types"
 
 
 export class GithubGameSystemFiles extends GameSystemFiles {
@@ -23,10 +24,16 @@ export class GithubGameSystemFiles extends GameSystemFiles {
 
             // Add files that are not currently stored (eg recently added catalogues) as they will never be updated otherwise
             const current = new Set()
-            await cataloguesdb.catalogues.where({ "content.catalogue.gameSystemId": this.bsid }).each((o) => {
+            const gsts = [] as string[]
+            await cataloguesdb.systemrows.each((o: Partial<GithubGameSystemRow>) => {
+                if (o.repoUrl && o.bsid && o.repoUrl === this.url) {
+                    gsts.push(o.bsid)
+                }
+            });
+            await cataloguesdb.catalogues.where("content.catalogue.gameSystemId").anyOf(gsts).each((o) => {
                 current.add(o.content.catalogue.fullFilePath)
             })
-            await cataloguesdb.systems.where({ "id": this.bsid }).each((o) => {
+            await cataloguesdb.systems.where("id").anyOf(gsts).each((o) => {
                 current.add(o.content.gameSystem.fullFilePath)
             })
             let count = 0;
@@ -43,9 +50,8 @@ export class GithubGameSystemFiles extends GameSystemFiles {
                 const data = getDataObject(json)
                 data.fullFilePath = treeFile.path;
                 data.sha = treeFile.sha;
-                if (json.gameSystem) {
-                    await this.setSystem(json)
-                } else if (json.catalogue) {
+
+                if (json.catalogue && data.gameSystemId === this.getId()) {
                     await this.setCatalogue(json)
                 }
                 count++;
