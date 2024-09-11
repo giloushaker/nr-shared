@@ -245,23 +245,32 @@ export function allowed_children(obj: any, key: string): Set<string> {
 }
 export function BSXmlToJson(data: string) {
   const result = xmlToJson(data);
-  normalize(getDataObject(result));
-  const type = result.catalogue ? "catalogue" : "gameSystem";
-  if (!result.catalogue) {
-    result.playable = 0;
-    result.id = 1000;
-  } else {
-    result.playable = 1;
-    result.id = hashFnv32a(result.catalogue.id);
-    result.include = [1000];
+  const key = Object.keys(result)[0]
+  const content = result[key]
+  normalize(content);
+  switch (key) {
+    case "catalogue":
+      result.playable = 1;
+      result.id = hashFnv32a(result.catalogue.id);
+      result.include = [1000];
+      result.name = content.name;
+      result.short = to_snake_case(content.name);
+      result.playable = !Boolean(content.library);
+      result.version = content.battleScribeVersion;
+      result.nrversion = content.revision;
+      break;
+    case "gameSystem":
+      result.playable = 0;
+      result.id = 1000;
+      result.name = content.name;
+      result.short = to_snake_case(content.name);
+      result.playable = !Boolean(content.library);
+      result.version = content.battleScribeVersion;
+      result.nrversion = content.revision;
+      break;
+    case "roster":
+      break;
   }
-
-  const content = result[type];
-  result.name = content.name;
-  result.short = to_snake_case(content.name);
-  result.playable = !Boolean(content.library);
-  result.version = content.battleScribeVersion;
-  result.nrversion = content.revision;
   return result;
 }
 
