@@ -19,6 +19,12 @@ const headers = {
 if (globalThis.process?.env?.githubToken) {
   headers["Authorization"] = `Bearer ${process.env.githubToken}`;
 }
+const anonHeaders = {
+  Accept: "application/vnd.github.v3+json",
+} as Record<string, string>;
+if (globalThis.process?.env?.githubAnonToken) {
+  headers["Authorization"] = `Bearer ${process.env.githubAnonToken}`;
+}
 
 function throwIfError(response: { message?: string }) {
   if (response.message) throw new Error(response.message);
@@ -453,4 +459,14 @@ export async function getRepoZip(owner: string, name: string, ref: string = "HEA
   const root = entries[0][0]
   const result = entries.map(([k, v]) => [removePrefix(k, root), v]) as typeof entries
   return result
+}
+
+
+export async function createAnonymousIssue(repo: string, data: { title: string, body: string }) {
+  const resp = await fetch(`https://api.github.com/repos/${repo}/issues`, {
+    headers: anonHeaders,
+    method: "POST",
+    body: JSON.stringify({ ...data, title: `[Anon] ${data.title}` })
+  })
+  return resp
 }
