@@ -14,16 +14,18 @@ export interface GithubIntegration {
   discovered?: boolean;
 }
 const headers = {
-  Accept: "application/vnd.github.v3+json",
+  "Accept": "application/vnd.github.v3+json",
+  "Content-type": "application/json; charset=UTF-8"
 } as Record<string, string>;
 if (globalThis.process?.env?.githubToken) {
   headers["Authorization"] = `Bearer ${process.env.githubToken}`;
 }
 const anonHeaders = {
-  Accept: "application/vnd.github.v3+json",
+  "Accept": "application/vnd.github.v3+json",
+  "Content-type": "application/json; charset=UTF-8"
 } as Record<string, string>;
 if (globalThis.process?.env?.githubAnonToken) {
-  headers["Authorization"] = `Bearer ${process.env.githubAnonToken}`;
+  anonHeaders["Authorization"] = `Bearer ${process.env.githubAnonToken}`;
 }
 
 function throwIfError(response: { message?: string }) {
@@ -468,5 +470,5 @@ export async function createAnonymousIssue(repo: string, data: { title: string, 
     method: "POST",
     body: JSON.stringify({ ...data, title: `[Anon] ${data.title}` })
   })
-  return resp
+  return await resp.json()
 }
