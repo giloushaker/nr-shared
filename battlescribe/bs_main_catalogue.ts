@@ -589,7 +589,7 @@ export class Catalogue extends Base {
         if (obj.alias) {
           for (const alias of obj.alias) {
             const copy = clone(obj)
-            obj.name = alias
+            copy.name = alias
             index.add(alias, copy);
           }
         }
