@@ -139,14 +139,24 @@ export { gitSha1 };
  * @param obj The object.
  * @param callbackfn The function to call with each value
  */
-export function forEachValueRecursive(obj: any, callbackfn: (obj: any) => unknown) {
+export function forEachValueRecursive(obj: any, callbackfn: (obj: any) => unknown, exclude = new Set()) {
   const stack = [obj];
   while (stack.length) {
     const current = stack.pop()!;
 
-    for (const value of Object.values(current)) {
-      if (value && typeof value === "object") {
-        stack.push(value);
+    if (Array.isArray(current)) {
+      for (const value of Object.values(current)) {
+        if (value && typeof value === "object") {
+          stack.push(value);
+        }
+      }
+    } else {
+      for (const key in current) {
+        if (exclude.has(key)) continue;
+        const value = current[key]
+        if (value && typeof value === "object") {
+          stack.push(value);
+        }
       }
     }
     if (!Array.isArray(current)) {
@@ -154,6 +164,9 @@ export function forEachValueRecursive(obj: any, callbackfn: (obj: any) => unknow
     }
   }
 }
+
+const exclude = new Set(["catalogue", "system", "parent"])
+
 /**
  * Recursively Calls callbackfn(value, key) for each object in the provided object
  * Travels Arrays but callbackfn is not called with the array object itself

@@ -268,6 +268,27 @@ export function prepareModifiers(
   return result;
 }
 
+function prepareConditionGroup(c: BSIConditionGroup) {
+  return {
+    type: c.type,
+    conditionGroups: c.conditionGroups?.map(prepareConditionGroup),
+    conditions: c.conditions?.map(prepareCondition)
+  }
+}
+function prepareCondition(c: BSICondition) {
+  return {
+    type: c.type,
+    scope: c.scope,
+    childId: c.childId,
+    field: c.field,
+    includeChildSelections: c.includeChildSelections,
+    includeChildForces: c.includeChildForces,
+    percentValue: c.percentValue,
+    shared: c.shared,
+    value: c.value,
+  }
+}
+
 /**
  * Converts modifiers to a better format for parsing
  * {effect, groups: Recursive<ConditionGroups>}
@@ -291,19 +312,19 @@ export function prepareModifiers2(
       const conditionGroups = [] as BSIConditionGroup[];
 
       for (const parent of parents) {
-        if (parent.conditions) conditions.push(...parent.conditions);
-        if (parent.conditionGroups) conditionGroups.push(...parent.conditionGroups);
+        if (parent.conditions) conditions.push(...parent.conditions.map(prepareCondition))
+        if (parent.conditionGroups) conditionGroups.push(...parent.conditionGroups.map(prepareConditionGroup));
       }
 
-      if (current.conditions) conditions.push(...current.conditions);
-      if (current.conditionGroups) conditionGroups.push(...current.conditionGroups);
+      if (current.conditions) conditions.push(...current.conditions.map(prepareCondition));
+      if (current.conditionGroups) conditionGroups.push(...current.conditionGroups.map(prepareConditionGroup));
 
       for (const modifier of current.modifiers) {
-        const resultConditionGroups = [...conditionGroups, ...(modifier.conditionGroups || [])];
+        const resultConditionGroups = [...conditionGroups, ...(modifier.conditionGroups || []).map(prepareConditionGroup)];
         if (conditions.length || modifier.conditions?.length) {
           resultConditionGroups.push({
             type: "and",
-            conditions: [...conditions, ...(modifier.conditions || [])],
+            conditions: [...conditions, ...(modifier.conditions || []).map(prepareCondition)],
           });
         }
 

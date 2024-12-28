@@ -51,7 +51,8 @@ export function groupProfiles(profiles: BSIProfile[], bigStringLength = 40, sumA
       profile.small = [] as BSICharacteristic[];
       for (const characteristic of profile.characteristics || []) {
         const maxCharacteristicLength = maxes[characteristic.typeId];
-        if (maxCharacteristicLength > bigStringLength) {
+        const localBigStringLength = profile.characteristics.length > 5 ? bigStringLength * 0.66 : bigStringLength
+        if (maxCharacteristicLength > localBigStringLength) {
           profile.big.push(characteristic);
         } else {
           profile.small.push(characteristic);
