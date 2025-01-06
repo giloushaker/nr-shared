@@ -83,16 +83,17 @@ export function removeParentGroups(str: string): string {
   return parsedName;
 }
 
-export function leanName(parsedName: string): string {
+export function leanName(parsedName: string, keepParent = false): string {
   parsedName = parsedName.replace(/[\n\r\t]/g, " ");
   parsedName = parsedName.replace(/[*]/g, "");
   parsedName = parsedName.replace(/[~]\([^)]*\)/g, " ");
-  parsedName = parsedName.replace(/\([^)]*\)/g, " ");
+  if (keepParent == false) {
+    parsedName = parsedName.replace(/\([^)]*\)/g, " ");
+  }
   parsedName = parsedName.replace(/^[ ,]+([^ ,].*)/g, "$1");
   while (parsedName.includes("  ")) parsedName = parsedName.replace(/ {2}/g, " ");
-  while (parsedName.endsWith(" ")) parsedName = parsedName.substr(0, parsedName.length - 1);
   parsedName = parsedName.replace(/Must take /g, "");
-  return parsedName;
+  return parsedName.trim();
 }
 
 export function dateFormat(date: Date | string): string {
