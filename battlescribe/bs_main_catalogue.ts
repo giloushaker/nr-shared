@@ -632,12 +632,17 @@ export class Catalogue extends Base {
     for (const force of forces) {
       const copiedForce = clone(force);
       copiedForce.main_catalogue = this;
+
       const forceCategories = [];
+      const hasUnits = new Set<string>();
+
       if (categories[UNCATEGORIZED_ID]?.units?.length) {
         forceCategories.push(categories[UNCATEGORIZED_ID]);
+        for (const child of categories[UNCATEGORIZED_ID].childs) {
+          hasUnits.add(child.id);
+        }
       }
 
-      const hasUnits = new Set<string>();
       for (const link of force.categoryLinks || []) {
         if (link.targetId in categories) {
           const copied = clone(link);
@@ -664,6 +669,7 @@ export class Catalogue extends Base {
           forceCategories.push(copied);
         }
       }
+
 
       const missingUnits = this.units.filter((o) => !hasUnits.has(o.id));
       if (missingUnits.length) {
