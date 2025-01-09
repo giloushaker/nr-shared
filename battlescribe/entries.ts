@@ -134,15 +134,18 @@ export const entries = {
     allowedChildrens: "type", //get from type
   },
   modifiers: {
-    allowedChildrens: ["conditions", "conditionGroups", "repeats"],
+    allowedChildrens: ["conditions", "conditionGroups", "localConditionGroups", "repeats"],
   },
   modifierGroups: {
-    allowedChildrens: ["modifiers", "modifierGroups", "conditions", "conditionGroups", "repeats"],
+    allowedChildrens: ["modifiers", "modifierGroups", "conditions", "conditionGroups", "localConditionGroups", "repeats"],
   },
   conditions: {
     allowedChildrens: [],
   },
   conditionGroups: {
+    allowedChildrens: ["conditions", "conditionGroups"],
+  },
+  localConditionGroups: {
     allowedChildrens: ["conditions", "conditionGroups"],
   },
   catalogue: {

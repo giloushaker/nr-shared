@@ -1267,12 +1267,14 @@ export class Catalogue extends Base {
         return;
       }
     }
-    this.addError(condition, {
-      source: condition,
-      severity: "warning",
-      msg: "child id does not exist",
-      id: "id-not-exist",
-    });
+    if (condition.editorTypeName !== 'localConditionGroup') {
+      this.addError(condition, {
+        source: condition,
+        severity: "warning",
+        msg: "child id does not exist",
+        id: "id-not-exist",
+      });
+    }
     // if (!this.unresolvedLinks![condition.childId]?.includes(condition)) {
     //   addObj(this.unresolvedLinks!, condition.childId, $toRaw(condition) as Condition & EditorBase);
     // }

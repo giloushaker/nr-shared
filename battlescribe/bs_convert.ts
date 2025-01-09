@@ -13,6 +13,7 @@ export const containerTags = {
   characteristicTypes: "characteristicType",
   conditions: "condition",
   conditionGroups: "conditionGroup",
+  localConditionGroups: "localConditionGroup",
   constraints: "constraint",
   costs: "cost",
   costLimits: "costLimit",

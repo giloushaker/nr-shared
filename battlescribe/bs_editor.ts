@@ -65,6 +65,7 @@ export const possibleChildren: ItemKeys[] = [
   "modifierGroups",
   "repeats",
   "conditionGroups",
+  "localConditionGroups",
 ];
 export const systemCategories: CategoryEntry[] = [
   {
@@ -164,6 +165,7 @@ export type ItemTypeNames =
   | "modifierGroup"
   | "repeat"
   | "conditionGroup"
+  | "localConditionGroup"
   | "cost"
   | "costType"
   | "link"
@@ -203,7 +205,8 @@ export type ItemKeys =
   | "modifiers"
   | "modifierGroups"
   | "repeats"
-  | "conditionGroups";
+  | "conditionGroups"
+  | "localConditionGroups";
 
 export function getTypeLabel(key: string, obj?: any): string {
   switch (key) {
@@ -267,6 +270,8 @@ export function getTypeLabel(key: string, obj?: any): string {
       return "Repeat";
     case "conditionGroup":
       return "Condition Group";
+    case "localConditionGroup":
+      return "Local Condition Group";
     case "catalogue":
       return "Catalogue";
     case "gameSystem":
@@ -342,6 +347,8 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
       return "repeat";
     case "conditionGroups":
       return "conditionGroup";
+    case "localConditionGroups":
+      return "localConditionGroup";
     case "catalogue":
     case "gameSystem":
       return key;
@@ -438,9 +445,10 @@ export function getName(obj: any): string {
       )} in ${fieldToText(parent, repeat.scope)} of ${repeat.childId ? fieldToText(parent, repeat.childId) : " any"}` + (repeat.includeChildSelections ? " (recursive)" : "");
     }
     case "conditions":
-      return conditionToString(getModifierOrConditionParent(obj), obj);
     case "constraints":
       return conditionToString(getModifierOrConditionParent(obj), obj);
+    case "localConditionGroups":
+      return conditionToString(getModifierOrConditionParent(obj), obj) + " where:";
 
     case "modifierGroups":
       return `Modify...`;
