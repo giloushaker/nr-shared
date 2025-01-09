@@ -67,10 +67,12 @@ export interface BSICondition extends BSIQuery, BSIValued {
 export interface BSIConditional {
   conditions?: BSICondition[];
   conditionGroups?: BSIConditionGroup[];
+  localConditionGroups?: BSILocalConditionGroup[];
 }
 export interface BSIConditionGroup extends BSIConditional, BSICommentable {
   type?: "and" | "or" | "exactly";
 }
+export interface BSILocalConditionGroup extends BSIConditional, BSICommentable, BSICondition { }
 
 export interface BSIConstraint extends BSIQuery, BSIValued, BSICommentable {
   id: string;
