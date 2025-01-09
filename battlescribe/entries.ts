@@ -143,7 +143,7 @@ export const entries = {
     allowedChildrens: [],
   },
   conditionGroups: {
-    allowedChildrens: ["conditions", "conditionGroups"],
+    allowedChildrens: ["conditions", "conditionGroups", "localConditionGroups"],
   },
   localConditionGroups: {
     allowedChildrens: ["conditions", "conditionGroups"],
