@@ -51,11 +51,12 @@ export interface BSIQuery extends BSICommentable {
   percentValue?: boolean;
   shared?: boolean;
 }
-
-export interface BSIRepeat extends BSIQuery, BSIValued {
+export interface BSIRepeatable {
   repeats: number;
   roundUp?: boolean;
 }
+
+export interface BSIRepeat extends BSIQuery, BSIValued, BSIRepeatable { }
 export interface BSICosts {
   costs?: BSICost[]
 }
@@ -69,10 +70,12 @@ export interface BSIConditional {
   conditionGroups?: BSIConditionGroup[];
   localConditionGroups?: BSILocalConditionGroup[];
 }
+
 export interface BSIConditionGroup extends BSIConditional, BSICommentable {
   type?: "and" | "or" | "exactly";
 }
-export interface BSILocalConditionGroup extends BSIConditional, BSICommentable, BSIQuery, BSIValued, BSIRepeat {
+
+export interface BSILocalConditionGroup extends BSIConditional, BSICommentable, BSIQuery, BSIValued, BSIRepeatable {
   type: "atLeast" | "greaterThan" | "atMost" | "lessThan" | "equalTo" | "notEqualTo";
 }
 
