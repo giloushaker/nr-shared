@@ -19,6 +19,7 @@ import type {
   NRAssociation,
   AssociationConstraint,
   BSIModifierType,
+  BSILocalConditionGroup,
 } from "./bs_types";
 import type { EditorBase, Catalogue } from "./bs_main_catalogue";
 import { clone, isObject } from "./bs_helpers";
@@ -167,9 +168,10 @@ export class Base implements BSModifierBase {
   modifiers?: BSIModifier[];
   modifierGroups?: BSIModifierGroup[];
   constraints?: BSIConstraint[];
-  repeats?: BSIRepeat[];
+  // repeats?: BSIRepeat[];
   conditions?: BSICondition[];
   conditionGroups?: BSIConditionGroup[];
+  localConditionGroups?: BSILocalConditionGroup[];
 
   // Processed (Catalogue)
   catalogue!: Catalogue; // Parent Catalogue
@@ -1145,6 +1147,20 @@ export class Modifier extends Base implements BSIModifier {
 export class ModifierGroup extends Base implements BSIModifierGroup { }
 export class ConditionGroup extends Base {
   declare type: "or" | "and"
+}
+
+export class LocalConditionGroup extends Base implements BSILocalConditionGroup {
+  declare type: "atLeast" | "greaterThan" | "atMost" | "lessThan" | "equalTo" | "notEqualTo";
+  declare scope: string;
+  declare field: string;
+  declare childId?: string | undefined;
+  declare includeChildSelections?: boolean | undefined;
+  declare includeChildForces?: boolean | undefined;
+  declare percentValue?: boolean | undefined;
+
+  declare repeats: number;
+  declare value: number;
+  declare roundUp?: boolean | undefined;
 }
 
 export class Rule extends Base implements BSIRule {
