@@ -1309,6 +1309,7 @@ export const goodJsonKeys = new Set([
   "min",
   "max",
   "of",
+  "info",
 
   // groups
   "flatten",

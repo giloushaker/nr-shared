@@ -375,4 +375,8 @@ export interface NRAssociation extends BSINamed, BSICommentable {
   scope: string;
   includeChildSelections?: boolean;
   childId: string;
+
+
+  // if in same unit defaults to "add" else "keep"
+  info?: "none" | "append" | "replace" | "append-self" | "replace-self"
 }
