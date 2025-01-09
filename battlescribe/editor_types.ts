@@ -24,6 +24,7 @@ export type ItemTypeNames =
   | "modifierGroup"
   | "repeat"
   | "conditionGroup"
+  | "localConditionGroup"
   | "cost"
   | "costType"
   | "link"
@@ -97,6 +98,8 @@ export function getTypeName(key: string, obj?: any): ItemTypeNames {
       return "repeat";
     case "conditionGroups":
       return "conditionGroup";
+    case "localConditionGroups":
+      return "localConditionGroup";
     case "catalogue":
     case "gameSystem":
       return key;

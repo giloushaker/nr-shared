@@ -87,7 +87,7 @@ const arrayKeys = [
   "costs",
 ];
 
-const arrayKeysWithoutId = ["conditions", "conditionGroups", "modifiers", "modifierGroups", "repeats"];
+const arrayKeysWithoutId = ["conditions", "conditionGroups", "localConditionGroups", "modifiers", "modifierGroups", "repeats"];
 export const goodKeys = new Set([...arrayKeys, ...arrayKeysWithoutId]);
 export const goodKeysWiki = new Set(arrayKeys);
 export function getDataObject(data: BSIData | Catalogue): BSIGameSystem | BSICatalogue {
@@ -230,7 +230,7 @@ export class Base implements BSModifierBase {
   isLink(): this is Link {
     return false;
   }
-  isCategory(): this is Category {
+  isCategory(): this is Category | Link<Category> {
     return false;
   }
   isRoster(): boolean {
@@ -676,7 +676,7 @@ export class Base implements BSModifierBase {
 }
 
 export class Entry extends Base {
-  isEntry() {
+  isEntry(): this is Entry {
     return true;
   }
   isQuantifiable(): boolean {
@@ -691,7 +691,7 @@ export class Group extends Base {
   getDefaultSelectionEntryId() {
     return this.defaultSelectionEntryId;
   }
-  isGroup() {
+  isGroup(): this is Group {
     return true;
   }
   isIdUnique() {
@@ -701,19 +701,19 @@ export class Group extends Base {
 export class Link<T extends Base = Group | Entry> extends Base {
   targetId!: string;
   declare target: T;
-  isLink() {
+  isLink(): this is Link {
     return true;
   }
-  isGroup() {
+  isGroup(): this is Link<Group> {
     return this.target?.isGroup();
   }
-  isCategory() {
+  isCategory(): this is Link<Category> {
     return this.target?.isCategory();
   }
   isQuantifiable(): boolean {
     return this.target?.isQuantifiable();
   }
-  isEntry() {
+  isEntry(): this is Entry {
     return this.target?.isEntry();
   }
   isIdUnique() {
@@ -915,7 +915,7 @@ export class Force extends Base {
   isForce(): this is Force {
     return true;
   }
-  isEntry() {
+  isEntry(): this is Entry {
     return true;
   }
   isIdUnique() {
@@ -1076,7 +1076,7 @@ export class Profile extends Base implements BSIProfile {
   declare typeId: string;
   declare typeName: string;
   declare publication?: BSIPublication | undefined;
-  isProfile() {
+  isProfile(): this is Profile {
     return true;
   }
   getTypeName() {
@@ -1112,7 +1112,7 @@ export class InfoGroup extends Base {
   declare typeId: string;
   declare typeName: string;
   declare publication?: BSIPublication | undefined;
-  isInfoGroup() {
+  isInfoGroup(): this is InfoGroup {
     return true;
   }
   isIdUnique() {
@@ -1143,6 +1143,9 @@ export class Modifier extends Base implements BSIModifier {
 
 }
 export class ModifierGroup extends Base implements BSIModifierGroup { }
+export class ConditionGroup extends Base {
+  declare type: "or" | "and"
+}
 
 export class Rule extends Base implements BSIRule {
   declare id: string;
@@ -1155,7 +1158,7 @@ export class Rule extends Base implements BSIRule {
   getDescription(): string {
     return Array.isArray(this.description) ? this.description.join("\n") : this.description;
   }
-  isRule() {
+  isRule(): this is Rule {
     return true;
   }
   isIdUnique() {
@@ -1244,6 +1247,7 @@ export const BaseChilds = [
   "modifiers",
   "constraints",
   "conditionGroups",
+  "localConditionGroups",
   "conditions",
   "repeats",
 ] as const;
