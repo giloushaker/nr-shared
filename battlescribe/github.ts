@@ -472,3 +472,11 @@ export async function createAnonymousIssue(repo: string, data: { title: string, 
   })
   return await resp.json()
 }
+
+
+export async function proxyGithubReq(url: string) {
+  const resp = await fetch(url, {
+    headers: anonHeaders,
+  })
+  return resp;
+}
