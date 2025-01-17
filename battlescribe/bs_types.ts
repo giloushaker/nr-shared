@@ -72,7 +72,7 @@ export interface BSIConditional {
 }
 
 export interface BSIConditionGroup extends BSIConditional, BSICommentable {
-  type?: "and" | "or" | "exactly";
+  type?: "and" | "or" | "not" | "greater" | "greaterOrEqual" | "less" | "lessOrEqual" | "equal" | "notEqual";
 }
 
 export interface BSILocalConditionGroup extends BSIConditional, BSICommentable, BSIQuery, BSIValued, BSIRepeatable {

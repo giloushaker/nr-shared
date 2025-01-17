@@ -485,27 +485,29 @@ type ArrayPropertyType<O, KT extends keyof O> = NonNullable<O[KT]> extends unkno
   : never;
 export function addObjIfMissing<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
   const found = obj[key] as unknown as T[];
-  if (found && !found.includes(val)) {
-    found.push(val);
-    return;
+  if (found) {
+    if (!found.includes(val)) {
+      found.push(val);
+    }
+  } else {
+    (obj[key] as unknown as T[]) = [val];
   }
-  (obj[key] as unknown as T[]) = [val];
 }
 export function addObj<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
   const found = obj[key] as unknown as T[];
   if (found) {
     found.push(val);
-    return;
+  } else {
+    (obj[key] as unknown as T[]) = [val];
   }
-  (obj[key] as unknown as T[]) = [val];
 }
 export function addObjUnique<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
   const found = obj[key] as unknown as T[];
-  if (found && found.indexOf(val) === -1) {
-    found.push(val);
-    return;
+  if (found) {
+    if (found.indexOf(val) === -1) found.push(val);
+  } else {
+    (obj[key] as unknown as T[]) = [val];
   }
-  (obj[key] as unknown as T[]) = [val];
 }
 export function popObj<O, KT extends keyof O, T extends ArrayPropertyType<O, KT>>(obj: O, key: KT, val: T) {
   const found = obj[key] as unknown as T[];
