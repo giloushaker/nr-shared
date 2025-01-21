@@ -449,10 +449,10 @@ export async function getRepoZip(owner: string, name: string, ref: string = "HEA
 
   let zipFile: Blob;
   try {
-    zipFile = await $fetch<Blob>(`https://corsproxy.io/?${encodeURIComponent(tagUrl)}`)
+    zipFile = await $fetch<Blob>(`https://www.newrecruit.eu/api/proxy?url=${encodeURIComponent(tagUrl)}`)
   }
   catch (e) {
-    zipFile = await $fetch<Blob>(`https://corsproxy.io/?${encodeURIComponent(headUrl)}`)
+    zipFile = await $fetch<Blob>(`https://www.newrecruit.eu/api/proxy?url=${encodeURIComponent(headUrl)}`)
   }
 
   // Extract the useful files
@@ -475,8 +475,7 @@ export async function createAnonymousIssue(repo: string, data: { title: string, 
 
 
 export async function proxyGithubReq(url: string) {
-  const resp = await fetch(url, {
-    headers: anonHeaders,
-  })
-  return resp;
+  const resp = await fetch(url, { headers: { Authorization: anonHeaders.Authorization } })
+  const result = await resp.text()
+  return result;
 }
