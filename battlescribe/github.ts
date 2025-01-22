@@ -442,9 +442,10 @@ export class DynamicPoller {
 }
 
 export async function getRepoZip(owner: string, name: string, ref: string = "HEAD") {
-  const tagUrl = `https://codeload.github.com/${owner}/${name}/legacy.zip/refs/tags/${ref}`
-  const headUrl = `https://codeload.github.com/${owner}/${name}/legacy.zip/refs/heads/${ref}`
-
+  // const tagUrl = `https://codeload.github.com/${owner}/${name}/legacy.zip/refs/tags/${ref}`
+  // const headUrl = `https://codeload.github.com/${owner}/${name}/legacy.zip/refs/heads/${ref}`
+  const tagUrl = `https://api.github.com/repos/${owner}/${name}/zipball/${ref}`
+  const headUrl = `https://api.github.com/repos/${owner}/${name}/zipball/${ref}`
 
 
   let zipFile: Blob;
@@ -454,7 +455,6 @@ export async function getRepoZip(owner: string, name: string, ref: string = "HEA
   catch (e) {
     zipFile = await $fetch<Blob>(`https://www.newrecruit.eu/api/proxy?url=${encodeURIComponent(headUrl)}`)
   }
-
   // Extract the useful files
   const folder = await unzip(zipFile);
   const entries = Object.entries(folder.entries)
@@ -474,8 +474,8 @@ export async function createAnonymousIssue(repo: string, data: { title: string, 
 }
 
 
-export async function proxyGithubReq(url: string) {
-  const resp = await fetch(url, { headers: { Authorization: anonHeaders.Authorization } })
-  const result = await resp.text()
+export async function proxyGithubReq(url: string, headers = {}) {
+  const resp = await fetch(url, { headers: { Authorization: anonHeaders.Authorization, ...headers } })
+  const result = await resp
   return result;
 }
