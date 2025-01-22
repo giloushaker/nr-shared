@@ -1452,3 +1452,75 @@ export function convertRuleToProfile(rule: BSIRule): BSIProfile {
     typeName: "Rules",
   };
 }
+
+
+export interface AffectsQuery {
+  scope?: string;
+  self?: boolean;
+  entries?: boolean;
+  forces?: boolean;
+  recursive?: boolean;
+  filterBy?: string;
+  affectsWhat?: string;
+}
+
+export function construct_affects_query(fields: AffectsQuery) {
+  const result = [];
+  if (fields.scope && fields.scope !== "self") result.push(fields.scope);
+  if (fields.self) result.push("self");
+  if (fields.entries) result.push("entries");
+  if (fields.forces) result.push("forces");
+  if (fields.recursive) result.push("recursive");
+  if (fields.filterBy && fields.filterBy !== "any") result.push(fields.filterBy);
+  if (fields.affectsWhat && fields.affectsWhat !== "entries") result.push(fields.affectsWhat);
+  const combined = result.join(".");
+  return combined;
+}
+export function deconstruct_affects_query(query?: string): AffectsQuery {
+  const selectors = ["profiles", "constraints", "costs", "rules", "categories"];
+
+  const filterBy = [];
+  const flags = {
+    self: false,
+    entries: false,
+    forces: false,
+    recursive: false,
+  } as Record<string, boolean>;
+
+  const split = (query || "").split(".");
+
+  let foundFlag = false;
+  let affectsWhat = "entries";
+  let scope = null as null | string;
+
+  for (let i = 0; i < split.length; i++) {
+    const cur = split[i];
+    if (selectors.includes(cur)) {
+      affectsWhat = split.slice(i).join(".");
+      break;
+    }
+    if (cur in flags) {
+      flags[cur] = true;
+      foundFlag = true;
+      continue;
+    }
+
+    if (!foundFlag) {
+      scope = cur;
+      continue;
+    }
+
+    filterBy.push(cur);
+  }
+
+  if (!flags.entries && !flags.forces) {
+    flags.self = true;
+  }
+
+  return {
+    scope: scope || "self",
+    ...flags,
+    filterBy: filterBy.length ? filterBy.join(".") : "any",
+    affectsWhat,
+  };
+}
