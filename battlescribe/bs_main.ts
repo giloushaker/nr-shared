@@ -1455,7 +1455,6 @@ export function convertRuleToProfile(rule: BSIRule): BSIProfile {
 
 
 export interface AffectsQuery {
-  scope?: string;
   self?: boolean;
   entries?: boolean;
   forces?: boolean;
@@ -1466,8 +1465,7 @@ export interface AffectsQuery {
 
 export function construct_affects_query(fields: AffectsQuery) {
   const result = [];
-  if (fields.scope && fields.scope !== "self") result.push(fields.scope);
-  if (fields.self) result.push("self");
+  if (fields.self && (fields.entries || fields.forces)) result.push("self");
   if (fields.entries) result.push("entries");
   if (fields.forces) result.push("forces");
   if (fields.recursive) result.push("recursive");
@@ -1478,7 +1476,6 @@ export function construct_affects_query(fields: AffectsQuery) {
 }
 export function deconstruct_affects_query(query?: string): AffectsQuery {
   const selectors = ["profiles", "constraints", "costs", "rules", "categories"];
-
   const filterBy = [];
   const flags = {
     self: false,
@@ -1488,10 +1485,7 @@ export function deconstruct_affects_query(query?: string): AffectsQuery {
   } as Record<string, boolean>;
 
   const split = (query || "").split(".");
-
-  let foundFlag = false;
   let affectsWhat = "entries";
-  let scope = null as null | string;
 
   for (let i = 0; i < split.length; i++) {
     const cur = split[i];
@@ -1501,15 +1495,8 @@ export function deconstruct_affects_query(query?: string): AffectsQuery {
     }
     if (cur in flags) {
       flags[cur] = true;
-      foundFlag = true;
       continue;
     }
-
-    if (!foundFlag) {
-      scope = cur;
-      continue;
-    }
-
     filterBy.push(cur);
   }
 
@@ -1518,7 +1505,6 @@ export function deconstruct_affects_query(query?: string): AffectsQuery {
   }
 
   return {
-    scope: scope || "self",
     ...flags,
     filterBy: filterBy.length ? filterBy.join(".") : "any",
     affectsWhat,
