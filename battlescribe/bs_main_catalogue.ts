@@ -771,7 +771,7 @@ export class Catalogue extends Base {
 
     function localAddBoundCategoryConstraints(
       catalogue: Catalogue,
-      category: Category,
+      category: Category | Force,
       constraints: Iterable<BSIConstraint>,
     ) {
       const target = category.target || category;
@@ -815,17 +815,9 @@ export class Catalogue extends Base {
       }
     }
     for (const force of this.forcesIteratorRecursive()) {
+      localAddBoundCategoryConstraints(this, force, force.constraintsIterator());
       force_or_category_ids.add(force.id);
-      // Add constraints wich are on categoryLinks
-      // for (const category of force.categories) {
-      //   if (category.constraints) {
-      //     localAddBoundCategoryConstraints(
-      //       this,
-      //       category,
-      //       category.constraints.filter((o) => o.scope === "roster")
-      //     );
-      //   }
-      // }
+
     }
     for (const category of this.categories) {
       force_or_category_ids.add(category.id);
