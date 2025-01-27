@@ -289,6 +289,9 @@ export class Base implements BSModifierBase {
   isCollective(): boolean | undefined {
     return this.collective;
   }
+  isCollapsible(): boolean | undefined {
+    return this.collective;
+  }
   isCollectiveRecursive() {
     const stack = [...this.selectionsIterator()];
     while (stack.length) {
@@ -736,6 +739,9 @@ export class Link<T extends Base = Group | Entry> extends Base {
       if (categoryLink.primary) return true;
     }
     return false;
+  }
+  isCollapsible(): boolean | undefined {
+    return this.collective || this.target.collective;
   }
   getId(): string {
     return this.targetId;
