@@ -33,6 +33,7 @@ export class GameSystemFiles extends BSCatalogueManager {
       obj.reset();
     }
     this.loadedCatalogues = {};
+    this.index = {}
     delete this.allLoaded;
   }
   async loadAll(progress_cb?: (current: number, max: number, msg?: string) => void | Promise<void>) {
