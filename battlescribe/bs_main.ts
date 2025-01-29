@@ -290,7 +290,7 @@ export class Base implements BSModifierBase {
     return this.collective;
   }
   isCollapsible(): boolean | undefined {
-    return this.collective;
+    return this.collapsible;
   }
   isCollectiveRecursive() {
     const stack = [...this.selectionsIterator()];
@@ -741,7 +741,7 @@ export class Link<T extends Base = Group | Entry> extends Base {
     return false;
   }
   isCollapsible(): boolean | undefined {
-    return this.collective || this.target.collective;
+    return this.collapsible || this.target.collapsible;
   }
   getId(): string {
     return this.targetId;
