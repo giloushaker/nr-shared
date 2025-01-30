@@ -241,7 +241,7 @@ export async function getCommitDate(owner: string, repo: string, sha: string) {
   throwIfError(json);
   return json.commit.committer.date;
 }
-export async function findLatestCommitDate(
+export async function getLatestCommitDate(
   owner: string,
   repo: string,
   path: string,
