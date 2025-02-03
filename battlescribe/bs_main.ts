@@ -1446,7 +1446,7 @@ export function convertRuleToProfile(rule: BSIRule): BSIProfile {
   return {
     characteristics: [
       {
-        name: "Descrption",
+        name: "Description",
         typeId: "description",
         $text: Array.isArray(rule.description) ? rule.description[0] : rule.description,
       },
