@@ -1,4 +1,4 @@
-import { groupBy, sortBy, addOne, sortByAscending, sortByAscendingInplace } from "./bs_helpers";
+import { groupBy, sortBy, addOne, sortByAscending, sortByAscendingInplace, clone } from "./bs_helpers";
 import { entryToJson } from "./bs_main";
 import { BSIProfile, BSICharacteristic } from "./bs_types";
 
@@ -97,7 +97,13 @@ export function isProfileModified(profile: BSIProfile) {
   return false;
 }
 export function hashProfile(profile: BSIProfile): string {
-  return entryToJson({ ...profile, id: undefined });
+  return JSON.stringify({
+    name: profile.name,
+    characteristics: profile.characteristics,
+    typeId: profile.typeId,
+    typeName: profile.typeName,
+    hidden: profile.hidden
+  })
 }
 export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles: T[], sumAmount = true): Record<string, T> {
   const hashed: { [hash: string]: T } = {};
@@ -108,7 +114,8 @@ export function indexProfiles<T extends BSIProfile | BSIGroupedProfile>(profiles
     if (hash in hashed && sumAmount) {
       hashed[hash].amount = (hashed[hash].amount || 1) + (profile.amount || 1)
     } else {
-      hashed[hash] = { ...profile, amount: (profile.amount || 1), }
+      hashed[hash] = clone(profile)
+      hashed[hash].amount = (profile.amount || 1)
     }
     // addOne(counts, hash);
     // profile.dupeCount = counts[hash];
