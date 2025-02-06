@@ -112,6 +112,7 @@ export interface BSIModifier extends BSIConditional, BSICommentable {
   value: number | string | boolean;
   arg?: number | string | boolean;
   join?: string;
+  position?: number;
 
   scope?: string;
   affects?: string;
