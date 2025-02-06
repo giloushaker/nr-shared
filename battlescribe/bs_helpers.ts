@@ -715,3 +715,15 @@ export function inBounds(n: number, min: number, max: number) {
   if (n > max) return max;
   return n;
 }
+
+export function replaceAt(str: string, search: RegExp | string, position: number, replacer: (match: string) => string) {
+  if (position === 0) return str.replaceAll(search, replacer);
+  //@ts-ignore string arg in matchAll seems to work fine in chrome & mozilla.
+  const matches = [...str.matchAll(search)];
+  const targetIndex = position < 0 ? matches.length + position : position - 1; // Support negative indexing
+  if (targetIndex < 0 || targetIndex >= matches.length) return str;
+  const match = matches[targetIndex]
+  const start = match.index
+  const text = match[0]
+  return str.slice(0, start) + replacer(text) + str.slice(start + text.length)
+}
