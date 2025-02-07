@@ -337,7 +337,8 @@ export function bookUrl(id_sys: number | string, id: number | string, date?: str
 }
 
 // from https://stackoverflow.com/questions/3665115/how-to-create-a-file-in-memory-for-user-to-download-but-not-through-server
-export function download(filename: string, mimeType: any, content: BlobPart) {
+export async function download(filename: string, mimeType: any, content: BlobPart) {
+
   const a = document.createElement("a");
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
@@ -345,6 +346,22 @@ export function download(filename: string, mimeType: any, content: BlobPart) {
   a.setAttribute("download", filename);
   a.setAttribute("target", "_blank");
   a.click(); // Start downloading
+
+}
+
+// from https://stackoverflow.com/questions/3665115/how-to-create-a-file-in-memory-for-user-to-download-but-not-through-server
+export async function saveFilePickerOrDownload(filename: string, mimeType: any, content: BlobPart) {
+  //@ts-ignore
+  if (globalThis.showSaveFilePicker) {
+    //@ts-ignore
+    const handle = await showSaveFilePicker({ suggestedName: filename });
+    const writable = await handle.createWritable();
+    await writable.write(content);
+    writable.close();
+  }
+  else {
+    download(filename, mimeType, content)
+  }
 }
 
 // @ts-ignore
