@@ -99,7 +99,7 @@ export function isProfileModified(profile: BSIProfile) {
 export function hashProfile(profile: BSIProfile): string {
   return JSON.stringify({
     name: profile.name,
-    characteristics: profile.characteristics,
+    characteristics: profile.characteristics.map(o => ({ $text: o.$text, name: o.name, typeId: o.typeId, originalValue: o.originalValue })),
     typeId: profile.typeId,
     typeName: profile.typeName,
     hidden: profile.hidden
