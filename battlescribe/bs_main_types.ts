@@ -135,7 +135,7 @@ export function setPrototype<Key extends string>(
   return obj;
 }
 
-export function setPrototypeRecursive(obj: any): void {
+export function setPrototypeRecursive(obj: any, force = false): void {
   const stack = [obj];
   while (stack.length) {
     const current = stack.pop();
@@ -151,6 +151,8 @@ export function setPrototypeRecursive(obj: any): void {
               if (isDefaultObject(cur)) {
                 setPrototype(cur, key);
                 stack.push(cur);
+              } else if (force) {
+                stack.push(cur);
               }
             }
           }
@@ -159,6 +161,8 @@ export function setPrototypeRecursive(obj: any): void {
         else {
           if (isDefaultObject(value)) {
             setPrototype(value, key);
+            stack.push(value);
+          } else if (force) {
             stack.push(value);
           }
         }

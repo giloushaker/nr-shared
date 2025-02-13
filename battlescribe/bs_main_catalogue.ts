@@ -1187,7 +1187,7 @@ export class Catalogue extends Base {
       link.name = target.name;
       this.addRef(link, link.target as EditorBase);
       const targetType = (link.target as EditorBase).editorTypeName;
-      if (targetType == "category") {
+      if (targetType == "categoryEntry") {
         delete link.type;
       } else {
         link.type = targetType;
