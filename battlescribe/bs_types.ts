@@ -332,6 +332,7 @@ export interface SupportedQueries {
 
 export interface BSIProfile extends BSINamed, BSIHidden, BSICommentable, BSIReference, BSIModifiable {
   characteristics: BSICharacteristic[];
+  attributes: BSIAttribute[];
   typeId: string;
   typeName: string;
   group?: string;
