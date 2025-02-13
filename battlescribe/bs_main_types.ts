@@ -65,9 +65,11 @@ export const protoMap = {
 
   forceEntries: Force.prototype,
   forces: Force.prototype,
+  forceEntry: Force.prototype,
   force: Force.prototype,
 
   categoryEntries: Category.prototype,
+  categoryEntry: Category.prototype,
   category: Category.prototype,
   categories: Category.prototype,
 

@@ -235,7 +235,7 @@ export const types = {
   selectionEntryGroup: { label: "Group" },
   selectionEntryLink: { label: "Entry (link)" },
   selectionEntryGroupLink: { label: "Group (link)" },
-  entryLink: { label: "Entry (link" },
+  entryLink: { label: "Entry (link)" },
   forceEntry: { label: "Force" },
   categoryEntry: { label: "Category" },
   categoryLink: { label: "Category (link)" },

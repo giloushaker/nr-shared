@@ -1414,5 +1414,5 @@ export function getAllPossibleParents(node: EditorBase) {
     }
     result.push(...temp.reverse())
   }
-  return result
+  return result.filter(o => o.editorTypeName !== 'catalogueLink')
 }
