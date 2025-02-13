@@ -20,12 +20,14 @@ import type {
   AssociationConstraint,
   BSIModifierType,
   BSILocalConditionGroup,
+  BSIAttributeType,
+  BSIAttribute,
 } from "./bs_types";
 import type { EditorBase, Catalogue } from "./bs_main_catalogue";
 import { clone, isObject } from "./bs_helpers";
 import { splitExactlyConstraints } from "./exactly_constraints";
 import { splitExactlyConstraintsModifiers } from "./exactly_constraints";
-
+import { entries } from "./entries";
 const isNonEmptyIfHasOneOf = [
   "modifiers",
   "modifierGroups",
@@ -46,51 +48,7 @@ export interface BSModifierBase {
   modifierGroups?: BSIModifierGroup[];
 }
 
-const arrayKeys = [
-  "profile",
-  "rule",
-  "infoLink",
-  "infoGroup",
-  "selectionEntry",
-  "selectionEntryGroup",
-  "entryLink",
-
-  "profiles",
-  "rules",
-  "infoLinks",
-  "infoGroups",
-  "entryLinks",
-  "selectionEntries",
-  "selectionEntryLinks",
-  "selectionEntryGroups",
-
-  "categoryLinks",
-  "costTypes",
-  "profileTypes",
-  "characteristicTypes",
-  "categoryEntries",
-  "categories",
-  "forceEntries",
-  "forces",
-  "sharedSelectionEntries",
-  "sharedSelectionEntryGroups",
-  "sharedProfiles",
-  "sharedRules",
-  "sharedInfoGroups",
-  "rules",
-  "rootRules",
-
-  "publications",
-  "catalogueLinks",
-  "constraints",
-
-  "characteristics",
-  "costs",
-];
-
-const arrayKeysWithoutId = ["conditions", "conditionGroups", "localConditionGroups", "modifiers", "modifierGroups", "repeats"];
-export const goodKeys = new Set([...arrayKeys, ...arrayKeysWithoutId]);
-export const goodKeysWiki = new Set(arrayKeys);
+export const arrayKeys = new Set([...Object.keys(entries).filter(s => s.endsWith('s'))])
 export function getDataObject(data: BSIData | Catalogue): BSIGameSystem | BSICatalogue {
   if ((data as Catalogue).isCatalogue && (data as Catalogue).isCatalogue()) {
     return data as BSICatalogue;
@@ -471,7 +429,7 @@ export class Base implements BSModifierBase {
 
   // console.log("foreachobjectwhitelist", keys);
 
-  forEachObject<T extends Base>(callbackfn: (value: T, parent: T) => unknown, whiteList = goodKeys, maxDepth?: number) {
+  forEachObject<T extends Base>(callbackfn: (value: T, parent: T) => unknown, whiteList = arrayKeys, maxDepth?: number) {
     let stack = [this as any];
     let next = []
     let depth = 0;
@@ -513,7 +471,7 @@ export class Base implements BSModifierBase {
     }
     // console.log("foreachobjectwhitelist", keys);
   }
-  forEachObjectWhitelist<T extends Base>(callbackfn: (value: T, parent: T) => unknown, whiteList = goodKeys, maxDepth?: number) {
+  forEachObjectWhitelist<T extends Base>(callbackfn: (value: T, parent: T) => unknown, whiteList = arrayKeys, maxDepth?: number) {
     return this.forEachObject(callbackfn, whiteList, maxDepth);
   }
   findOption(cb: (opt: Base | Link) => boolean): Base | Link | undefined {
@@ -537,7 +495,7 @@ export class Base implements BSModifierBase {
         const current = stack.pop()!;
         for (const key in current) {
           const value = current[key];
-          if (!goodKeys.has(key)) continue;
+          if (!arrayKeys.has(key)) continue;
           if (isObject(value)) {
             if (Array.isArray(value)) {
               if (value.length && isObject(value[0])) {
@@ -577,7 +535,7 @@ export class Base implements BSModifierBase {
         const current = stack.pop()!;
         for (const key in current) {
           const value = current[key];
-          if (!goodKeys.has(key)) continue;
+          if (!arrayKeys.has(key)) continue;
           if (isObject(value)) {
             if (Array.isArray(value)) {
               if (value.length && isObject(value[0])) {
@@ -1076,11 +1034,13 @@ export interface BSIExtraConstraint extends BSIConstraint, BSINamed {
 
 export class ProfileType extends Base implements BSIProfileType {
   declare characteristicTypes: BSICharacteristicType[];
+  declare attributeTypes: BSIAttributeType[];
   declare sortIndex?: number;
 }
 // const debugKeys = new Set();
 export class Profile extends Base implements BSIProfile {
   declare characteristics: BSICharacteristic[];
+  declare attributes: BSIAttribute[];
   declare typeId: string;
   declare typeName: string;
   declare publication?: BSIPublication | undefined;
@@ -1231,53 +1191,9 @@ export function* iterateModifierGroupsRecursive(
   }
 }
 
-export const BaseChilds = [
-  "costTypes",
-  "costs",
 
-  "categoryEntries",
-
-  "forceEntries",
-
-  "sharedSelectionEntries",
-  "selectionEntries",
-
-  "sharedSelectionEntryGroups",
-  "selectionEntryGroups",
-
-  "entryLinks",
-  "infoLinks",
-  "categoryLinks",
-  "catalogueLinks",
-
-  "sharedProfiles",
-  "profiles",
-  "profileTypes",
-  "characteristics",
-  "characteristicTypes",
-
-  "sharedInfoGroups",
-  "infoGroups",
-
-  "sharedRules",
-  "rules",
-
-  "publications",
-  "associations",
-
-  "modifierGroups",
-  "modifiers",
-  "constraints",
-  "conditionGroups",
-  "localConditionGroups",
-  "conditions",
-  "repeats",
-] as const;
-export type BaseChildsT = (typeof BaseChilds)[number];
-export const goodJsonArrayKeys = new Set(BaseChilds);
 export const goodJsonKeys = new Set([
-  ...goodJsonArrayKeys,
-
+  ...arrayKeys,
   "defaultAmount",
   "id",
   "import",
@@ -1425,7 +1341,7 @@ export function entriesToJson(
 export function forEachObjectWhitelist2<T extends Base>(
   current: Base,
   callbackfn: (value: T, parent: T) => unknown,
-  whiteList = goodKeys
+  whiteList = arrayKeys
 ) {
   for (const key in current) {
     if (whiteList.has(key)) {

@@ -1,4 +1,4 @@
-import { Base, BaseChildsT, Condition, Constraint, Link, Modifier, ModifierGroup, Profile, goodJsonKeys } from "./bs_main";
+import { Base, Condition, Link, Modifier, Profile, goodJsonKeys } from "./bs_main";
 import { Catalogue, CatalogueLink, EditorBase } from "./bs_main_catalogue";
 import { conditionToString, fieldToText, getModifierOrConditionParent, modifierToString } from "./bs_modifiers";
 import {
@@ -14,11 +14,11 @@ import { BSCatalogueManager } from "./bs_system";
 import { isObject, type MaybeArray } from "./bs_helpers";
 import { textNodeTags } from "./bs_convert";
 import { validChildIds, validScopes } from "./bs_condition";
-
+import { entries, types } from "./entries"
 export interface CategoryEntry {
   name: string;
-  type: ItemKeys;
-  links?: ItemKeys;
+  type: string & keyof typeof entries;
+  links?: string & keyof typeof entries;
   icon: string;
 }
 
@@ -32,8 +32,8 @@ export type ItemTypes = (
   | BSIConditionGroup
   | BSIConstraint
 ) & {
-  parentKey: ItemKeys;
-  editorTypeName: ItemTypeNames;
+  parentKey: string & keyof typeof entries;
+  editorTypeName: keyof typeof types;
 };
 export const filterByItems = [
   {
@@ -133,7 +133,7 @@ export const filterByItems = [
     shared: false,
   },
 ];
-export const possibleChildren: ItemKeys[] = [
+export const possibleChildren: Array<string & keyof typeof entries> = [
   // Catalogue stuff
   "publications",
   "costTypes",
@@ -184,12 +184,12 @@ export const systemCategories: CategoryEntry[] = [
   {
     type: "categoryEntries",
     name: "Category Entries",
-    icon: "category.png",
+    icon: "categoryEntry.png",
   },
   {
     type: "forceEntries",
     name: "Force Entries",
-    icon: "force.png",
+    icon: "forceEntry.png",
   },
   {
     type: "sharedSelectionEntries",
@@ -237,223 +237,21 @@ export const catalogueCategories: CategoryEntry[] = [
   },
   ...systemCategories,
 ];
-export type ItemTypeNames =
-  | "catalogue"
-  | "gameSystem"
-  | "selectionEntry"
-  | "selectionEntryGroup"
-  | "category"
-  | "force"
-  | "selectionEntryLink"
-  | "selectionEntryGroupLink"
-  | "categoryLink"
-  | "catalogueLink"
-  | "profile"
-  | "rule"
-  | "profileType"
-  | "characteristic"
-  | "characteristicType"
-  | "publication"
-  | "infoGroup"
-  | "infoLink"
-  | "association"
-  | "constraint"
-  | "condition"
-  | "modifier"
-  | "modifierGroup"
-  | "repeat"
-  | "conditionGroup"
-  | "localConditionGroup"
-  | "cost"
-  | "costType"
-  | "link"
-  | "profileLink"
-  | "ruleLink"
-  | "infoGroupLink";
 
-export type ItemKeys =
-  // Entries
-  | "selectionEntries"
-  | "sharedSelectionEntries"
-  | "selectionEntryGroups"
-  | "sharedSelectionEntryGroups"
-  | "entryLinks"
-  | "forceEntries"
-  | "categoryEntries"
-  | "categoryLinks"
-
-  //
-  | "catalogueLinks"
-  | "publications"
-  | "costTypes"
-  | "profileTypes"
-  | "sharedProfiles"
-  | "sharedRules"
-  | "sharedInfoGroups"
-
-  // Modifiable
-  | "infoLinks"
-  | "profiles"
-  | "rules"
-  | "infoGroups"
-
-  // Constraints and modifiers
-  | "constraints"
-  | "conditions"
-  | "modifiers"
-  | "modifierGroups"
-  | "repeats"
-  | "conditionGroups"
-  | "localConditionGroups";
-
-export function getTypeLabel(key: string, obj?: any): string {
-  switch (key) {
-    case "selectionEntry":
-      return "Entry";
-    case "selectionEntryGroup":
-      return "Group";
-    case "selectionEntryLink":
-      return "Entry (link)";
-    case "selectionEntryGroupLink":
-      return "Group (link)";
-
-    case "force":
-      return "Force";
-    case "category":
-      return "Category";
-    case "categoryLink":
-      return "Category (link)";
-
-    case "catalogueLink":
-      return "Catalogue (link)";
-    case "publication":
-      return "Publication";
-    case "costType":
-      return "Cost Type";
-    case "costs":
-      return "Cost";
-
-    case "link":
-      return "Link";
-    case "profileType":
-      return "Profile Type";
-    case "profile":
-      return "Profile";
-    case "rule":
-      return "Rule";
-    case "infoLink":
-      return "Info (link)";
-    case "infoGroup":
-      return "Info Group";
-    case "profileLink":
-      return "Profile";
-    case "ruleLink":
-      return "Rule (link)";
-    case "infoGroupLink":
-      return "Info Group (link)";
-    case "characteristic":
-      return "Characteristic";
-    case "characteristicType":
-      return "Characteristic Type";
-
-    case "constraint":
-      return "Constraint";
-    case "condition":
-      return "Condition";
-    case "modifier":
-      return "Modifier";
-    case "modifierGroup":
-      return "Modifier Group";
-    case "repeat":
-      return "Repeat";
-    case "conditionGroup":
-      return "Condition Group";
-    case "localConditionGroup":
-      return "Local Condition Group";
-    case "catalogue":
-      return "Catalogue";
-    case "gameSystem":
-      return "Game System";
-    default:
-      console.warn("unknown getTypeLabel key", key);
-      return key as any;
-  }
+export function getTypeLabel(key: string & keyof typeof types): string {
+  const label = types[key]?.label
+  if (label) return label
+  console.warn("unknown getTypeLabel key", key);
+  return key as any;
 }
-export function getTypeName(key: string, obj?: any): ItemTypeNames {
-  switch (key) {
-    case "selectionEntries":
-      return "selectionEntry";
-    case "selectionEntryGroups":
-      return "selectionEntryGroup";
-
-    case "sharedSelectionEntries":
-      return obj?.targetId ? "selectionEntryLink" : "selectionEntry";
-    case "sharedSelectionEntryGroups":
-      return obj?.targetId ? "selectionEntryLink" : "selectionEntryGroup";
-
-    case "entryLinks":
-      return obj?.target ? ((obj.target.editorTypeName + "Link") as any) : "link";
-    case "forceEntries":
-      return "force";
-    case "categoryEntries":
-      return "category";
-    case "categoryLinks":
-      return "categoryLink";
-
-    case "catalogueLinks":
-      return "catalogueLink";
-    case "publications":
-      return "publication";
-    case "costTypes":
-      return "costType";
-    case "costs":
-      return "cost";
-
-    case "profileTypes":
-      return "profileType";
-    case "profiles":
-      return "profile";
-    case "rules":
-      return "rule";
-    case "characteristics":
-      return "characteristic";
-    case "characteristicTypes":
-      return "characteristicType";
-    case "sharedProfiles":
-      return "profile";
-    case "sharedRules":
-      return "rule";
-    case "sharedInfoGroups":
-      return "infoGroup";
-
-    case "infoLinks":
-      return obj ? (`${obj.type || "info"}Link` as ItemTypeNames) : "infoLink";
-    case "infoGroups":
-      return "infoGroup";
-
-    case "associations":
-      return "association";
-    case "constraints":
-      return "constraint";
-    case "conditions":
-      return "condition";
-    case "modifiers":
-      return "modifier";
-    case "modifierGroups":
-      return "modifierGroup";
-    case "repeats":
-      return "repeat";
-    case "conditionGroups":
-      return "conditionGroup";
-    case "localConditionGroups":
-      return "localConditionGroup";
-    case "catalogue":
-    case "gameSystem":
-      return key;
-    default:
-      console.warn("unknown getTypeName key", key);
-      return key as any;
+export function getTypeName(key: string & keyof typeof entries, obj?: any): keyof typeof types {
+  if (obj?.target) {
+    const targetType = getTypeName(obj.target.parentKey, obj.target)
+    return targetType + "Link" as keyof typeof types
   }
+  const type = entries[key]?.type
+  if (type) return type
+  return key as keyof typeof types
 }
 
 export function getNameExtra(obj: EditorBase, _refs = true, _type = true): string {
@@ -526,6 +324,8 @@ export function getName(obj: any): string {
     case "costTypes":
     case "sharedProfiles":
     case "profiles":
+    case "attributes":
+    case "attributeTypes":
     case "characteristics":
     case "characteristicTypes":
       return obj.getName();
@@ -817,7 +617,7 @@ export function scrambleIds(catalogue: Catalogue, entry_or_entries: MaybeArray<E
   }
 }
 
-export function fixKey(parent: EditorBase | Catalogue, key: BaseChildsT, catalogueKey?: BaseChildsT | ""): BaseChildsT | "" {
+export function fixKey(parent: EditorBase | Catalogue, key: keyof typeof entries, catalogueKey?: keyof typeof entries): string {
   if (!parent.isCatalogue()) {
     switch (key) {
       case "sharedRules":

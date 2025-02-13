@@ -1,6 +1,5 @@
 import { InfoIndex } from "~/assets/shared/battlescribe/bs_info_index";
 import { isScopeValid, validScopes } from "./bs_condition";
-import type { ItemTypeNames } from "./bs_editor";
 import {
   addObj,
   addObjIfMissing,
@@ -27,9 +26,7 @@ import {
   UNCATEGORIZED_ID,
   basicQueryFields,
   forEachObjectWhitelist2,
-  goodJsonArrayKeys,
-  goodKeys,
-  goodKeysWiki,
+  arrayKeys,
 } from "./bs_main";
 import { getModifierOrConditionParent } from "./bs_modifiers";
 import type { BSCatalogueManager } from "./bs_system";
@@ -47,6 +44,7 @@ import type {
   BSIRule,
 } from "./bs_types";
 import type { GameSystemFiles } from "./local_game_system";
+import { types } from "./entries";
 
 if (typeof $toRaw === "undefined") {
   globalThis.$toRaw = function (o) {
@@ -77,7 +75,7 @@ export interface EditorBase extends Base {
   catalogue: Catalogue;
 
   parentKey: string & keyof EditorBase;
-  editorTypeName: ItemTypeNames;
+  editorTypeName: string & keyof typeof types;
 
   showInEditor?: boolean;
   showChildsInEditor?: boolean;
@@ -194,13 +192,14 @@ export class Catalogue extends Base {
       addObjUnique(imported as any, "refs", this);
     });
     function proc(cur: WikiBase, parent: WikiBase) {
+      if (!cur.id) return;
       (cur as WikiBase).parent = parent as WikiBase;
       if (cur.target) addObjUnique(cur.target as any, "refs", parent as WikiBase);
       if (cur instanceof Rule) {
         rulesObj[cur.id] = cur;
       }
     }
-    forEachObjectWhitelist2(this, proc, goodKeysWiki);
+    forEachObjectWhitelist2(this, proc, arrayKeys);
 
     for (const force of this.forces || []) {
       (force as any).parent = this;
@@ -246,9 +245,9 @@ export class Catalogue extends Base {
           }
         }
       },
-      goodJsonArrayKeys,
+      arrayKeys,
     );
-    forEachObjectWhitelist2<EditorBase>(this, (cur) => cur.isLink() ? this.updateLink(cur) : this.refreshErrors(cur), goodJsonArrayKeys);
+    forEachObjectWhitelist2<EditorBase>(this, (cur) => cur.isLink() ? this.updateLink(cur) : this.refreshErrors(cur), arrayKeys);
   }
   get url(): string {
     return "%{book}";
@@ -348,7 +347,7 @@ export class Catalogue extends Base {
     }
   }
 
-  *iterateProfileTypes(): Iterable<ProfileType> {
+  *iterateProfileTypes(): Generator<ProfileType> {
     for (const catalogue of this.imports) {
       if (catalogue.profileTypes) {
         yield* catalogue.profileTypes;
@@ -1138,7 +1137,7 @@ export class Catalogue extends Base {
           unresolvedChildIds.push(cur);
         }
       },
-      goodKeys,
+      arrayKeys,
     );
 
     const indexes = this.getIndexes();

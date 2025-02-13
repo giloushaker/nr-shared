@@ -113,7 +113,6 @@ export interface BSIModifier extends BSIConditional, BSICommentable {
   arg?: number | string | boolean;
   position?: number;
   join?: string;
-  position?: number;
 
   scope?: string;
   affects?: string;
@@ -127,6 +126,12 @@ export interface BSIModifierGroup extends BSIConditional, BSIModifiable, BSIComm
 }
 
 export interface BSICharacteristic {
+  name: string;
+  typeId: string;
+  $text: string | number;
+  originalValue?: string | number | boolean;
+}
+export interface BSIAttribute {
   name: string;
   typeId: string;
   $text: string | number;
@@ -334,12 +339,13 @@ export interface BSIProfile extends BSINamed, BSIHidden, BSICommentable, BSIRefe
 }
 
 export interface BSICharacteristicType extends BSINamed {
-  name: string;
-  id: string;
+}
+export interface BSIAttributeType extends BSINamed {
 }
 
 export interface BSIProfileType extends BSINamed {
-  characteristicTypes: BSICharacteristicType[];
+  characteristicTypes?: BSICharacteristicType[];
+  attributeTypes?: BSIAttributeType[]
   sortIndex?: number;
 }
 

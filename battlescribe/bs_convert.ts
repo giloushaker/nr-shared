@@ -1,49 +1,21 @@
 import { unzip } from "unzipit";
 import { X2jOptions, XMLParser, XMLBuilder, XmlBuilderOptions } from "fast-xml-parser";
 import { forEachValueRecursive, hashFnv32a, isObject, removePrefix, to_snake_case } from "./bs_helpers";
-import { rootToJson, getDataObject, goodJsonArrayKeys } from "./bs_main";
+import { rootToJson, getDataObject, arrayKeys } from "./bs_main";
 import type { BSICatalogue, BSIGameSystem } from "./bs_types";
 import type { Catalogue } from "./bs_main_catalogue";
-export const containerTags = {
-  categories: "category",
-  catalogueLinks: "catalogueLink",
-  categoryEntries: "categoryEntry",
-  categoryLinks: "categoryLink",
-  characteristics: "characteristic",
-  characteristicTypes: "characteristicType",
-  conditions: "condition",
-  conditionGroups: "conditionGroup",
-  localConditionGroups: "localConditionGroup",
-  constraints: "constraint",
-  costs: "cost",
-  costLimits: "costLimit",
-  costTypes: "costType",
-  entryLinks: "entryLink",
-  forceEntries: "forceEntry",
-  infoGroups: "infoGroup",
-  infoLinks: "infoLink",
-  forces: "force",
-  modifiers: "modifier",
-  modifierGroups: "modifierGroup",
-  profiles: "profile",
-  profileTypes: "profileType",
-  publications: "publication",
-  repeats: "repeat",
-  rules: "rule",
-  selections: "selection",
-  selectionEntries: "selectionEntry",
-  selectionEntryGroups: "selectionEntryGroup",
-  sharedInfoGroups: "infoGroup",
-  sharedProfiles: "profile",
-  sharedRules: "rule",
-  sharedSelectionEntries: "selectionEntry",
-  sharedSelectionEntryGroups: "selectionEntryGroup",
+import { entries } from "./entries";
 
-  associations: "association",
-} as Record<string, string | undefined>;
+
+export const containerTags = {} as Record<string, string | undefined>;
+for (const key in entries) {
+  const cur = entries[key as keyof typeof entries]
+  if (cur.type) {
+    containerTags[key] = cur.type
+  }
+}
 export const textNodeTags = new Set(["description", "readme", "comment"]);
 export const textArrayTags = new Set(["alias"]);
-import { entries } from "./entries";
 
 const escapedHtml = /&(?:amp|lt|gt|quot|#39|apos);/g;
 const htmlUnescapes = {
@@ -89,7 +61,7 @@ function parseValue(str: string): any {
   }
 }
 export function xmlToJson(data: string) {
-  const options: X2jOptions = {
+  const options: Partial<X2jOptions> = {
     allowBooleanAttributes: true,
     ignoreAttributes: false,
     attributeNamePrefix: "",
