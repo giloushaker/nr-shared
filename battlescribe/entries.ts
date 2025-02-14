@@ -39,6 +39,9 @@ export const entries = {
     allowedChildrens: ["profiles", "rules", "infoGroups", "infoLinks", "constraints", "modifiers", "modifierGroups"],
     type: "categoryLink"
   },
+  categories: {
+    type: "category"
+  },
   forceEntries: {
     allowedChildrens: [
       "forceEntries",
@@ -53,6 +56,12 @@ export const entries = {
       "costs",
     ],
     type: "forceEntry"
+  },
+  forces: {
+    type: "force"
+  },
+  selections: {
+    type: "selection"
   },
   entryLinks: {
     allowedChildrens: "type",
@@ -236,7 +245,9 @@ export const types = {
   selectionEntryLink: { label: "Entry (link)" },
   selectionEntryGroupLink: { label: "Group (link)" },
   entryLink: { label: "Entry (link" },
+  forceEntry: { label: "Force" },
   force: { label: "Force" },
+  selection: { label: "Selection" },
   category: { label: "Category" },
   categoryEntry: { label: "Category" },
   categoryLink: { label: "Category (link)" },
