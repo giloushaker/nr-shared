@@ -1187,7 +1187,7 @@ export class Catalogue extends Base {
       link.name = target.name;
       this.addRef(link, link.target as EditorBase);
       const targetType = (link.target as EditorBase).editorTypeName;
-      if (targetType == "category") {
+      if (targetType == "categoryEntry") {
         delete link.type;
       } else {
         link.type = targetType;
@@ -1414,5 +1414,5 @@ export function getAllPossibleParents(node: EditorBase) {
     }
     result.push(...temp.reverse())
   }
-  return result
+  return result.filter(o => o.editorTypeName !== 'catalogueLink')
 }
