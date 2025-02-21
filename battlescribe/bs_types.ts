@@ -86,6 +86,7 @@ export interface BSIConstraint extends BSIQuery, BSIValued, BSICommentable {
   shared?: boolean;
   negative?: boolean;
   message?: string;
+  automatic?: boolean;
 }
 
 export interface BSICategory extends BSINamed { }
