@@ -283,6 +283,11 @@ export function getNameExtra(obj: EditorBase, _refs = true, _type = true): strin
     case "modifierGroups":
       pieces.push(`(${(obj.modifiers?.length || 0) + (obj.modifierGroups?.length || 0)})`);
       break;
+    case "constraints":
+      if ((obj as unknown as BSIConstraint).automatic) {
+        pieces.push('(automatic)')
+      }
+      break;
     default:
       break;
   }
@@ -344,7 +349,7 @@ export function getName(obj: any): string {
     }
     case "constraints":
       const constraint = obj as BSIConstraint;
-      return conditionToString(getModifierOrConditionParent(obj), constraint) + (constraint.automatic ? " (automatic)" : "");
+      return conditionToString(getModifierOrConditionParent(obj), constraint);
     case "conditions":
       return conditionToString(getModifierOrConditionParent(obj), obj);
     case "localConditionGroups":
