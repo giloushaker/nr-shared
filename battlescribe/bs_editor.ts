@@ -342,8 +342,10 @@ export function getName(obj: any): string {
         repeat.field
       )} in ${fieldToText(parent, repeat.scope)} of ${repeat.childId ? fieldToText(parent, repeat.childId) : " any"}` + (repeat.includeChildSelections ? " (recursive)" : "");
     }
-    case "conditions":
     case "constraints":
+      const constraint = obj as BSIConstraint;
+      return conditionToString(getModifierOrConditionParent(obj), constraint) + (constraint.automatic ? " (automatic)" : "");
+    case "conditions":
       return conditionToString(getModifierOrConditionParent(obj), obj);
     case "localConditionGroups":
       return conditionToString(getModifierOrConditionParent(obj), obj) + " where:";
