@@ -98,7 +98,7 @@ export class Base implements BSModifierBase {
   hidden!: boolean;
   value?: number | string | boolean;
   page?: string;
-  defaultAmount?: number;
+  defaultAmount?: number | string;
 
   profiles?: Profile[];
   rules?: Rule[];
@@ -788,7 +788,10 @@ export class Link<T extends Base = Group | Entry> extends Base {
     yield* super.infoProfilesIterator();
   }
   getDefaultAmount(): number | string | undefined {
-    return this.defaultAmount === undefined ? this.target.defaultAmount : this.defaultAmount;
+    if (this.defaultAmount === "" || this.defaultAmount === undefined) {
+      return this.target.getDefaultAmount()
+    }
+    return this.defaultAmount
   }
   getName(): string {
     return this.target?.name ?? this.name ?? "";
