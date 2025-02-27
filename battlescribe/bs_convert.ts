@@ -16,6 +16,7 @@ for (const key in entries) {
 }
 export const textNodeTags = new Set(["description", "readme", "comment"]);
 export const textArrayTags = new Set(["alias"]);
+export const allowEmptyStringKeys = new Set(["join"])
 
 const escapedHtml = /&(?:amp|lt|gt|quot|#39|apos);/g;
 const htmlUnescapes = {
@@ -155,7 +156,9 @@ const oldBuggedTypes = {
 
 export function normalize(x: any) {
   for (let attr in x) {
-    if (containerTags[attr] && x[attr]) {
+    if (x[attr] === "" && !allowEmptyStringKeys.has(attr)) {
+      delete x[attr];
+    } else if (containerTags[attr] && x[attr]) {
       if (attr in oldBuggedTypes) {
         const normal = x[attr][containerTags[attr] as string];
         const old = x[attr][oldBuggedTypes[attr]];
