@@ -104,7 +104,9 @@ export type BSIModifierType =
   | "modulo"
   | "append"
   | "prepend"
-  | "replace";
+  | "replace"
+  | "floor"
+  | "ceil";
 
 export interface BSIModifier extends BSIConditional, BSICommentable {
   repeats?: BSIRepeat[];
