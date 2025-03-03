@@ -1,4 +1,5 @@
 import JSZip, { OutputType } from "jszip";
+import { shareBlob } from "@/assets/ts/filesystem";
 
 export function getRandomKey(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
@@ -326,42 +327,10 @@ export function baseLog(x: number, y: number): number {
   return Math.log(y) / Math.log(x);
 }
 
-export function bookUrl(id_sys: number | string, id: number | string, date?: string | null) {
-  let res = `/api/rpc?m=books_get_book&id_sys=${encodeURIComponent(id_sys)}&id=${encodeURIComponent(id)}`;
-
-  if (date != null) {
-    res += "&date=" + encodeURIComponent(date);
-  }
-
-  return res;
-}
-
-// from https://stackoverflow.com/questions/3665115/how-to-create-a-file-in-memory-for-user-to-download-but-not-through-server
 export async function download(filename: string, mimeType: any, content: BlobPart) {
-
-  const a = document.createElement("a");
   const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  a.setAttribute("href", url);
-  a.setAttribute("download", filename);
-  a.setAttribute("target", "_blank");
-  a.click(); // Start downloading
 
-}
-
-// from https://stackoverflow.com/questions/3665115/how-to-create-a-file-in-memory-for-user-to-download-but-not-through-server
-export async function saveFilePickerOrDownload(filename: string, mimeType: any, content: BlobPart) {
-  //@ts-ignore
-  if (globalThis.showSaveFilePicker) {
-    //@ts-ignore
-    const handle = await showSaveFilePicker({ suggestedName: filename });
-    const writable = await handle.createWritable();
-    await writable.write(content);
-    writable.close();
-  }
-  else {
-    download(filename, mimeType, content)
-  }
+  shareBlob(blob, filename);
 }
 
 // @ts-ignore
