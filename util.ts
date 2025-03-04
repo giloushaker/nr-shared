@@ -1,5 +1,4 @@
 import JSZip, { OutputType } from "jszip";
-import { shareBlob } from "@/assets/ts/filesystem";
 
 export function getRandomKey(): string {
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
@@ -325,12 +324,6 @@ export function closest500(n: number): number {
 
 export function baseLog(x: number, y: number): number {
   return Math.log(y) / Math.log(x);
-}
-
-export async function download(filename: string, mimeType: any, content: BlobPart) {
-  const blob = new Blob([content], { type: mimeType });
-
-  shareBlob(blob, filename);
 }
 
 // @ts-ignore
