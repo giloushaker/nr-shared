@@ -249,7 +249,7 @@ export function getTypeName(key: string & keyof typeof entries, obj?: any): keyo
     const targetType = getTypeName(obj.target.parentKey, obj.target)
     return targetType + "Link" as keyof typeof types
   }
-  const type = entries[key]?.type
+  const type = (entries[key] as { type?: keyof typeof types })?.type
   if (type) return type
   return key as keyof typeof types
 }

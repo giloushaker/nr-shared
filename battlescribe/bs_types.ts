@@ -3,6 +3,7 @@ export interface BSICommentable {
 }
 export interface BSIOption extends BSICommentable {
   id: string;
+  sortIndex?: number
 }
 export interface BSINamed extends BSICommentable {
   name: string;
@@ -155,6 +156,7 @@ export interface BSIConstrainable {
 export interface BSIForce extends BSINamed, BSIReference, BSIHidden {
   categoryLinks?: BSICategoryLink[];
   forceEntries?: BSIForce[];
+  childForcesLabel?: string;
 }
 
 export interface BSIInfo {
