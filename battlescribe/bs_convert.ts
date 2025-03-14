@@ -16,7 +16,7 @@ for (const key in entries) {
 }
 export const textNodeTags = new Set(["description", "readme", "comment"]);
 export const textArrayTags = new Set(["alias"]);
-export const allowEmptyStringKeys = new Set(["join"])
+export const allowEmptyStringKeys = new Set(["join", "arg"])
 
 const escapedHtml = /&(?:amp|lt|gt|quot|#39|apos);/g;
 const htmlUnescapes = {
