@@ -7,6 +7,7 @@ import type {
   BSIConditionGroup,
   BSICondition,
   BSIRepeat,
+  BSIConditional,
 } from "./bs_types";
 import { Condition, Modifier, ModifierGroup, Link, Constraint, Base, ConditionGroup } from "./bs_main";
 import type { Catalogue, EditorBase } from "./bs_main_catalogue";
@@ -34,7 +35,15 @@ export function* getAllQueries(queries: SupportedQueries): Iterable<BSIQuery> {
     for (const condition of getAllQueries(modifier)) yield condition;
   }
 }
-
+export function* getAllConditions(queries: {
+  conditions?: BSICondition[];
+  conditionGroups?: BSIConditionGroup[];
+}): Iterable<BSIQuery> {
+  for (const condition of queries.conditions || []) yield condition;
+  for (const conditionGroup of queries.conditionGroups || []) {
+    for (const condition of getAllQueries(conditionGroup)) yield condition;
+  }
+}
 export function getModifiedField(base: Base | Link | undefined, field: string) {
   if (!base) return;
   if (!field) return;
