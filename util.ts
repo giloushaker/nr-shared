@@ -530,7 +530,9 @@ export function getMimeTypeFromBase64(base64String: string) {
   return match ? match[1] : null;
 }
 
-export function isDateLessThanNDaysInPast(expiration: Date, n: number): boolean {
+export function isDateLessThanNDaysInPast(expParam: Date | string, n: number): boolean {
+  const expiration = new Date(expParam);
+
   // Get the current date and time
   const now = new Date();
 
