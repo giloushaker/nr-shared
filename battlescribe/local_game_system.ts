@@ -4,10 +4,8 @@ import { BooksDate } from "./bs_versioning";
 import { Catalogue } from "./bs_main_catalogue";
 import { loadData } from "./bs_load_data";
 import type { GithubIntegration } from "./github";
-import { db } from "./cataloguesdexie";
 import { Base } from "./bs_main";
 import { noObserve } from "./bs_main_types";
-import { db as cataloguesdb } from "~/assets/shared/battlescribe/cataloguesdexie";
 
 export class GameSystemFiles extends BSCatalogueManager {
   gameSystem: BSIDataSystem | null = null;
@@ -17,7 +15,7 @@ export class GameSystemFiles extends BSCatalogueManager {
   github?: GithubIntegration;
   unresolvedLinks: Record<string, Array<Base>> = {};
   index: Record<string, Base> = {};
-  update?: (file: BSIData) => void | Promise<void>
+  update?: (file: BSIData) => void | Promise<void>;
   async loadData(data: BSIData, booksDate?: BooksDate): Promise<Catalogue> {
     const loaded = await loadData(this, data, booksDate, { deleteBadLinks: false });
     return loaded;
@@ -33,7 +31,7 @@ export class GameSystemFiles extends BSCatalogueManager {
       obj.reset();
     }
     this.loadedCatalogues = {};
-    this.index = {}
+    this.index = {};
     delete this.allLoaded;
   }
   async loadAll(progress_cb?: (current: number, max: number, msg?: string) => void | Promise<void>) {
@@ -93,17 +91,16 @@ export class GameSystemFiles extends BSCatalogueManager {
 
   setSystem(system: BSIDataSystem) {
     this.gameSystem = system;
-    const promise = cataloguesdb.systems.put({ id: system.gameSystem.id, content: system })
-    this.update && this.update(system)
-    return promise
+    const promise = cataloguesdexie.systems.put({ id: system.gameSystem.id, content: system });
+    this.update && this.update(system);
+    return promise;
   }
   setCatalogue(catalogue: BSIDataCatalogue) {
     const catalogueId = catalogue.catalogue.id;
     this.catalogueFiles[catalogueId] = catalogue;
-    const promise = cataloguesdb.catalogues.put({ id: catalogue.catalogue.id, content: catalogue })
-    this.update && this.update(catalogue)
-    return promise
-
+    const promise = cataloguesdexie.catalogues.put({ id: catalogue.catalogue.id, content: catalogue });
+    this.update && this.update(catalogue);
+    return promise;
   }
   removeCatalogue(catalogue: BSIDataCatalogue) {
     for (const [key, value] of Object.entries(this.catalogueFiles)) {
@@ -121,14 +118,14 @@ export class GameSystemFiles extends BSCatalogueManager {
       return this.catalogueFiles[catalogueLink.targetId];
     }
 
-    const catalogue = await db.catalogues.get({
+    const catalogue = await cataloguesdexie.catalogues.get({
       "content.catalogue.id": catalogueLink.targetId,
     });
     if (catalogue) {
       return catalogue.content;
     }
 
-    const system = await db.systems.get(catalogueLink.targetId);
+    const system = await cataloguesdexie.systems.get(catalogueLink.targetId);
     if (system) {
       return system.content;
     }
